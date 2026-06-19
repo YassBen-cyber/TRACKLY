@@ -80,12 +80,12 @@ export function AvailabilitiesModal({ initialAvailabilities }: { initialAvailabi
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button variant="outline" className="rounded-xl border-zinc-300 hover:bg-zinc-100 text-zinc-900">
           <Settings2 className="mr-2 h-4 w-4" />
           Mes Horaires Types
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
           <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">

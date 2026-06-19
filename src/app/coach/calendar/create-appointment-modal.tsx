@@ -72,12 +72,12 @@ export function CreateAppointmentModal({ clients }: { clients: any[] }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-zinc-900 shadow-lg shadow-blue-600/20 transition-all">
           <Plus className="mr-2 h-4 w-4" />
           Nouveau Rendez-vous
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[500px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full">
           <div className="p-6 pb-4 border-b border-zinc-200 bg-white">

@@ -36,7 +36,7 @@ export function AssignedSessionsList({
         </h3>
         
         <div className="w-full sm:w-64">
-          <Select value={filter} onValueChange={setFilter}>
+          <Select value={filter} onValueChange={(val) => setFilter(val || '')}>
             <SelectTrigger className="bg-white border-zinc-300 h-10 rounded-xl text-zinc-900">
               <SelectValue placeholder="Filtrer par statut..." />
             </SelectTrigger>

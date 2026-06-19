@@ -49,12 +49,12 @@ export function AddClientModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 transition-all rounded-xl">
           <PlusCircle className="mr-2 h-4 w-4" />
           Ajouter un athlète
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-md border-zinc-300 bg-zinc-50 text-zinc-900 shadow-2xl shadow-primary/10 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-xl">Inviter un nouvel athlète</DialogTitle>

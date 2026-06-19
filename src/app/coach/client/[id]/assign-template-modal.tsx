@@ -34,17 +34,13 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
     setSuccess(false)
 
     try {
-      const res = await applyTemplateToClient(clientId, selectedTemplateId)
-      if (res?.error) {
-        setError(res.error)
-      } else {
-        setSuccess(true)
-        setTimeout(() => {
-          setOpen(false)
-          setSuccess(false)
-          setSelectedTemplateId('')
-        }, 2000)
-      }
+      await applyTemplateToClient(clientId, selectedTemplateId)
+      setSuccess(true)
+      setTimeout(() => {
+        setOpen(false)
+        setSuccess(false)
+        setSelectedTemplateId('')
+      }, 2000)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -54,12 +50,12 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button variant="outline" className="w-full h-11 rounded-xl bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 transition-all">
           <Target className="mr-2 h-4 w-4" />
           Appliquer un gabarit d'objectif
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[500px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full">
           <div className="p-6 pb-2 border-b border-zinc-200 bg-white">
@@ -94,7 +90,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                    <Select value={selectedTemplateId} onValueChange={(val) => setSelectedTemplateId(val || '')}>
                       <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
                         <SelectValue placeholder="Choisir un gabarit..." />
                       </SelectTrigger>

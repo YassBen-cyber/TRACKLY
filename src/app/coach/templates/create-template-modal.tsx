@@ -84,12 +84,12 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-105">
           <Plus className="mr-2 h-4 w-4" />
           Nouveau Gabarit
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full max-h-[85vh]">
           <div className="p-6 pb-2 border-b border-zinc-200 bg-white">

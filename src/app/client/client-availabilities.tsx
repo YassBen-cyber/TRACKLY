@@ -104,7 +104,7 @@ export function ClientAvailabilities({ availabilities }: { availabilities: any[]
           />
         </div>
         <div className="flex-1 flex items-center gap-2">
-          <Select value={startTime} onValueChange={setStartTime}>
+          <Select value={startTime} onValueChange={(val) => setStartTime(val || '')}>
             <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
               <SelectValue />
             </SelectTrigger>
@@ -113,7 +113,7 @@ export function ClientAvailabilities({ availabilities }: { availabilities: any[]
             </SelectContent>
           </Select>
           <span className="text-zinc-600">à</span>
-          <Select value={endTime} onValueChange={setEndTime}>
+          <Select value={endTime} onValueChange={(val) => setEndTime(val || '')}>
             <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
               <SelectValue />
             </SelectTrigger>
@@ -135,7 +135,7 @@ export function ClientAvailabilities({ availabilities }: { availabilities: any[]
           </div>
         ) : (
           sortedDates.map(dateStr => {
-            const slots = grouped[dateStr].sort((a, b) => a.start_time.localeCompare(b.start_time))
+            const slots = grouped[dateStr].sort((a: any, b: any) => a.start_time.localeCompare(b.start_time))
             const formattedDate = new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
             
             return (
@@ -144,7 +144,7 @@ export function ClientAvailabilities({ availabilities }: { availabilities: any[]
                   {formattedDate}
                 </div>
                 <div className="flex-1 flex flex-wrap gap-2">
-                  {slots.map(slot => (
+                  {slots.map((slot: any) => (
                     <div key={slot.id} className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm">
                       <span>{slot.start_time.substring(0,5)} - {slot.end_time.substring(0,5)}</span>
                       <button 

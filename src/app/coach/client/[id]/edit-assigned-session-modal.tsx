@@ -86,11 +86,11 @@ export function EditAssignedSessionModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <button className="text-zinc-600 hover:text-zinc-900 transition-colors" title="Modifier ou supprimer">
           <Edit className="h-4 w-4" />
         </button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[700px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
           <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">

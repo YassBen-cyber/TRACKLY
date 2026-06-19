@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { LogOut, User as UserIcon } from 'lucide-react'
+import { LogOut, User as UserIcon, Dumbbell } from 'lucide-react'
 import { ClientAvailabilities } from './client-availabilities'
 import { ClientWorkouts } from './client-workouts'
 import { ClientPayments } from './client-payments'
