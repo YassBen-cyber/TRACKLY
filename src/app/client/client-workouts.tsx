@@ -13,6 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar, CheckCircle2, XCircle, AlertCircle, Loader2, Dumbbell, Clock } from 'lucide-react'
 import { validateSession } from './actions'
+import Link from 'next/link'
 
 export function ClientWorkouts({ sessions }: { sessions: any[] }) {
   const [validatingSession, setValidatingSession] = useState<any>(null)
@@ -110,18 +111,35 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
           </div>
         </div>
 
-        {type === 'pending' && (
-          <Button 
-            onClick={() => setValidatingSession(session)}
-            className="mt-2 w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-lg shadow-yellow-500/20"
-          >
-            Faire mon retour
-          </Button>
-        )}
+        <div className="flex gap-2 mt-2">
+          <Link href={`/client/workout/${session.id}`} className="flex-1">
+            <Button variant="outline" className="w-full bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300">
+              Voir les détails
+            </Button>
+          </Link>
+          {type === 'pending' && (
+            <Button 
+              onClick={() => setValidatingSession(session)}
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-lg shadow-yellow-500/20"
+            >
+              Faire mon retour
+            </Button>
+          )}
+        </div>
 
-        {type === 'history' && session.execution_feedback && (
-          <div className="mt-2 text-sm text-zinc-700 bg-black/40 p-3 rounded-xl border border-zinc-200 italic">
-            "{session.execution_feedback}"
+        {type === 'history' && (
+          <div className="mt-2 text-sm text-zinc-700 bg-black/40 p-3 rounded-xl border border-zinc-200 italic relative group">
+            "{session.execution_feedback || "Pas de retour"}"
+            <button 
+              onClick={() => {
+                setValidatingSession(session)
+                setFeedback(session.execution_feedback || '')
+                setStatus(session.status as 'completed' | 'missed')
+              }}
+              className="absolute top-2 right-2 p-1.5 text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+            >
+              Modifier
+            </button>
           </div>
         )}
       </div>

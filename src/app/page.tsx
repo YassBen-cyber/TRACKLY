@@ -1,320 +1,628 @@
-import Link from 'next/link'
-import { Dumbbell, ArrowRight, CheckCircle2, ChevronDown, Activity, Calendar, CreditCard, Users, Zap, Award } from 'lucide-react'
-import { SmoothScroll } from '@/components/smooth-scroll'
+'use client'
 
-export default function Home() {
+import Link from 'next/link'
+import Image from 'next/image'
+import { useEffect, useRef, useState, ReactNode } from 'react'
+import {
+  ArrowRight,
+  Calendar,
+  Target,
+  Brain,
+  CreditCard,
+  Users,
+  TrendingUp,
+  Layers,
+  ChevronDown,
+  CheckCircle2,
+  Zap,
+  BarChart2,
+  Dumbbell,
+  Trophy,
+  HeartPulse,
+  Menu,
+  X,
+} from 'lucide-react'
+
+// ────────────────────────────────────────────────────────────
+//  Sport icons — minimal SVG line art (monochrome)
+// ────────────────────────────────────────────────────────────
+const SportIcons: Record<string, ReactNode> = {
+  Football: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a10 10 0 0 1 6.5 2.4L12 9 5.5 4.4A10 10 0 0 1 12 2z"/>
+      <path d="M2 12h4l2-3 4 1 4-1 2 3h4"/>
+      <path d="M12 22a10 10 0 0 1-6.5-2.4L12 15l6.5 4.6A10 10 0 0 1 12 22z"/>
+    </svg>
+  ),
+  Basketball: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M4.9 4.9a14 14 0 0 1 14.2 14.2"/>
+      <path d="M19.1 4.9A14 14 0 0 0 4.9 19.1"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <line x1="12" y1="2" x2="12" y2="22"/>
+    </svg>
+  ),
+  Tennis: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M5 5a8 8 0 0 1 0 14"/>
+      <path d="M19 5a8 8 0 0 0 0 14"/>
+    </svg>
+  ),
+  Natation: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>
+      <path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>
+      <path d="M14 4a2 2 0 1 0 4 0 2 2 0 0 0-4 0"/>
+      <path d="M16 6l-3 4H9l-2 3"/>
+    </svg>
+  ),
+  Cyclisme: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="16" r="3.5"/>
+      <circle cx="19" cy="16" r="3.5"/>
+      <path d="M5 16l4-8h5l2 4"/>
+      <path d="M13 8l1.5 4H19"/>
+      <circle cx="16" cy="5" r="1.5"/>
+    </svg>
+  ),
+  Boxe: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="8" width="12" height="10" rx="4"/>
+      <path d="M16 12h2a2 2 0 0 1 0 4h-2"/>
+      <path d="M8 8V6a2 2 0 0 1 4 0v2"/>
+      <line x1="7" y1="12" x2="13" y2="12"/>
+    </svg>
+  ),
+  Haltérophilie: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="6" y1="12" x2="18" y2="12"/>
+      <rect x="2" y="9" width="2.5" height="6" rx="1"/>
+      <rect x="3.5" y="10.5" width="2" height="3" rx="0.5"/>
+      <rect x="19.5" y="9" width="2.5" height="6" rx="1"/>
+      <rect x="18.5" y="10.5" width="2" height="3" rx="0.5"/>
+      <circle cx="12" cy="7" r="2"/>
+      <path d="M12 9v6"/>
+    </svg>
+  ),
+  Athlétisme: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="14" cy="4" r="1.5"/>
+      <path d="M8 19l3-6 2 2 3-5"/>
+      <path d="M10 13l-2 6"/>
+      <path d="M16 11l3-3"/>
+      <path d="M13 11l1-3-3-2-3 2"/>
+    </svg>
+  ),
+  Gymnastique: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="4" r="1.5"/>
+      <path d="M7 21l5-8 5 8"/>
+      <path d="M12 13V9"/>
+      <path d="M9 11l3-2 3 2"/>
+      <line x1="5" y1="17" x2="9" y2="17"/>
+      <line x1="15" y1="17" x2="19" y2="17"/>
+    </svg>
+  ),
+  Rugby: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="12" rx="7" ry="4.5" transform="rotate(45 12 12)"/>
+      <line x1="7.5" y1="7.5" x2="16.5" y2="16.5"/>
+      <line x1="9" y1="12" x2="15" y2="12"/>
+      <line x1="12" y1="9" x2="12" y2="15"/>
+    </svg>
+  ),
+  Volleyball: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a10 10 0 0 1 5 13.5"/>
+      <path d="M7 4.5A10 10 0 0 1 19.5 17"/>
+      <path d="M2 12a10 10 0 0 0 12.5 9.5"/>
+    </svg>
+  ),
+  CrossFit: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="10" width="3" height="4" rx="1"/>
+      <rect x="19" y="10" width="3" height="4" rx="1"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <rect x="7" y="8" width="2.5" height="8" rx="1"/>
+      <rect x="14.5" y="8" width="2.5" height="8" rx="1"/>
+    </svg>
+  ),
+}
+
+// ────────────────────────────────────────────────────────────
+//  Sports ticker
+// ────────────────────────────────────────────────────────────
+const sports = [
+  'Football', 'Basketball', 'Tennis', 'Athlétisme',
+  'Natation', 'Cyclisme', 'Rugby', 'Volleyball',
+  'Boxe', 'Gymnastique', 'CrossFit', 'Triathlon',
+  'Judo', 'Escalade', 'Aviron', 'Handball',
+]
+
+function SportsTicker() {
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#2D2A26] font-sans selection:bg-[#E87A5D]/20 selection:text-[#2D2A26]">
-      <SmoothScroll />
-      {/* Header */}
-      <header className="relative z-30 w-full px-4 py-4 md:px-8 border-b border-[#2D2A26]/5 bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E87A5D] rounded-md">
-            <div className="bg-[#FAF9F6] border border-[#2D2A26]/10 p-1.5 rounded-lg shadow-sm">
-              <Dumbbell className="h-5 w-5 text-[#2D2A26]" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-[#2D2A26]">TRACKLY</span>
+    <div
+      className="relative overflow-hidden w-full py-1"
+      style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
+    >
+      <div className="flex gap-8 animate-ticker whitespace-nowrap">
+        {[...sports, ...sports].map((s, i) => (
+          <span key={i} className="text-xs font-medium uppercase tracking-[0.18em] text-black/25 select-none font-ui">
+            {s} <span className="text-black/12 mx-3">·</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+//  Animated counter
+// ────────────────────────────────────────────────────────────
+function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      let start = 0
+      const step = target / 60
+      const timer = setInterval(() => {
+        start += step
+        if (start >= target) { setCount(target); clearInterval(timer) }
+        else setCount(Math.floor(start))
+      }, 16)
+    }, { threshold: 0.5 })
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [target])
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
+// ────────────────────────────────────────────────────────────
+//  Logo
+// ────────────────────────────────────────────────────────────
+function Logo({ size = 32 }: { size?: number }) {
+  return (
+    <Image src="/TRACKLY_LOGO.webp" alt="Trackly logo" width={size} height={size} className="object-contain" priority />
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+//  Feature Card
+// ────────────────────────────────────────────────────────────
+function FeatureCard({ icon: Icon, title, description, tag }: {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>; title: string; description: string; tag?: string
+}) {
+  return (
+    <div className="group relative flex flex-col gap-5 rounded-2xl border border-black/6 bg-white p-7 transition-all duration-300 hover:border-black/12 hover:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)] hover:-translate-y-0.5">
+      {tag && (
+        <span className="font-ui absolute top-5 right-5 text-[10px] font-semibold uppercase tracking-widest text-blue-600/70 border border-blue-200 rounded-full px-2.5 py-0.5 bg-blue-50">
+          {tag}
+        </span>
+      )}
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/4 border border-black/6 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
+        <Icon className="h-5 w-5 text-black/40 group-hover:text-blue-600 transition-colors duration-300" />
+      </div>
+      <div>
+        {/* Titre en Satoshi medium */}
+        <h3 className="font-ui text-[14px] font-semibold text-black mb-2 tracking-tight">{title}</h3>
+        {/* Description en Satoshi regular */}
+        <p className="font-ui text-[13px] leading-relaxed text-black/45">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+//  Main Page
+// ────────────────────────────────────────────────────────────
+export default function Home() {
+  const [scrollY, setScrollY] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const navScrolled = scrollY > 40
+
+  return (
+    <div className="min-h-screen bg-white text-black overflow-x-hidden">
+
+      {/* ── Nav — Satoshi ──────────────────────────────────────── */}
+      <header
+        className={`fixed top-0 z-50 w-full px-5 transition-all duration-500 ${
+          navScrolled
+            ? 'py-3 bg-white/90 backdrop-blur-xl border-b border-black/6 shadow-[0_1px_12px_rgba(0,0,0,0.04)]'
+            : 'py-5 bg-transparent'
+        }`}
+      >
+        <div className="mx-auto flex max-w-[1120px] items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Logo size={34} />
+            <span className="font-ui text-[15px] font-semibold tracking-tight text-black">Trackly</span>
           </Link>
-          
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#2D2A26]/60">
-            <a href="#services" className="hover:text-[#E87A5D] transition-colors">Services</a>
-            <a href="#comment-ca-marche" className="hover:text-[#E87A5D] transition-colors">Comment ça marche</a>
-            <a href="#pour-qui" className="hover:text-[#E87A5D] transition-colors">Pour qui ?</a>
-            <a href="#faq" className="hover:text-[#E87A5D] transition-colors">FAQ</a>
+
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { label: 'Fonctionnalités', href: '#features' },
+              { label: 'Sports', href: '#sports' },
+              { label: 'Comment ça marche', href: '#how' },
+            ].map(({ label, href }) => (
+              <a key={label} href={href}
+                className="font-ui px-4 py-2 text-[13px] font-medium text-black/50 hover:text-black rounded-full hover:bg-black/4 transition-all duration-150">
+                {label}
+              </a>
+            ))}
           </nav>
-          
-          <div className="flex items-center gap-2">
-            <Link href="/login" className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-[#2D2A26]/70 hover:text-[#2D2A26] hover:bg-[#2D2A26]/5 rounded-full transition-colors">
-              Se connecter
+
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/login" className="font-ui text-[13px] font-medium text-black/50 hover:text-black transition-colors px-4 py-2 rounded-full hover:bg-black/4">
+              Connexion
             </Link>
-            <Link href="/register" className="px-5 py-2 text-sm font-medium bg-[#2D2A26] text-[#FAF9F6] hover:bg-[#1A1816] rounded-full transition-colors flex items-center gap-2 shadow-md shadow-[#2D2A26]/10">
-              Commencer <ArrowRight className="h-4 w-4" />
+            <Link href="/register" className="font-ui inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition-all duration-150">
+              Commencer <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
+
+          <button className="md:hidden p-2 rounded-lg hover:bg-black/4 transition-colors" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {menuOpen && (
+          <div className="md:hidden border-t border-black/6 bg-white/95 backdrop-blur-xl px-5 py-4 flex flex-col gap-2">
+            {['Fonctionnalités', 'Sports', 'Comment ça marche'].map((item) => (
+              <a key={item} href="#"
+                className="font-ui px-4 py-3 text-[14px] font-medium text-black/60 hover:text-black rounded-xl hover:bg-black/4"
+                onClick={() => setMenuOpen(false)}>
+                {item}
+              </a>
+            ))}
+            <div className="border-t border-black/6 pt-4 mt-2 flex flex-col gap-2">
+              <Link href="/login" className="font-ui px-4 py-3 text-[14px] font-medium text-black/60 text-center rounded-xl border border-black/10">Connexion</Link>
+              <Link href="/register" className="font-ui px-4 py-3 text-[14px] font-semibold text-white text-center rounded-xl bg-black">Commencer gratuitement</Link>
+            </div>
+          </div>
+        )}
       </header>
 
-      <main className="relative">
-        {/* Hero Section */}
-        <section className="relative px-4 pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-          {/* Muted background blobs */}
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#E87A5D]/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-[#41B3A3]/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+      <main>
+
+        {/* ── Hero ───────────────────────────────────────────────── */}
+        <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pt-28 pb-20 text-center">
+
+          {/* 1 — Image de fond (tout en bas) */}
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <Image
+              src="/BG-HERO-ALL-SPORTS.webp"
+              alt=""
+              fill
+              className="imghero object-contain object-center opacity-[0.12]"
+              priority
+            />
+          </div>
+
+          {/* 2 — Dot grid par-dessus l'image */}
+          <div className="pointer-events-none absolute inset-0 z-[1] opacity-30"
+            style={{ backgroundImage: 'radial-gradient(circle, #b0b0b0 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
           
-          <div className="mx-auto flex w-full max-w-[900px] flex-col items-center text-center gap-8 relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#2D2A26]/10 text-xs font-semibold text-[#2D2A26]/60 uppercase tracking-wider mb-2 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#E87A5D] animate-pulse"></span>
-              La nouvelle référence
-            </div>
-            
-            <h1 className="font-serif font-light text-[44px] leading-[1.1] tracking-[-0.03em] text-[#2D2A26] md:text-[80px]">
-              L'écosystème <span className="font-medium text-[#E87A5D]">sur-mesure</span> pour chaque athlète.
-            </h1>
-            
-            <p className="text-lg leading-relaxed text-[#2D2A26]/70 max-w-[600px]">
-              Oubliez les fichiers Excel et les messages éparpillés. Planifiez vos séances, suivez les progrès et gérez vos paiements au même endroit.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center gap-4 mt-6">
-              <Link href="/register" className="h-14 px-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#E87A5D] text-white font-medium text-base hover:bg-[#D96B4D] transition-transform active:scale-95 shadow-lg shadow-[#E87A5D]/20">
-                Essayer gratuitement
-              </Link>
-              <Link href="/login" className="h-14 px-8 inline-flex items-center justify-center gap-2 rounded-full bg-white border border-[#2D2A26]/10 text-[#2D2A26] font-medium text-base hover:bg-[#F4F0EB] transition-colors shadow-sm">
-                Espace Client
-              </Link>
-            </div>
+          {/* 4 — Glow bleu subtil */}
+          <div className="pointer-events-none absolute top-1/3 left-1/2 z-[3] -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full bg-blue-100/40 blur-[100px]" />
+
+          {/* H1 — Apple Garamond */}
+          <h1 className="font-display relative max-w-[860px] text-[58px] leading-[1.08] md:text-[80px] lg:text-[96px]">
+            Une plateforme.{' '}
+            <br className="hidden md:block" />
+            Tous vos athlètes.
+          </h1>
+
+          {/* Subline — Satoshi light */}
+          <p className="font-ui relative mt-7 max-w-[500px] text-[17px] leading-[1.65] text-black font-light">
+            Trackly centralise la gestion des athlètes, le suivi des performances et l'administration — pour arrêter de jongler entre 10 applications différentes.
+          </p>
+
+          {/* CTAs — Satoshi */}
+          <div className="relative mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link href="/register"
+              className="font-ui inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-[14px] font-semibold text-white hover:bg-black/85 transition-all duration-150 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+              Commencer gratuitement <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/login"
+              className="font-ui inline-flex items-center gap-2 rounded-full border border-black/12 px-7 py-3.5 text-[14px] font-medium text-black/55 hover:text-black hover:border-black/25 transition-all duration-150">
+              Se connecter
+            </Link>
           </div>
 
-          {/* Abstract Visual / Dashboard Mockup */}
-          <div className="mt-24 relative w-full max-w-[1000px] mx-auto z-20">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#FAF9F6] via-transparent to-transparent z-10 h-full w-full pointer-events-none"></div>
-            <div className="rounded-3xl border border-[#2D2A26]/5 bg-white/50 backdrop-blur-sm shadow-2xl p-2 md:p-4 rotate-1 hover:rotate-0 transition-transform duration-700 ease-out">
-              <div className="rounded-2xl border border-[#2D2A26]/5 bg-white aspect-[16/9] w-full flex flex-col overflow-hidden relative shadow-inner">
-                {/* Mockup Header */}
-                <div className="h-12 border-b border-[#2D2A26]/5 flex items-center px-4 gap-4 bg-[#FAF9F6]">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-[#2D2A26]/20"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#2D2A26]/20"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#2D2A26]/20"></div>
-                  </div>
-                  <div className="w-48 h-4 rounded-full bg-[#2D2A26]/5 ml-auto"></div>
-                </div>
-                {/* Mockup Body */}
-                <div className="flex-1 p-6 flex gap-6 bg-white">
-                  {/* Sidebar */}
-                  <div className="w-1/4 hidden md:flex flex-col gap-4">
-                    <div className="w-full h-10 rounded-lg bg-[#E87A5D]/10"></div>
-                    <div className="w-3/4 h-8 rounded-lg bg-[#2D2A26]/5"></div>
-                    <div className="w-3/4 h-8 rounded-lg bg-[#2D2A26]/5"></div>
-                  </div>
-                  {/* Main Content */}
-                  <div className="flex-1 flex flex-col gap-6">
-                    <div className="w-1/3 h-8 rounded-full bg-[#41B3A3]/10"></div>
-                    <div className="flex gap-4">
-                      <div className="w-1/2 h-32 rounded-2xl bg-[#2D2A26]/5"></div>
-                      <div className="w-1/2 h-32 rounded-2xl bg-[#2D2A26]/5"></div>
-                    </div>
-                    <div className="w-full h-full rounded-2xl bg-[#2D2A26]/5"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Logo hero */}
+          <div className="relative mt-16">
+            <Image src="/TRACKLY_LOGO.webp" alt="Trackly" width={64} height={64} className="object-contain opacity-85 mx-auto" />
+          </div>
+
+          {/* Sports ticker */}
+          <div className="relative mt-14 w-full max-w-[900px]">
+            <p className="font-ui mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-black/25">Compatible avec tous les sports</p>
+            <SportsTicker />
+          </div>
+
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-black/20">
+            <ChevronDown className="h-4 w-4 animate-bounce" />
           </div>
         </section>
 
-        {/* Logos / Social Proof */}
-        <section className="py-12 border-y border-[#2D2A26]/5 bg-white">
-          <div className="max-w-[1000px] mx-auto px-4 text-center">
-            <p className="text-xs font-semibold text-[#2D2A26]/40 uppercase tracking-widest mb-8">Ils ont choisi la performance</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 grayscale">
-              <div className="text-xl font-serif font-bold">CROSSFIT CLUB</div>
-              <div className="text-xl font-bold tracking-tighter">ELITE ATHLETICS</div>
-              <div className="text-xl font-bold italic">ProGym</div>
-              <div className="text-xl font-serif font-bold">FITNESS HUB</div>
-            </div>
+        {/* ── Stats — Garamond numbers, Satoshi labels ────────────── */}
+        <section className="py-16 px-5 border-y border-black/6 bg-black/[0.015]">
+          <div className="mx-auto grid max-w-[1120px] grid-cols-2 gap-px md:grid-cols-4 bg-black/6 rounded-2xl overflow-hidden">
+            {[
+              { value: 40, suffix: '+', label: 'Sports supportés' },
+              { value: 12, suffix: 'k+', label: 'Athlètes suivis' },
+              { value: 98, suffix: '%', label: 'Coaches satisfaits' },
+              { value: 3, suffix: 'x', label: 'Plus rapide que les tableurs' },
+            ].map(({ value, suffix, label }) => (
+              <div key={label} className="flex flex-col items-center justify-center gap-1.5 bg-white py-10 px-6 text-center">
+                {/* Number: Apple Garamond */}
+                <span className="font-display text-[44px] leading-none text-black">
+                  <Counter target={value} suffix={suffix} />
+                </span>
+                {/* Label: Satoshi */}
+                <span className="font-ui text-[12px] text-black/35 font-medium mt-1">{label}</span>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Services Section */}
-        <section id="services" className="py-24 px-4 max-w-[1200px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-serif font-light text-3xl md:text-5xl tracking-[-0.03em] text-[#2D2A26] mb-4">
-              La clarté à chaque étape.
-            </h2>
-            <p className="text-[#2D2A26]/60 max-w-2xl mx-auto text-lg">
-              Une suite d'outils pensée par et pour les coachs sportifs afin de vous faire gagner un temps précieux.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-8 rounded-3xl border border-[#2D2A26]/5 shadow-sm hover:shadow-md transition-all group">
-              <div className="h-12 w-12 bg-[#41B3A3]/10 text-[#41B3A3] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Activity className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[#2D2A26] mb-3">Programmes & Suivi</h3>
-              <p className="text-[#2D2A26]/60 leading-relaxed text-sm">
-                Créez vos templates, assignez-les en un clic. Vos clients valident leurs séances avec leurs retours, et vous gardez un historique précis.
-              </p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-3xl border border-[#2D2A26]/5 shadow-sm hover:shadow-md transition-all group">
-              <div className="h-12 w-12 bg-[#E87A5D]/10 text-[#E87A5D] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Calendar className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[#2D2A26] mb-3">Rendez-vous fluides</h3>
-              <p className="text-[#2D2A26]/60 leading-relaxed text-sm">
-                Vos athlètes indiquent leurs disponibilités, vous placez les séances aux bons créneaux. Fini les allers-retours interminables par message.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-[#2D2A26]/5 shadow-sm hover:shadow-md transition-all group">
-              <div className="h-12 w-12 bg-[#2D2A26]/5 text-[#2D2A26] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <CreditCard className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[#2D2A26] mb-3">Paiements centralisés</h3>
-              <p className="text-[#2D2A26]/60 leading-relaxed text-sm">
-                Générez des factures ou des demandes de paiement directement depuis l'application. Vous et vos athlètes savez toujours où vous en êtes.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Comment ça marche */}
-        <section id="comment-ca-marche" className="py-24 px-4 bg-[#2D2A26] text-white rounded-[2rem] mx-4 md:mx-8 mb-24 relative overflow-hidden">
-          <div className="max-w-[1000px] mx-auto relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="font-serif font-light text-3xl md:text-5xl tracking-[-0.03em] mb-4">
-                Une méthode éprouvée
+        {/* ── Problem ────────────────────────────────────────────── */}
+        <section className="py-28 px-5">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="mb-16 max-w-[560px]">
+              <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-600">Le problème</p>
+              {/* Garamond */}
+              <h2 className="font-display text-[42px] leading-[1.1] md:text-[54px]">
+                Le coaching est fragmenté.<br />
+                <span className="font-display-italic text-black/25">Ça ne devrait pas l'être.</span>
               </h2>
-              <p className="text-white/60 max-w-2xl mx-auto">
-                La méthode la plus rapide pour gérer votre activité.
+              <p className="font-ui mt-5 text-[16px] leading-[1.7] text-black/40">
+                La plupart des coachs perdent des heures chaque semaine à basculer d'une app à l'autre — WhatsApp pour communiquer, Google Sheets pour tracker, une autre pour la facturation, une autre pour la planification. Trackly met fin au chaos.
               </p>
             </div>
 
-            <div className="space-y-12">
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-                <div className="w-16 h-16 rounded-2xl bg-white/10 text-white flex items-center justify-center font-bold text-xl shrink-0 border border-white/10">1</div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Vous invitez vos athlètes</h3>
-                  <p className="text-white/60 text-lg">Créez leur profil en quelques secondes. Ils accèdent à leur espace dédié pour renseigner leurs disponibilités.</p>
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-                <div className="w-16 h-16 rounded-2xl bg-[#E87A5D] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-lg shadow-[#E87A5D]/20">2</div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Vous assignez le travail</h3>
-                  <p className="text-white/60 text-lg">Piocher dans vos templates d'entraînement. Planifiez les séances et gérez la facturation en un seul clic.</p>
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-                <div className="w-16 h-16 rounded-2xl bg-[#41B3A3] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-lg shadow-[#41B3A3]/20">3</div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Ils s'entraînent, vous validez</h3>
-                  <p className="text-white/60 text-lg">L'athlète s'entraîne et valide sa séance avec des retours précis (RPE, sensations). Vous ajustez pour la prochaine fois.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pour Qui */}
-        <section id="pour-qui" className="py-24 px-4 max-w-[1200px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="font-serif font-light text-3xl md:text-5xl tracking-[-0.03em] text-[#2D2A26] mb-6">
-                Pour ceux qui veulent <span className="font-medium text-[#41B3A3]">passer un cap</span>.
-              </h2>
-              <p className="text-lg text-[#2D2A26]/70 mb-8 leading-relaxed">
-                TRACKLY n'est pas une simple application de fitness. C'est un véritable hub pensé exclusivement pour les professionnels du sport cherchant l'excellence.
-              </p>
-              
-              <ul className="space-y-4">
-                <li className="flex items-center gap-3 text-[#2D2A26]/80 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-[#41B3A3]" /> Préparateurs physiques
-                </li>
-                <li className="flex items-center gap-3 text-[#2D2A26]/80 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-[#41B3A3]" /> Coachs sportifs indépendants
-                </li>
-                <li className="flex items-center gap-3 text-[#2D2A26]/80 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-[#41B3A3]" /> Kinésithérapeutes du sport
-                </li>
-                <li className="flex items-center gap-3 text-[#2D2A26]/80 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-[#41B3A3]" /> Entraîneurs personnels (Personal Trainers)
-                </li>
-              </ul>
-            </div>
-            
-            <div className="relative">
-              <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-[#2D2A26]/5 shadow-xl shadow-[#2D2A26]/5">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="h-16 w-16 bg-[#FAF9F6] rounded-2xl flex items-center justify-center border border-[#2D2A26]/5">
-                    <Award className="h-8 w-8 text-[#E87A5D]" />
+            <div className="grid gap-px md:grid-cols-3 bg-black/6 rounded-2xl overflow-hidden">
+              {[
+                { pain: 'Données éparpillées sur 10 applications', fix: 'Tout centralisé dans un seul tableau de bord', icon: Layers },
+                { pain: 'Templates rigides inadaptés à votre sport', fix: 'Métriques entièrement personnalisables par discipline', icon: Target },
+                { pain: 'Aucune visibilité sur la progression des athlètes', fix: 'Suivi des performances en temps réel & analytics', icon: TrendingUp },
+              ].map(({ pain, fix, icon: Icon }) => (
+                <div key={pain} className="flex flex-col gap-6 bg-white p-8">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/4 border border-black/6">
+                    <Icon className="h-4.5 w-4.5 text-black/40" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-[#2D2A26]">Professionnalisez votre image</h4>
-                    <p className="text-[#2D2A26]/50 text-sm">Finis les PDF brouillons.</p>
+                    <p className="font-ui text-[13px] text-black/30 line-through mb-3">{pain}</p>
+                    <p className="font-ui text-[14px] font-medium text-black flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />{fix}
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div className="p-4 bg-[#FAF9F6] rounded-2xl border border-[#2D2A26]/5 flex gap-4 items-center">
-                    <Zap className="h-6 w-6 text-[#E87A5D] shrink-0" />
-                    <p className="text-sm font-medium text-[#2D2A26]/70">Gain de temps : <strong className="text-[#2D2A26]">4 heures/semaine</strong></p>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Features Grid ───────────────────────────────────────── */}
+        <section id="features" className="py-28 px-5 bg-black/[0.015]">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="mb-16 text-center">
+              <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-600">Fonctionnalités</p>
+              <h2 className="font-display text-[42px] leading-[1.1] md:text-[54px]">
+                Conçu pour les coachs,<br />
+                <span className="font-display-italic text-black/25">pas pour les managers génériques.</span>
+              </h2>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <FeatureCard icon={HeartPulse} title="Suivi des performances" description="Enregistrez les séances, suivez des métriques personnalisées (HRV, RPE, charge, vitesse…) et visualisez la progression avec des graphiques adaptés." tag="Essentiel" />
+              <FeatureCard icon={Users} title="CRM athlète" description="Profils complets avec historique, objectifs, notes de santé, journaux de blessures et documents. Toujours à jour." />
+              <FeatureCard icon={Brain} title="Métriques personnalisables" description="Définissez exactement ce que vous suivez — saut vertical, temps de passage, force maximale — aucun template rigide." />
+              <FeatureCard icon={Dumbbell} title="Programmes d'entraînement" description="Créez et assignez des programmes complets. Les athlètes enregistrent les résultats en temps réel." />
+              <FeatureCard icon={Calendar} title="Planning & rendez-vous" description="Gérez séances, entraînements collectifs et calendriers athlètes en une seule vue. Fini les doublons." tag="Business" />
+              <FeatureCard icon={CreditCard} title="Facturation & paiements" description="Envoyez des factures, suivez les paiements et gérez les abonnements directement dans Trackly." />
+              <FeatureCard icon={BarChart2} title="Analytics de progression" description="Graphiques et tendances pour repérer les plateaux, les pics et les opportunités d'amélioration." />
+              <FeatureCard icon={Zap} title="Multi-sport natif" description="Du football à la gymnastique, de la natation au CrossFit — Trackly s'adapte à votre sport." tag="Universel" />
+              <FeatureCard icon={Trophy} title="Objectifs & jalons" description="Définissez des records personnels et des objectifs de saison. Suivez la progression automatiquement." />
+            </div>
+          </div>
+        </section>
+
+        {/* ── All Sports ─────────────────────────────────────────── */}
+        <section id="sports" className="py-28 px-5">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="grid md:grid-cols-2 gap-20 items-center">
+              <div>
+                <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-600">Universel</p>
+                <h2 className="font-display text-[42px] leading-[1.1] md:text-[54px] mb-6">
+                  Un seul outil pour<br />
+                  <span className="font-display-italic text-black/25">tous vos sports.</span>
+                </h2>
+                <p className="font-ui text-[16px] leading-[1.7] text-black/40 mb-8">
+                  Que vous entraîniez des athlètes professionnels ou des amateurs du weekend, sur un sport ou dix, Trackly vous donne la même plateforme puissante — personnalisée pour ce qui compte dans votre discipline.
+                </p>
+                <div className="flex flex-col gap-3">
+                  {['Définissez vos propres métriques de performance', 'Templates adaptés par sport', 'Gestion multi-athlètes et équipes', 'Comparaison de progression entre athlètes'].map((item) => (
+                    <div key={item} className="font-ui flex items-center gap-3 text-[14px] text-black/60">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 flex-shrink-0" />{item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sport grid — SVG icons */}
+              <div className="grid grid-cols-3 gap-2.5">
+                {Object.entries(SportIcons).map(([name, icon]) => (
+                  <div key={name}
+                    className="group flex flex-col items-center gap-3 rounded-xl border border-black/6 bg-white p-5 text-center hover:border-black/15 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] transition-all duration-200 cursor-default">
+                    {/* SVG icon */}
+                    <div className="h-7 w-7 text-black/50 group-hover:text-black transition-colors duration-200">
+                      {icon}
+                    </div>
+                    {/* Name — Satoshi */}
+                    <span className="font-ui text-[11px] font-medium text-black/40 group-hover:text-black/60 transition-colors">{name}</span>
                   </div>
-                  <div className="p-4 bg-[#FAF9F6] rounded-2xl border border-[#2D2A26]/5 flex gap-4 items-center">
-                    <Users className="h-6 w-6 text-[#41B3A3] shrink-0" />
-                    <p className="text-sm font-medium text-[#2D2A26]/70">Satisfaction athlète : <strong className="text-[#2D2A26]">Suivi 100% transparent</strong></p>
-                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Stop App Fatigue ────────────────────────────────────── */}
+        <section className="py-28 px-5 bg-black/[0.015]">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="mb-16 text-center">
+              <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-600">Tout-en-un</p>
+              <h2 className="font-display text-[42px] leading-[1.1] md:text-[54px]">Fini la fatigue des apps.</h2>
+              <p className="font-ui mt-4 max-w-[460px] mx-auto text-[16px] text-black/35">
+                Remplacez votre stack d'outils déconnectés par un seul espace de travail cohérent.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="rounded-2xl border border-black/6 bg-white p-8">
+                <p className="font-ui text-[11px] font-semibold uppercase tracking-widest text-black/25 mb-6">Sans Trackly</p>
+                <div className="flex flex-col gap-4">
+                  {['WhatsApp pour communiquer avec les athlètes', 'Google Sheets pour les données de performance', 'Calendly pour la planification', 'Stripe manuellement pour les paiements', "Dropbox pour les vidéos d'entraînement", 'Notes pour les journaux de séance'].map((item) => (
+                    <div key={item} className="font-ui flex items-center gap-3 text-[14px] text-black/30">
+                      <span className="h-1.5 w-1.5 rounded-full bg-black/15 flex-shrink-0" />{item}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 p-4 rounded-xl bg-black/3 border border-black/6">
+                  <p className="font-ui text-[12px] text-black/30 text-center">6 apps. 6 abonnements. Changements de contexte constants.</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-8">
+                <p className="font-ui text-[11px] font-semibold uppercase tracking-widest text-blue-600/70 mb-6">Avec Trackly</p>
+                <div className="flex flex-col gap-4">
+                  {['Profils athlètes & hub de communication', 'Métriques custom & suivi en temps réel', 'Calendrier & rendez-vous intégrés', 'Facturation & invoicing intégrés', 'Bibliothèque multimédia pour le contenu', 'Journal automatique de séances & progression'].map((item) => (
+                    <div key={item} className="font-ui flex items-center gap-3 text-[14px] text-black/65">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 flex-shrink-0" />{item}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 p-4 rounded-xl bg-blue-100/60 border border-blue-200">
+                  <p className="font-ui text-[12px] text-blue-700 text-center font-semibold">Un seul espace de travail. Zéro friction.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section id="faq" className="py-24 px-4 bg-white border-t border-[#2D2A26]/5">
-          <div className="max-w-[800px] mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="font-serif font-light text-3xl md:text-5xl tracking-[-0.03em] text-[#2D2A26] mb-4">
-                Questions Fréquentes
+        {/* ── How it works ────────────────────────────────────────── */}
+        <section id="how" className="py-28 px-5">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="mb-16 text-center">
+              <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-600">Comment ça marche</p>
+              <h2 className="font-display text-[42px] leading-[1.1] md:text-[54px]">
+                Opérationnel<br />
+                <span className="font-display-italic text-black/25">en quelques minutes.</span>
               </h2>
             </div>
-            
-            <div className="space-y-4">
-              <details className="group bg-[#FAF9F6] border border-[#2D2A26]/5 rounded-2xl open:bg-white open:shadow-lg transition-all duration-300">
-                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-lg text-[#2D2A26]">
-                  Comment les paiements fonctionnent-ils ?
-                  <ChevronDown className="h-5 w-5 text-[#2D2A26]/40 group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="px-6 pb-6 text-[#2D2A26]/60 text-sm leading-relaxed">
-                  Actuellement, la plateforme gère vos demandes de paiement comme un livre de comptes interactif. Vous créez une demande, le client la voit sur son espace, et une fois réglée (par virement, espèces, etc.), vous pouvez la marquer comme validée.
+            <div className="flex flex-col gap-0">
+              {[
+                { step: '01', title: 'Créez votre espace de travail', description: "Inscrivez-vous, choisissez votre sport (ou vos sports), et définissez les métriques qui comptent pour vous. Moins de 5 minutes.", icon: Zap },
+                { step: '02', title: 'Ajoutez vos athlètes', description: "Importez ou invitez vos athlètes. Configurez leurs profils avec objectifs, données de santé et historique d'entraînement.", icon: Users },
+                { step: '03', title: 'Assignez programmes & séances', description: "Créez des plans d'entraînement, planifiez des séances et envoyez-les directement aux athlètes.", icon: Dumbbell },
+                { step: '04', title: 'Suivez la progression en temps réel', description: "Les athlètes enregistrent leurs séances, vous voyez les données instantanément. Graphiques, tendances et alertes.", icon: TrendingUp },
+              ].map(({ step, title, description, icon: Icon }, i, arr) => (
+                <div key={step} className={`flex gap-8 items-start py-10 ${i < arr.length - 1 ? 'border-b border-black/6' : ''}`}>
+                  <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-blue-600">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <span className="font-ui text-[10px] font-bold text-black/20 tracking-widest">{step}</span>
+                  </div>
+                  <div className="pt-1 max-w-[600px]">
+                    {/* Step title — Apple Garamond */}
+                    <h3 className="font-display text-[22px] text-black mb-2">{title}</h3>
+                    {/* Step desc — Satoshi */}
+                    <p className="font-ui text-[14px] leading-[1.7] text-black/40">{description}</p>
+                  </div>
                 </div>
-              </details>
-              
-              <details className="group bg-[#FAF9F6] border border-[#2D2A26]/5 rounded-2xl open:bg-white open:shadow-lg transition-all duration-300">
-                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-lg text-[#2D2A26]">
-                  Puis-je créer mes propres exercices et métriques ?
-                  <ChevronDown className="h-5 w-5 text-[#2D2A26]/40 group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="px-6 pb-6 text-[#2D2A26]/60 text-sm leading-relaxed">
-                  Absolument. Vous pouvez assigner des templates de séances complets et définir des formulaires de suivi spécifiques (sommeil, poids, sensations) pour chaque athlète.
-                </div>
-              </details>
-
-              <details className="group bg-[#FAF9F6] border border-[#2D2A26]/5 rounded-2xl open:bg-white open:shadow-lg transition-all duration-300">
-                <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-lg text-[#2D2A26]">
-                  Mes athlètes doivent-ils payer pour utiliser l'application ?
-                  <ChevronDown className="h-5 w-5 text-[#2D2A26]/40 group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="px-6 pb-6 text-[#2D2A26]/60 text-sm leading-relaxed">
-                  Non, l'accès pour vos athlètes est totalement gratuit. Ils se connectent avec un code d'accès que vous leur fournissez.
-                </div>
-              </details>
+              ))}
             </div>
           </div>
         </section>
-      </main>
-      
-      {/* Footer */}
-      <footer className="border-t border-[#2D2A26]/5 py-12 px-4 md:px-8 bg-[#FAF9F6]">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="bg-white p-1.5 rounded-lg border border-[#2D2A26]/5 shadow-sm">
-              <Dumbbell className="h-4 w-4 text-[#2D2A26]" />
+
+        {/* ── CTA ────────────────────────────────────────────────── */}
+        <section className="py-28 px-5">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="relative overflow-hidden rounded-3xl border border-black/6 bg-black p-12 md:p-20 text-center">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="h-[400px] w-[600px] rounded-full bg-blue-600/15 blur-[100px]" />
+              </div>
+              <div className="relative flex justify-center mb-8">
+                <Image src="/TRACKLY_LOGO.webp" alt="Trackly" width={52} height={52} className="object-contain opacity-90" />
+              </div>
+              <div className="relative">
+                <p className="font-ui mb-4 text-[11px] font-semibold uppercase tracking-widest text-blue-400">Commencez aujourd'hui</p>
+                {/* CTA headline — Apple Garamond */}
+                <h2 className="font-display text-[42px] leading-[1.1] md:text-[60px] mb-6 text-white">
+                  Prêt à coacher<br />
+                  <span className="font-display-italic text-white/30">sans le chaos ?</span>
+                </h2>
+                <p className="font-ui mb-10 text-[16px] text-white/40 max-w-[420px] mx-auto font-light">
+                  Rejoignez des coachs de tous les sports qui gèrent leurs athlètes en un seul endroit.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Link href="/register"
+                    className="font-ui inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-[14px] font-semibold text-black hover:bg-white/90 transition-all duration-150 shadow-[0_4px_32px_rgba(255,255,255,0.15)]">
+                    Commencer gratuitement <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link href="/login"
+                    className="font-ui inline-flex items-center gap-2 rounded-full border border-white/15 px-8 py-4 text-[14px] font-medium text-white/50 hover:text-white hover:border-white/30 transition-all duration-150">
+                    Déjà un compte
+                  </Link>
+                </div>
+              </div>
             </div>
-            <span className="text-[#2D2A26] text-lg font-bold tracking-tight">TRACKLY</span>
           </div>
-          
-          <nav className="flex gap-6 text-sm text-[#2D2A26]/60 font-medium">
-            <a href="#" className="hover:text-[#2D2A26]">Mentions légales</a>
-            <a href="#" className="hover:text-[#2D2A26]">Confidentialité</a>
-            <a href="#" className="hover:text-[#2D2A26]">Contact</a>
-          </nav>
-          
-          <div className="text-[#2D2A26]/40 text-sm">
-            © 2026 TRACKLY. Tous droits réservés.
+        </section>
+
+      </main>
+
+      {/* ── Footer ─────────────────────────────────────────────── */}
+      <footer className="border-t border-black/6 px-5 py-16 bg-white">
+        <div className="mx-auto max-w-[1120px]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 mb-12">
+            <div className="flex items-center gap-2.5">
+              <Logo size={28} />
+              <span className="font-ui text-[14px] font-semibold text-black">Trackly</span>
+            </div>
+            <nav className="flex flex-wrap gap-6">
+              {['Fonctionnalités', 'Tarifs', 'À propos', 'Contact', 'Confidentialité', 'CGU'].map((item) => (
+                <a key={item} href="#" className="font-ui text-[13px] text-black/35 hover:text-black/70 transition-colors">{item}</a>
+              ))}
+            </nav>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-8 border-t border-black/6">
+            <p className="font-ui text-[12px] text-black/25">© 2026 Trackly. Fait pour les coachs partout dans le monde.</p>
+            <p className="font-display-italic text-[13px] text-black/20">Tous les sports. Une seule plateforme.</p>
           </div>
         </div>
       </footer>
+
+      <style>{`
+        @keyframes ticker {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        .animate-ticker { animation: ticker 35s linear infinite; }
+      `}</style>
     </div>
   )
 }

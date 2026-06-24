@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
-import { DM_Sans, Playfair_Display } from 'next/font/google'
 import './globals.css'
 
-const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif' })
-
 export const metadata: Metadata = {
-  title: 'TRACKLY',
-  description: 'Gérez vos athlètes vers l\'excellence',
+  title: 'Trackly — The coaching platform for every sport',
+  description: 'Centralisez la gestion de vos athlètes, suivez leurs performances et gérez votre activité — sur une seule plateforme.',
+  icons: {
+    icon: '/TRACKLY_LOGO.webp',
+    apple: '/TRACKLY_LOGO.webp',
+  },
 }
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${dmSans.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground`}>
+      <body className="antialiased bg-background text-foreground">
         {children}
       </body>
     </html>

@@ -2,8 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, User, Calendar, Dumbbell } from 'lucide-react'
-import { MetricForms } from './metric-forms'
+import { ChevronLeft, User, Calendar } from 'lucide-react'
 import { ClientMetricsView } from './client-metrics-view'
 import { AssignTemplateModal } from './assign-template-modal'
 import { AssignWorkoutModal } from './assign-workout-modal'
@@ -70,9 +69,9 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
         {/* Section Entraînements planifiés */}
         <AssignedSessionsList clientId={client.id} assignedSessions={assignedSessions || []} />
 
-        <MetricForms clientId={client.id} metricTypes={metricTypes || []} />
 
-        <div className="pt-4 border-t border-zinc-200">
+
+        <div className="pt-2 border-t border-zinc-200">
           <ClientMetricsView values={allValues || []} clientName={client.full_name} />
         </div>
 

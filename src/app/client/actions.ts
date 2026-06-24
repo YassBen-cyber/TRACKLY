@@ -87,3 +87,59 @@ export async function simulatePayment(paymentId: string) {
   revalidatePath('/client')
   return { success: true }
 }
+
+export async function addClientMetricValue(metricTypeId: string, value: number, photoUrl: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('metric_values')
+    .insert({
+      client_id: user.id,
+      metric_type_id: metricTypeId,
+      value: value,
+      date: new Date().toISOString(),
+      photo_url: photoUrl
+    })
+
+  if (error) {
+    throw new Error('Erreur lors de l\'ajout de la métrique')
+  }
+
+  revalidatePath('/client')
+  return { success: true }
+}
+
+export async function deleteClientMetricValue(metricValueId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('metric_values')
+    .delete()
+    .eq('id', metricValueId)
+    .eq('client_id', user.id)
+
+  if (error) throw new Error('Erreur lors de la suppression')
+
+  revalidatePath('/client')
+}
+
+export async function updateClientMetricValue(metricValueId: string, value: number, photoUrl: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('metric_values')
+    .update({ value, photo_url: photoUrl })
+    .eq('id', metricValueId)
+    .eq('client_id', user.id)
+
+  if (error) throw new Error('Erreur lors de la modification')
+
+  revalidatePath('/client')
+}
+

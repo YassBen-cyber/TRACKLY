@@ -177,39 +177,44 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={groupedMetrics[name].data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
                       <XAxis 
                         dataKey="date" 
-                        stroke="#ffffff50" 
+                        stroke="#a3a3a3" 
                         fontSize={12} 
                         tickLine={false} 
                         axisLine={false} 
                         dy={10}
                       />
                       <YAxis 
-                        stroke="#ffffff50" 
+                        stroke="#a3a3a3" 
                         fontSize={12} 
                         tickLine={false} 
                         axisLine={false} 
                         dx={-10}
-                        domain={['auto', 'auto']}
+                        domain={[
+                          (dataMin: number | string) => parseFloat((Number(dataMin) * 0.95).toFixed(2)),
+                          (dataMax: number | string) => parseFloat((Number(dataMax) * 1.05).toFixed(2)),
+                        ]}
                       />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#18181b', borderColor: '#ffffff20', borderRadius: '12px', color: '#fff' }}
-                        itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
+                        contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e5e5e5', borderRadius: '12px', color: '#0a0a0a', boxShadow: '0 4px 24px -4px rgba(0,0,0,0.12)' }}
+                        labelStyle={{ color: '#737373', fontSize: '12px', marginBottom: '4px' }}
+                        itemStyle={{ color: '#2563eb', fontWeight: '600' }}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
-                        stroke="#3b82f6" 
-                        strokeWidth={4} 
+                        stroke="#2563eb" 
+                        strokeWidth={2.5} 
                         isAnimationActive={false}
-                        dot={{ fill: '#09090b', stroke: '#3b82f6', strokeWidth: 2, r: 5 }} 
-                        activeDot={{ r: 7, fill: '#60a5fa', stroke: '#1d4ed8', strokeWidth: 2 }}
+                        dot={{ fill: '#ffffff', stroke: '#2563eb', strokeWidth: 2, r: 4 }} 
+                        activeDot={{ r: 6, fill: '#2563eb', stroke: '#ffffff', strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+
               </div>
             ))}
           </div>

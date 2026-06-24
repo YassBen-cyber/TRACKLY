@@ -1,13 +1,61 @@
+/* ── Satoshi — doit être en premier ──────────────────────── */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+/* ── Apple Garamond ───────────────────────────────────────── */
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('/apple_garamond/AppleGaramond-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: 'Satoshi', system-ui, sans-serif;
+  --font-serif: 'Apple Garamond', Georgia, serif;
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-border: var(--border);
@@ -15,24 +63,24 @@
 }
 
 :root {
-  --background: #F2F1ED;
-  --foreground: #18181b;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
   --card: #ffffff;
-  --card-foreground: #18181b;
+  --card-foreground: #0a0a0a;
   --popover: #ffffff;
-  --popover-foreground: #18181b;
-  --primary: #18181b; /* Zinc 900 for discreet primary */
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f5f5f5;
+  --accent-foreground: #0a0a0a;
   --destructive: #ef4444;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #18181b;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #0a0a0a;
   --radius: 1rem;
 }
 
@@ -42,15 +90,42 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+html{
+  scroll-behavior: smooth;
+}
+
+/* ── Typography utilities ─────────────────────────────────── */
+.font-display {
+  font-family: 'Apple Garamond', Georgia, serif;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+.font-display-italic {
+  font-family: 'Apple Garamond', Georgia, serif;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.font-ui {
+  font-family: 'Satoshi', system-ui, sans-serif;
 }
 
 .glass-panel {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.06);
 }
 
-.animated-gradient-bg {
-  background: #F2F1ED;
+.imghero {
+  width: 50% !important;
+  margin: auto
 }

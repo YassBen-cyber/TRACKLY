@@ -51,7 +51,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button variant="outline" className="w-full h-11 rounded-xl bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 transition-all">
+        <Button variant="outline" className=" h-11 rounded-xl bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 transition-all">
           <Target className="mr-2 h-4 w-4" />
           Appliquer un gabarit d'objectif
         </Button>
