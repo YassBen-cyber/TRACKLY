@@ -42,7 +42,7 @@ export function AssignWorkoutModal({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedTemplateId || !selectedDate) {
-      setError("Veuillez sélectionner un gabarit et une date.")
+      setError("Veuillez sélectionner un template et une date.")
       return
     }
 
@@ -92,7 +92,7 @@ export function AssignWorkoutModal({
 
             {templates.length === 0 ? (
               <div className="text-center p-6 border border-dashed border-zinc-300 rounded-xl bg-white">
-                <p className="text-zinc-600 text-sm">Vous n'avez créé aucun gabarit d'entraînement.</p>
+                <p className="text-zinc-600 text-sm">Vous n'avez créé aucun template d'entraînement.</p>
               </div>
             ) : (
               <div className="space-y-4">

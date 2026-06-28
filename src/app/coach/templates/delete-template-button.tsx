@@ -9,7 +9,7 @@ export function DeleteTemplateButton({ templateId, templateName }: { templateId:
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer le gabarit "${templateName}" ?`)) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer le template "${templateName}" ?`)) {
       return
     }
 
@@ -25,7 +25,7 @@ export function DeleteTemplateButton({ templateId, templateName }: { templateId:
       onClick={handleDelete}
       disabled={isDeleting}
       className="rounded-full text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-      title="Supprimer ce gabarit"
+      title="Supprimer ce template"
     >
       {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
     </Button>

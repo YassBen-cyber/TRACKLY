@@ -75,7 +75,7 @@ export function CreateWorkoutModal() {
       <DialogTrigger render={
         <Button className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 hover:scale-105 transition-all">
           <Plus className="mr-2 h-4 w-4" />
-          Nouveau Gabarit
+          Nouveau Template
         </Button>
       } />
       <DialogContent className="sm:max-w-[700px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
@@ -84,7 +84,7 @@ export function CreateWorkoutModal() {
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Dumbbell className="h-5 w-5 text-primary" />
-                Créer un Gabarit de Séance
+                Créer un Template de Séance
               </DialogTitle>
               <DialogDescription className="text-zinc-600">
                 Créez un modèle d'entraînement réutilisable pour l'assigner rapidement à vos athlètes.
@@ -159,7 +159,7 @@ export function CreateWorkoutModal() {
                 Annuler
               </Button>
               <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Créer le gabarit'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Créer le template'}
               </Button>
             </DialogFooter>
           </div>

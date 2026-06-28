@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Dumbbell, LayoutDashboard, Activity, CreditCard, History, LogOut } from 'lucide-react'
+import { Dumbbell, LayoutDashboard, Activity, CreditCard, History, LogOut, Settings, User } from 'lucide-react'
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -12,7 +12,7 @@ export default async function ClientLayout({ children }: { children: React.React
     redirect('/login')
   }
 
-  const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('full_name, photo_url').eq('id', user.id).single()
 
   return (
     <div className="flex h-screen bg-[#F2F1ED] overflow-hidden">
@@ -52,11 +52,28 @@ export default async function ClientLayout({ children }: { children: React.React
               Paiements
             </Button>
           </Link>
+          <Link href="/client/settings">
+            <Button variant="ghost" className="w-full justify-start text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100">
+              <Settings className="mr-3 h-5 w-5" />
+              Paramètres
+            </Button>
+          </Link>
         </div>
 
         <div className="p-4 border-t border-zinc-200">
-          <div className="mb-4 px-2 text-sm font-medium text-zinc-800 truncate">
-            {profile?.full_name || 'Athlète'}
+          <div className="mb-4 px-2 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-zinc-200 flex-shrink-0 border-2 border-primary/20">
+              {profile?.photo_url ? (
+                <img src={profile.photo_url} alt={profile.full_name || 'Athlète'} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-primary/20 text-primary">
+                  <User className="w-5 h-5" />
+                </div>
+              )}
+            </div>
+            <div className="text-sm font-bold text-zinc-800 truncate">
+              {profile?.full_name || 'Athlète'}
+            </div>
           </div>
           <form action={async () => {
             'use server'

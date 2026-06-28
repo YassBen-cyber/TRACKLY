@@ -18,13 +18,24 @@ export async function addMetricType(formData: FormData) {
     throw new Error('Non autorisé')
   }
 
-  const { error } = await supabase
+  const { data: newType, error } = await supabase
     .from('metric_types')
     .insert({ name, unit, client_id: clientId })
+    .select('id')
+    .single()
 
-  if (error) {
+  if (error || !newType) {
     throw new Error('Erreur lors de la création de la métrique')
   }
+
+  await supabase
+    .from('metric_values')
+    .insert({
+      client_id: clientId,
+      metric_type_id: newType.id,
+      value: 0,
+      date: new Date().toISOString()
+    })
 
   if (clientId) {
     revalidatePath(`/coach/client/${clientId}`)
@@ -74,7 +85,7 @@ export async function applyTemplateToClient(clientId: string, templateId: string
     .eq('id', templateId)
     .single()
 
-  if (tError || !template) throw new Error("Gabarit introuvable")
+  if (tError || !template) throw new Error("Template introuvable")
 
   const metrics = template.metrics || []
   
@@ -190,6 +201,91 @@ export async function deleteAssignedSession(sessionId: string, clientId: string)
     .eq('coach_id', user.id)
 
   if (error) throw new Error("Erreur lors de la suppression de la séance")
+
+  revalidatePath(`/coach/client/${clientId}`)
+  return { success: true }
+}
+
+export async function updateCoachMetricValue(metricValueId: string, clientId: string, value: number, dateStr: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { data: profile } = await supabase.from('profiles').select('coach_id').eq('id', clientId).single()
+  if (profile?.coach_id !== user.id) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('metric_values')
+    .update({ 
+      value,
+      date: new Date(dateStr).toISOString()
+    })
+    .eq('id', metricValueId)
+    .eq('client_id', clientId)
+
+  if (error) throw new Error('Erreur lors de la modification')
+
+  revalidatePath(`/coach/client/${clientId}`)
+  return { success: true }
+}
+
+export async function deleteCoachMetricValue(metricValueId: string, clientId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { data: profile } = await supabase.from('profiles').select('coach_id').eq('id', clientId).single()
+  if (profile?.coach_id !== user.id) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('metric_values')
+    .delete()
+    .eq('id', metricValueId)
+    .eq('client_id', clientId)
+
+  if (error) throw new Error('Erreur lors de la suppression')
+
+  revalidatePath(`/coach/client/${clientId}`)
+  return { success: true }
+}
+
+export async function saveTrainingReport(appointmentId: string, publicSummary: string, privateNotes: string, clientId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  // Verify coach owns this appointment
+  const { data: appointment } = await supabase
+    .from('appointments')
+    .select('coach_id, status')
+    .eq('id', appointmentId)
+    .single()
+
+  if (appointment?.coach_id !== user.id) {
+    throw new Error('Non autorisé')
+  }
+
+  // Upsert the training report
+  const { error: reportError } = await supabase
+    .from('training_reports')
+    .upsert({
+      appointment_id: appointmentId,
+      public_summary: publicSummary,
+      private_notes: privateNotes,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'appointment_id' })
+
+  if (reportError) {
+    throw new Error('Erreur lors de la sauvegarde du compte rendu')
+  }
+
+  // Update appointment status to completed if not already
+  if (appointment.status !== 'completed') {
+    await supabase
+      .from('appointments')
+      .update({ status: 'completed' })
+      .eq('id', appointmentId)
+  }
 
   revalidatePath(`/coach/client/${clientId}`)
   return { success: true }

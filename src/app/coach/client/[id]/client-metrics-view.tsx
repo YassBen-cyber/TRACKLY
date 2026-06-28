@@ -3,7 +3,11 @@
 import { useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Button } from '@/components/ui/button'
-import { Download, Loader2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Download, Loader2, Plus, Pencil, Trash2, Activity } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { addMetricValue, updateCoachMetricValue, deleteCoachMetricValue } from './actions'
 
 import jsPDF from 'jspdf'
 
@@ -11,14 +15,27 @@ type MetricValue = {
   id: string
   date: string
   value: number
+  metric_type_id: string
   metric_types: {
     name: string
     unit: string
   }
 }
 
-export function ClientMetricsView({ values, clientName }: { values: MetricValue[], clientName: string }) {
+export function ClientMetricsView({ values, clientName, clientId, metricTypes }: { values: MetricValue[], clientName: string, clientId: string, metricTypes: any[] }) {
   const [isExporting, setIsExporting] = useState(false)
+  
+  // Add Metric Modal State
+  const [isAdding, setIsAdding] = useState(false)
+  const [addTypeId, setAddTypeId] = useState(metricTypes[0]?.id || '')
+  const [addVal, setAddVal] = useState('')
+  const [addDate, setAddDate] = useState(new Date().toISOString().split('T')[0])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Edit Metric Modal State
+  const [editingValue, setEditingValue] = useState<any>(null)
+  const [editVal, setEditVal] = useState('')
+  const [editDate, setEditDate] = useState('')
 
   // Group values by metric type name
   const groupedMetrics = useMemo(() => {
@@ -32,9 +49,11 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
       }
       
       groups[name].data.push({
+        id: v.id,
         date: new Date(v.date).toLocaleDateString('fr-FR'),
         value: Number(v.value),
-        fullDate: new Date(v.date)
+        fullDate: new Date(v.date),
+        rawDate: v.date
       })
     })
 
@@ -45,6 +64,46 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
 
     return groups
   }, [values])
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!addTypeId || !addVal || !addDate) return
+
+    setIsSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('clientId', clientId)
+      formData.append('metricTypeId', addTypeId)
+      formData.append('value', addVal)
+      formData.append('date', addDate)
+      await addMetricValue(formData)
+      
+      setAddVal('')
+      setAddDate(new Date().toISOString().split('T')[0])
+      setIsAdding(false)
+    } catch (error) {
+      console.error(error)
+      alert("Erreur lors de l'ajout")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingValue || !editVal || !editDate) return
+
+    setIsSubmitting(true)
+    try {
+      await updateCoachMetricValue(editingValue.id, clientId, parseFloat(editVal), editDate)
+      setEditingValue(null)
+    } catch (error) {
+      console.error(error)
+      alert("Erreur lors de la modification")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   async function exportPDF() {
     setIsExporting(true)
@@ -73,9 +132,6 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
         pdf.setFontSize(14)
         pdf.text("Aucune donnée enregistrée.", pageWidth / 2, yOffset, { align: 'center' })
       } else {
-        // Dynamically import autoTable to avoid SSR issues or global pollution if needed,
-        // but normally we can just import it. Since we didn't import it at the top,
-        // we require it here.
         const autoTable = (await import('jspdf-autotable')).default
 
         metricNames.forEach((name, index) => {
@@ -143,14 +199,72 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-zinc-900">Évolution des métriques</h2>
-        <Button 
-          onClick={exportPDF} 
-          disabled={isExporting || metricNames.length === 0}
-          className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-300 rounded-xl"
-        >
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          Exporter en PDF
-        </Button>
+        <div className="flex gap-2">
+          {metricTypes.length > 0 && (
+            <Dialog open={isAdding} onOpenChange={setIsAdding}>
+              <DialogTrigger render={
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl">
+                  <Plus className="mr-2 h-4 w-4" /> Ajouter une mesure
+                </Button>
+              } />
+              <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold">Nouvelle mesure</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleAddSubmit} className="space-y-6 pt-4">
+                  <div className="space-y-2">
+                    <Label>Métrique</Label>
+                    <select 
+                      className="w-full h-11 px-3 rounded-xl border border-zinc-300 bg-white"
+                      value={addTypeId}
+                      onChange={(e) => setAddTypeId(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>Choisir une métrique...</option>
+                      {metricTypes.map((t: any) => (
+                        <option key={t.id} value={t.id}>{t.name} ({t.unit})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Date</Label>
+                    <Input 
+                      type="date" 
+                      required 
+                      value={addDate}
+                      onChange={(e) => setAddDate(e.target.value)}
+                      className="h-11 rounded-xl bg-white border-zinc-300" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Valeur</Label>
+                    <Input 
+                      type="number" 
+                      step="0.1" 
+                      required 
+                      value={addVal}
+                      onChange={(e) => setAddVal(e.target.value)}
+                      className="h-11 rounded-xl bg-white border-zinc-300" 
+                      placeholder="Ex: 75.5"
+                    />
+                  </div>
+                  <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold">
+                    {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Enregistrer"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          <Button 
+            onClick={exportPDF} 
+            disabled={isExporting || metricNames.length === 0}
+            className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-300 rounded-xl"
+          >
+            {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+            Exporter
+          </Button>
+        </div>
       </div>
 
       <div id="metrics-pdf-content" className="p-4 sm:p-6 bg-zinc-50 rounded-3xl border border-zinc-200 shadow-2xl">
@@ -164,7 +278,7 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
             <p className="text-zinc-600">Aucune métrique enregistrée pour le moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-8">
             {metricNames.map(name => (
               <div key={name} className="glass-panel p-6 rounded-3xl border border-zinc-200 bg-white backdrop-blur-sm">
                 <div className="mb-6 flex justify-between items-center">
@@ -174,7 +288,7 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
                   </span>
                 </div>
                 
-                <div className="h-64 w-full">
+                <div className="h-64 w-full mb-6">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={groupedMetrics[name].data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
@@ -215,11 +329,75 @@ export function ClientMetricsView({ values, clientName }: { values: MetricValue[
                   </ResponsiveContainer>
                 </div>
 
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {groupedMetrics[name].data.map((v: any) => (
+                    <div key={v.id} className="bg-zinc-50 p-3 rounded-2xl border border-zinc-200 flex flex-col items-center text-center relative group">
+                      <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => {
+                            setEditingValue(v)
+                            setEditVal(v.value.toString())
+                            setEditDate(v.rawDate.split('T')[0])
+                          }} 
+                          className="p-1.5 text-blue-500 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors" title="Modifier"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                        <button onClick={async () => {
+                            if (confirm("Voulez-vous vraiment supprimer cette mesure ?")) {
+                              await deleteCoachMetricValue(v.id, clientId)
+                            }
+                          }} 
+                          className="p-1.5 text-red-500 bg-red-100 hover:bg-red-200 rounded-lg transition-colors" title="Supprimer"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <span className="text-xs font-medium text-zinc-500 mb-1">{v.date}</span>
+                      <span className="text-lg font-black text-zinc-900">{v.value}</span>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Modal d'édition */}
+      <Dialog open={!!editingValue} onOpenChange={(open) => !open && setEditingValue(null)}>
+        <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Modifier la mesure</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-6 pt-4">
+            <div className="space-y-2">
+              <Label>Date</Label>
+              <Input 
+                type="date" 
+                required 
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                className="h-11 rounded-xl bg-white border-zinc-300" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Valeur</Label>
+              <Input 
+                type="number" 
+                step="0.1" 
+                required 
+                value={editVal}
+                onChange={(e) => setEditVal(e.target.value)}
+                className="h-11 rounded-xl bg-white border-zinc-300" 
+              />
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold">
+              {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Enregistrer les modifications"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

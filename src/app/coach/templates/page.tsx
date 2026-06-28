@@ -13,7 +13,7 @@ export default async function TemplatesPage() {
     redirect('/login')
   }
 
-  // Récupérer la liste des gabarits de métriques
+  // Récupérer la liste des templates de métriques
   const { data: templates } = await supabase
     .from('metric_templates')
     .select('*')
@@ -26,7 +26,7 @@ export default async function TemplatesPage() {
         <div>
           <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
             <Target className="text-primary h-6 w-6" />
-            Gabarits d'Objectifs (Métriques)
+            Templates d'Objectifs (Métriques)
           </h2>
           <p className="text-zinc-600 text-sm mt-1">Créez des ensembles de métriques (ex: Prise de masse, Basket) pour les assigner rapidement à vos athlètes.</p>
         </div>
@@ -51,7 +51,7 @@ export default async function TemplatesPage() {
                     <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center">
                       <Target className="h-6 w-6 text-zinc-500" />
                     </div>
-                    <p>Aucun gabarit configuré.</p>
+                    <p>Aucun template configuré.</p>
                   </div>
                 </TableCell>
               </TableRow>

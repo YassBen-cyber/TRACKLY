@@ -25,7 +25,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedTemplateId) {
-      setError("Veuillez sélectionner un gabarit.")
+      setError("Veuillez sélectionner un template.")
       return
     }
 
@@ -53,7 +53,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
       <DialogTrigger render={
         <Button variant="outline" className=" h-11 rounded-xl bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 transition-all">
           <Target className="mr-2 h-4 w-4" />
-          Appliquer un gabarit d'objectif
+          Appliquer un template d'objectif
         </Button>
       } />
       <DialogContent className="sm:max-w-[500px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
@@ -65,7 +65,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
                 Assigner un Objectif
               </DialogTitle>
               <DialogDescription className="text-zinc-600">
-                Sélectionnez un gabarit pour initialiser automatiquement les métriques de cet athlète.
+                Sélectionnez un template pour initialiser automatiquement les métriques de cet athlète.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -74,7 +74,7 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
             {success ? (
               <div className="flex flex-col items-center justify-center py-6 text-green-400 space-y-3">
                 <CheckCircle2 className="h-12 w-12" />
-                <p className="font-medium">Gabarit appliqué avec succès !</p>
+                <p className="font-medium">Template appliqué avec succès !</p>
               </div>
             ) : (
               <>
@@ -86,13 +86,13 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
 
                 {templates.length === 0 ? (
                   <div className="text-center p-6 border border-dashed border-zinc-300 rounded-xl bg-white">
-                    <p className="text-zinc-600 text-sm">Vous n'avez créé aucun gabarit. Allez dans l'onglet "Gabarits" pour en créer un.</p>
+                    <p className="text-zinc-600 text-sm">Vous n'avez créé aucun template. Allez dans l'onglet "Templates" pour en créer un.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Select value={selectedTemplateId} onValueChange={(val) => setSelectedTemplateId(val || '')}>
                       <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
-                        <SelectValue placeholder="Choisir un gabarit..." />
+                        <SelectValue placeholder="Choisir un template..." />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-50 border-zinc-300 text-zinc-900">
                         {templates.map(t => (

@@ -87,7 +87,7 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
       <DialogTrigger render={
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-105">
           <Plus className="mr-2 h-4 w-4" />
-          Nouveau Gabarit
+          Nouveau Template
         </Button>
       } />
       <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
@@ -96,7 +96,7 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Target className="h-5 w-5 text-primary" />
-                Créer un gabarit d'objectif
+                Créer un template d'objectif
               </DialogTitle>
               <DialogDescription className="text-zinc-600">
                 Définissez un groupe de métriques pour un objectif précis (ex: Prise de masse) pour pouvoir l'assigner à vos clients.
@@ -188,7 +188,7 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
               </Button>
               <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Créer le gabarit
+                Créer le template
               </Button>
             </DialogFooter>
           </div>

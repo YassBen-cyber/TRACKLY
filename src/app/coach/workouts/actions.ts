@@ -20,7 +20,7 @@ export async function createWorkoutTemplate(formData: FormData, exercises: any[]
       exercises
     })
 
-  if (error) throw new Error('Erreur lors de la création du gabarit')
+  if (error) throw new Error('Erreur lors de la création du template')
 
   revalidatePath('/coach/workouts')
   return { success: true }

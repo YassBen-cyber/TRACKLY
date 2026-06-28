@@ -127,19 +127,50 @@ export async function deleteClientMetricValue(metricValueId: string) {
   revalidatePath('/client')
 }
 
-export async function updateClientMetricValue(metricValueId: string, value: number, photoUrl: string | null) {
+export async function updateClientMetricValue(metricValueId: string, value: number, photoUrl: string | null, dateStr?: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
 
+  const updateData: any = { value, photo_url: photoUrl }
+  if (dateStr) {
+    updateData.date = new Date(dateStr).toISOString()
+  }
+
   const { error } = await supabase
     .from('metric_values')
-    .update({ value, photo_url: photoUrl })
+    .update(updateData)
     .eq('id', metricValueId)
     .eq('client_id', user.id)
 
   if (error) throw new Error('Erreur lors de la modification')
 
   revalidatePath('/client')
+}
+
+export async function createAppointmentAsClient(coachId: string, title: string, startTime: string, endTime: string, notes: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('appointments')
+    .insert({
+      coach_id: coachId,
+      client_id: user.id,
+      title: title,
+      start_time: startTime,
+      end_time: endTime,
+      notes: notes,
+      status: 'scheduled'
+    })
+
+  if (error) {
+    throw new Error('Erreur lors de la prise de rendez-vous')
+  }
+
+  revalidatePath('/client')
+  revalidatePath('/coach/calendar')
+  return { success: true }
 }
 

@@ -25,7 +25,7 @@ export default async function WorkoutsPage() {
             Bibliothèque de Séances
           </h2>
           <p className="text-zinc-600 mt-1">
-            Créez vos gabarits d'entraînements pour les assigner facilement à vos athlètes.
+            Créez vos templates d'entraînements pour les assigner facilement à vos athlètes.
           </p>
         </div>
         <CreateWorkoutModal />
@@ -34,9 +34,9 @@ export default async function WorkoutsPage() {
       {(!templates || templates.length === 0) ? (
         <div className="glass-panel p-12 rounded-3xl text-center border border-zinc-200 border-dashed">
           <Dumbbell className="h-12 w-12 text-primary/50 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-zinc-900 mb-2">Aucun gabarit de séance</h3>
+          <h3 className="text-xl font-bold text-zinc-900 mb-2">Aucun template de séance</h3>
           <p className="text-zinc-600 max-w-md mx-auto mb-6">
-            Vous n'avez pas encore créé de séance type. Commencez par créer votre premier gabarit avec les exercices, séries et répétitions !
+            Vous n'avez pas encore créé de séance type. Commencez par créer votre premier template avec les exercices, séries et répétitions !
           </p>
           <CreateWorkoutModal />
         </div>

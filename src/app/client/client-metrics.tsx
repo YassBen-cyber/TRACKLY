@@ -8,11 +8,17 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Activity, Plus, Camera, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react'
 import { addClientMetricValue } from './actions'
+import { Pencil } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
 export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[], metricValues: any[] }) {
   const [selectedType, setSelectedType] = useState<any>(metricTypes[0] || null)
   const [isAdding, setIsAdding] = useState(false)
+  const [editingValue, setEditingValue] = useState<any>(null)
+  const [editVal, setEditVal] = useState('')
+  const [editDate, setEditDate] = useState('')
+  const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
+  const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null)
   const [value, setValue] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -38,6 +44,18 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
       const reader = new FileReader()
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleEditPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setEditPhotoFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setEditPhotoPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -77,6 +95,44 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
     } catch (error) {
       console.error(error)
       alert("Erreur lors de l'ajout de la métrique")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingValue || !editVal || !editDate) return
+
+    setIsSubmitting(true)
+    try {
+      let finalPhotoUrl = editingValue.photo_url
+
+      if (editPhotoFile) {
+        const fileExt = editPhotoFile.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const filePath = `metrics/${fileName}`
+        
+        const { error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(filePath, editPhotoFile)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('photos')
+          .getPublicUrl(filePath)
+          
+        finalPhotoUrl = publicUrl
+      }
+
+      await import('./actions').then(m => m.updateClientMetricValue(editingValue.id, parseFloat(editVal), finalPhotoUrl, editDate))
+      setEditingValue(null)
+      setEditPhotoFile(null)
+      setEditPhotoPreview(null)
+    } catch (error) {
+      console.error(error)
+      alert("Erreur lors de la modification de la métrique")
     } finally {
       setIsSubmitting(false)
     }
@@ -213,6 +269,17 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
             {currentValues.map((v: any) => (
               <div key={v.id} className="bg-white p-4 rounded-2xl border border-zinc-200 flex flex-col items-center text-center relative group">
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => {
+                      setEditingValue(v)
+                      setEditVal(v.value.toString())
+                      setEditDate(v.date.split('T')[0])
+                      setEditPhotoFile(null)
+                      setEditPhotoPreview(v.photo_url || null)
+                    }} 
+                    className="p-1.5 text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" title="Modifier"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
                   <button onClick={async () => {
                       if (confirm("Voulez-vous vraiment supprimer cette mesure ?")) {
                         await import('./actions').then(m => m.deleteClientMetricValue(v.id))
@@ -253,6 +320,59 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
           <p className="text-zinc-500">Aucune donnée enregistrée pour cette métrique.</p>
         </div>
       )}
+
+      {/* Modal d'édition */}
+      <Dialog open={!!editingValue} onOpenChange={(open) => !open && setEditingValue(null)}>
+        <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Modifier la mesure</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-6 pt-4">
+            <div className="space-y-2">
+              <Label>Date</Label>
+              <Input 
+                type="date" 
+                required 
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                className="h-11 rounded-xl bg-white border-zinc-300" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Valeur ({selectedType?.unit})</Label>
+              <Input 
+                type="number" 
+                step="0.1" 
+                required 
+                value={editVal}
+                onChange={(e) => setEditVal(e.target.value)}
+                className="h-11 rounded-xl bg-white border-zinc-300" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Photo de progression (Optionnel)</Label>
+              <div className="flex items-center gap-4">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-zinc-300 border-dashed rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors relative overflow-hidden">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {editPhotoPreview ? (
+                      <img src={editPhotoPreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <Camera className="w-8 h-8 mb-2 text-zinc-400" />
+                        <p className="text-sm text-zinc-500 font-medium">Modifier la photo</p>
+                      </>
+                    )}
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleEditPhotoUpload} />
+                </label>
+              </div>
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold">
+              {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Enregistrer les modifications"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

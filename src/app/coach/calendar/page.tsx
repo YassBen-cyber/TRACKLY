@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { Calendar as CalendarIcon, Clock, Video, Users, Trash2 } from 'lucide-react'
+import { Calendar as CalendarIcon, Clock, Video, Users, Trash2, Info } from 'lucide-react'
 import { AvailabilitiesModal } from './availabilities-modal'
+import { SpecificAvailabilitiesManager } from './specific-availabilities-manager'
 import { CreateAppointmentModal } from './create-appointment-modal'
 import { Button } from '@/components/ui/button'
 
@@ -30,6 +31,13 @@ export default async function CalendarPage() {
     .eq('coach_id', user.id)
     .order('day_of_week')
     .order('start_time')
+
+  // Fetch coach specific availabilities
+  const { data: specificAvailabilities } = await supabase
+    .from('coach_specific_availabilities')
+    .select('*')
+    .eq('coach_id', user.id)
+    .order('date', { ascending: true })
 
   // Fetch appointments (upcoming & recent)
   const thirtyDaysAgo = new Date()
@@ -180,6 +188,17 @@ export default async function CalendarPage() {
           </div>
         </div>
 
+      </div>
+
+      <div className="pt-4 border-t border-zinc-200">
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl">
+          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-6 text-sm text-blue-800 flex gap-3">
+            <Info className="h-5 w-5 shrink-0" />
+            <p>Vos "Horaires types" sont vos disponibilités générales (gérées via le bouton en haut). Pour ouvrir la réservation aux clients, générez vos créneaux spécifiques pour une semaine donnée, ou ajoutez-les manuellement ci-dessous. Le client verra uniquement les créneaux générés ci-dessous.</p>
+          </div>
+
+          <SpecificAvailabilitiesManager specificAvailabilities={specificAvailabilities || []} />
+        </div>
       </div>
     </div>
   )

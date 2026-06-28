@@ -60,7 +60,20 @@ export default async function CoachDashboard() {
             ) : (
               clients.map((client) => (
                 <TableRow key={client.id} className="border-zinc-200 hover:bg-zinc-100 transition-colors group cursor-pointer">
-                  <TableCell className="font-semibold text-zinc-900 px-6 py-4">{client.full_name}</TableCell>
+                  <TableCell className="font-semibold text-zinc-900 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-200 flex-shrink-0">
+                        {client.photo_url ? (
+                          <img src={client.photo_url} alt={client.full_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-primary/20 text-primary">
+                            <Users className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                      <span>{client.full_name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-zinc-600 px-6 py-4">
                     {new Date(client.created_at).toLocaleDateString('fr-FR')}
                   </TableCell>
