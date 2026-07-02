@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, Clock, Video, Users, Trash2, Info } from 'luc
 import { AvailabilitiesModal } from './availabilities-modal'
 import { SpecificAvailabilitiesManager } from './specific-availabilities-manager'
 import { CreateAppointmentModal } from './create-appointment-modal'
+import { CoachWeeklyPlanner } from './coach-weekly-planner'
 import { Button } from '@/components/ui/button'
 
 // Helper for formatting time
@@ -82,60 +83,17 @@ export default async function CalendarPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="gap-8">
         
-        {/* Colonne de gauche : Prochains RDV */}
-        <div className="lg:col-span-2 space-y-6">
-          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Clock className="h-5 w-5 text-blue-400" />
-            Prochains rendez-vous
-          </h3>
-          
-          {upcoming.length === 0 ? (
-            <div className="glass-panel p-12 rounded-3xl text-center border border-border border-dashed">
-              <CalendarIcon className="h-12 w-12 text-primary/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">Aucun rendez-vous à venir.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {upcoming.map(apt => (
-                <div key={apt.id} className="glass-panel p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 relative group">
-                  {/* Status Badge */}
-                  <span className="absolute top-4 right-4 text-xs font-bold text-blue-400 bg-blue-500/20 px-2 py-1 rounded-md">
-                    À venir
-                  </span>
-
-                  <div className="text-sm font-medium text-muted-foreground mb-1 capitalize">
-                    {new Date(apt.start_time).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </div>
-                  <div className="text-xl font-bold text-foreground mb-1">{apt.title}</div>
-                  <div className="text-sm text-blue-300 font-medium flex items-center gap-1 mb-4">
-                    <Clock className="h-3 w-3" /> {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
-                  </div>
-                  
-                  <div className="space-y-2 border-t border-border pt-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      {apt.profiles?.full_name}
-                    </div>
-                    {apt.meeting_url && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Video className="h-4 w-4 text-green-400" />
-                        <a href={apt.meeting_url} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline truncate">
-                          Rejoindre la visio
-                        </a>
-                      </div>
-                    )}
-                    {apt.notes && (
-                      <div className="text-xs text-muted-foreground mt-2 italic bg-black/30 p-2 rounded-lg">
-                        "{apt.notes}"
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Colonne de gauche : Planning Hebdomadaire */}
+        <div className="lg:col-span-2 space-y-6 fill">
+          <CoachWeeklyPlanner 
+            clients={clients || []}
+            appointments={appointments || []}
+            availabilities={availabilities || []}
+            specificAvailabilities={specificAvailabilities || []}
+            clientAvailabilities={clientAvailabilities || []}
+          />
 
           {/* Historique récent */}
           {past.length > 0 && (
@@ -163,39 +121,7 @@ export default async function CalendarPage() {
           )}
         </div>
 
-        {/* Colonne de droite : Rappel des dispos */}
-        <div className="lg:col-span-1">
-          <div className="glass-panel p-6 rounded-3xl border border-border sticky top-8">
-            <h3 className="text-lg font-bold text-foreground mb-6">Vos disponibilités</h3>
-            {(!availabilities || availabilities.length === 0) ? (
-              <p className="text-sm text-muted-foreground text-center py-4 bg-card rounded-xl">
-                Vous n'avez pas encore défini vos horaires.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5, 6, 0].map(dayId => {
-                  const dayName = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][dayId]
-                  const slots = availabilities.filter(a => a.day_of_week === dayId)
-                  
-                  if (slots.length === 0) return null
 
-                  return (
-                    <div key={dayId} className="flex flex-col gap-1 border-b border-border pb-2 last:border-0 last:pb-0">
-                      <span className="text-sm font-bold text-muted-foreground">{dayName}</span>
-                      <div className="flex flex-wrap gap-2">
-                        {slots.map((slot, idx) => (
-                          <span key={idx} className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-md">
-                            {slot.start_time.substring(0,5)} - {slot.end_time.substring(0,5)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
 
       </div>
 

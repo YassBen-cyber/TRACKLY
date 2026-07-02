@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Settings2, Calendar, Dumbbell, CreditCard, Settings, User } from 'lucide-react'
+import { LogOut, LayoutDashboard, Settings2, Calendar, Dumbbell, CreditCard, Settings, User, Users } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 
@@ -38,7 +38,13 @@ export default async function CoachLayout({
           <Link href="/coach">
             <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
               <LayoutDashboard className="mr-3 h-5 w-5" />
-              Clients
+              Dashboard
+            </Button>
+          </Link>
+          <Link href="/coach/clients">
+            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
+              <Users className="mr-3 h-5 w-5" />
+              Athlètes
             </Button>
           </Link>
           <Link href="/coach/workouts">

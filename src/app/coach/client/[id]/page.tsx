@@ -119,7 +119,8 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
               clientId={client.id} 
               assignedSessions={assignedSessions || []} 
               availabilities={availabilities || []} 
-              templates={sessionTemplates || []} 
+              templates={sessionTemplates || []}
+              appointments={appointments || []}
             />
           </div>
         </div>

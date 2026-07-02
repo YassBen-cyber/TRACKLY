@@ -19,12 +19,14 @@ export function WeeklyPlanner({
   clientId, 
   assignedSessions, 
   availabilities,
-  templates
+  templates,
+  appointments
 }: { 
   clientId: string, 
   assignedSessions: any[], 
   availabilities: any[],
-  templates: any[]
+  templates: any[],
+  appointments?: any[]
 }) {
   const [weekStart, setWeekStart] = useState<Date>(() => {
     const today = new Date()
@@ -117,16 +119,18 @@ export function WeeklyPlanner({
       
       const dayAvails = availabilities.filter(a => a.date === dateIso && (a.availability_type === 'workout' || a.availability_type === 'both'))
       const daySessions = assignedSessions.filter(s => s.scheduled_date === dateIso)
+      const dayAppointments = (appointments || []).filter(a => a.start_time.startsWith(dateIso))
 
       arr.push({
         date: currentDate,
         dateStr: dateIso,
         availabilities: dayAvails,
-        sessions: daySessions
+        sessions: daySessions,
+        appointments: dayAppointments
       })
     }
     return arr
-  }, [weekStart, availabilities, assignedSessions])
+  }, [weekStart, availabilities, assignedSessions, appointments])
 
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekEnd.getDate() + 6)
@@ -188,6 +192,22 @@ export function WeeklyPlanner({
                   </div>
                 )}
               </div>
+
+              {/* Rendez-vous */}
+              {day.appointments && day.appointments.length > 0 && (
+                <div className="space-y-2 pointer-events-none">
+                  <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> Rendez-vous
+                  </div>
+                  <div className="space-y-2">
+                    {day.appointments.map((apt: any, idx: number) => (
+                      <div key={idx} className="p-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-800 text-xs font-medium">
+                        {new Date(apt.start_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {apt.location_type === 'remote' ? 'Visio' : 'Présentiel'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Séances Assignées */}
               <div className="space-y-2 flex-1">

@@ -18,14 +18,14 @@ import {
 import { Loader2, Plus, Calendar } from 'lucide-react'
 import { createAppointment } from './actions'
 
-export function CreateAppointmentModal({ clients, clientAvailabilities, defaultClientId }: { clients: any[], clientAvailabilities: any[], defaultClientId?: string }) {
+export function CreateAppointmentModal({ clients, clientAvailabilities, defaultClientId, defaultDate, triggerButton }: { clients: any[], clientAvailabilities: any[], defaultClientId?: string, defaultDate?: string, triggerButton?: React.ReactElement }) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [clientId, setClientId] = useState(defaultClientId || '')
   const [title, setTitle] = useState('')
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState(defaultDate || '')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [meetingUrl, setMeetingUrl] = useState('')
@@ -77,10 +77,12 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, defaultC
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20 transition-all">
-          <Plus className="mr-2 h-4 w-4" />
-          Nouveau Rendez-vous
-        </Button>
+        triggerButton || (
+          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20 transition-all">
+            <Plus className="mr-2 h-4 w-4" />
+            Nouveau Rendez-vous
+          </Button>
+        )
       } />
       <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full">

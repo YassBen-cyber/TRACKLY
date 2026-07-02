@@ -64,7 +64,10 @@ export async function createAppointment(clientId: string, title: string, startTi
       location_details: locationDetails
     })
 
-  if (error) throw new Error('Erreur lors de la création du rendez-vous')
+  if (error) {
+    console.error("Supabase insert error:", error)
+    throw new Error(error.message || 'Erreur lors de la création du rendez-vous')
+  }
 
   revalidatePath('/coach/calendar')
   revalidatePath(`/coach/client/${clientId}`) // Revalidate client page too

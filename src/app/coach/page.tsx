@@ -1,11 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Users, Calendar, Activity, TrendingUp, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Users, ChevronRight, Calendar, Activity, TrendingUp } from 'lucide-react'
-import { AddClientModal } from './add-client-modal'
-import { DeleteClientButton } from './delete-client-button'
 
 export default async function CoachDashboard() {
   const supabase = await createClient()
@@ -15,20 +12,21 @@ export default async function CoachDashboard() {
     redirect('/login')
   }
 
-  // Récupérer la liste des clients
+  // Récupérer la liste des clients pour le compte
   const { data: clients } = await supabase
     .from('profiles')
     .select('*')
     .eq('coach_id', user.id)
     .eq('role', 'client')
-    .order('created_at', { ascending: false })
 
-  // Fetch appointments for stats
+  // Fetch appointments for stats (upcoming)
   const { data: appointments } = await supabase
     .from('appointments')
-    .select('id, start_time')
+    .select('id, start_time, client:profiles!client_id(full_name)')
     .eq('coach_id', user.id)
     .gte('start_time', new Date().toISOString())
+    .order('start_time', { ascending: true })
+    .limit(5)
     
   const upcomingCount = appointments?.length || 0
   const activeClientsCount = clients?.length || 0
@@ -38,9 +36,8 @@ export default async function CoachDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
-          <p className="text-muted-foreground text-sm mt-1">Gérez vos clients et suivez votre activité.</p>
+          <p className="text-muted-foreground text-sm mt-1">Revue globale de votre activité.</p>
         </div>
-        <AddClientModal />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -84,69 +81,57 @@ export default async function CoachDashboard() {
         </div>
       </div>
 
-      <div className="glass-panel rounded-3xl overflow-hidden shadow-xl">
-        <div className="p-6 border-b border-border bg-card/50">
-          <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
-            <Activity className="w-5 h-5 text-primary" />
-            Liste des athlètes
-          </h3>
-        </div>
-
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium h-12 px-6">Nom</TableHead>
-              <TableHead className="text-muted-foreground font-medium h-12 px-6">Inscrit le</TableHead>
-              <TableHead className="text-right text-muted-foreground font-medium h-12 px-6">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {!clients || clients.length === 0 ? (
-              <TableRow className="border-border hover:bg-transparent">
-                <TableCell colSpan={3} className="text-center py-16 text-muted-foreground">
-                  <div className="flex flex-col items-center justify-center space-y-3">
-                    <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center">
-                      <Users className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p>Aucun athlète pour le moment.</p>
-                  </div>
-                </TableCell>
-              </TableRow>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-panel p-6 rounded-3xl border border-border shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <Calendar className="w-5 h-5 text-primary" />
+              Prochains rendez-vous
+            </h3>
+            <Link href="/coach/calendar">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                Voir tout <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {!appointments || appointments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Aucun rendez-vous prévu.</p>
             ) : (
-              clients.map((client) => (
-                <TableRow key={client.id} className="border-border hover:bg-muted/50 transition-colors group cursor-pointer">
-                  <TableCell className="font-semibold text-foreground px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full overflow-hidden bg-muted flex-shrink-0 border border-border">
-                        {client.photo_url ? (
-                          <img src={client.photo_url} alt={client.full_name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
-                            <Users className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
-                      <span>{client.full_name}</span>
+              appointments.map((apt) => (
+                <div key={apt.id} className="flex justify-between items-center p-4 rounded-2xl bg-muted/50 border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center border border-border text-primary font-bold">
+                      {new Date(apt.start_time).getDate()}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground px-6 py-4">
-                    {new Date(client.created_at).toLocaleDateString('fr-FR')}
-                  </TableCell>
-                  <TableCell className="text-right px-6 py-4">
-                    <div className="flex justify-end items-center gap-1">
-                      <DeleteClientButton clientId={client.id} clientName={client.full_name} />
-                      <Link href={`/coach/client/${client.id}`}>
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/20 text-muted-foreground hover:text-primary transition-colors">
-                          <ChevronRight className="h-5 w-5" />
-                        </Button>
-                      </Link>
+                    <div>
+                      <p className="font-semibold text-foreground">
+                        {/* @ts-ignore */}
+                        {apt.client?.full_name || 'Client'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(apt.start_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))
             )}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
+
+        <div className="glass-panel p-6 rounded-3xl border border-border shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <Activity className="w-5 h-5 text-emerald-500" />
+              Activité récente
+            </h3>
+          </div>
+          <div className="flex flex-col items-center justify-center py-12 text-center h-full">
+            <Activity className="w-12 h-12 text-muted-foreground/30 mb-4" />
+            <p className="text-muted-foreground">Historique d'activité bientôt disponible.</p>
+          </div>
+        </div>
       </div>
     </div>
   )
