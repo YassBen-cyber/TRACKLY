@@ -194,7 +194,7 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, defaultC
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Type de lieu</Label>
-                <Select value={locationType} onValueChange={(val) => setLocationType(val)}>
+                <Select value={locationType} onValueChange={(val) => setLocationType(val as string)}>
                   <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
                     <SelectValue />
                   </SelectTrigger>
