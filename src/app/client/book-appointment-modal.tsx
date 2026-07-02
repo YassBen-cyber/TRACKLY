@@ -45,6 +45,8 @@ export function BookAppointmentModal({
 
   const [selectedSlot, setSelectedSlot] = useState<{date: string, start: string, end: string} | null>(null)
   const [notes, setNotes] = useState('')
+  const [locationType, setLocationType] = useState('remote')
+  const [locationDetails, setLocationDetails] = useState('')
 
   // Générer les créneaux disponibles pour toute la semaine
   const weekDaysWithSlots = useMemo(() => {
@@ -165,10 +167,12 @@ export function BookAppointmentModal({
     const endIso = new Date(`${selectedSlot.date}T${selectedSlot.end}:00`).toISOString()
 
     try {
-      await createAppointmentAsClient(coachId, 'Séance de Coaching', startIso, endIso, notes)
+      await createAppointmentAsClient(coachId, locationType === 'remote' ? 'Séance Visio' : 'Séance Coaching', startIso, endIso, notes, locationType, locationDetails)
       setOpen(false)
       setSelectedSlot(null)
       setNotes('')
+      setLocationType('remote')
+      setLocationDetails('')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -183,20 +187,20 @@ export function BookAppointmentModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 transition-all font-bold">
+        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-primary-foreground shadow-lg shadow-blue-600/20 transition-all font-bold">
           <CalendarIcon className="mr-2 h-4 w-4" />
           Prendre un RDV
         </Button>
       } />
-      <DialogContent className="sm:max-w-[700px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
+      <DialogContent className="sm:max-w-[700px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full max-h-[85vh]">
-          <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">
+          <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5 text-blue-500" />
                 Réserver une séance
               </DialogTitle>
-              <DialogDescription className="text-zinc-600">
+              <DialogDescription className="text-muted-foreground">
                 Sélectionnez un créneau parmi les disponibilités de votre coach.
               </DialogDescription>
             </DialogHeader>
@@ -210,14 +214,14 @@ export function BookAppointmentModal({
             )}
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between bg-zinc-50 p-2 rounded-xl border border-zinc-200">
-                <Button type="button" variant="ghost" size="icon" onClick={prevWeek} disabled={isCurrentWeek} className="rounded-lg hover:bg-zinc-200">
+              <div className="flex items-center justify-between bg-muted/50 p-2 rounded-xl border border-border">
+                <Button type="button" variant="ghost" size="icon" onClick={prevWeek} disabled={isCurrentWeek} className="rounded-lg hover:bg-muted">
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
-                <div className="font-bold text-zinc-700">
+                <div className="font-bold text-muted-foreground">
                   Semaine du {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au {weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={nextWeek} className="rounded-lg hover:bg-zinc-200">
+                <Button type="button" variant="ghost" size="icon" onClick={nextWeek} className="rounded-lg hover:bg-muted">
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
@@ -225,14 +229,14 @@ export function BookAppointmentModal({
               <div className="grid grid-cols-7 gap-2">
                 {weekDaysWithSlots.map((day, i) => (
                   <div key={i} className="flex flex-col gap-2">
-                    <div className="text-center pb-2 border-b border-zinc-200">
-                      <div className="text-xs font-semibold text-zinc-500 uppercase">{day.date.toLocaleDateString('fr-FR', { weekday: 'short' })}</div>
-                      <div className="text-sm font-bold text-zinc-900">{day.date.getDate()}</div>
+                    <div className="text-center pb-2 border-b border-border">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase">{day.date.toLocaleDateString('fr-FR', { weekday: 'short' })}</div>
+                      <div className="text-sm font-bold text-foreground">{day.date.getDate()}</div>
                     </div>
                     
                     <div className="flex flex-col gap-2">
                       {day.slots.length === 0 ? (
-                        <div className="text-xs text-center text-zinc-400 py-2">-</div>
+                        <div className="text-xs text-center text-muted-foreground py-2">-</div>
                       ) : (
                         day.slots.map((slot, idx) => {
                           const isSelected = selectedSlot?.date === day.dateStr && selectedSlot?.start === slot.start
@@ -243,8 +247,8 @@ export function BookAppointmentModal({
                               onClick={() => setSelectedSlot({ date: day.dateStr, start: slot.start, end: slot.end })}
                               className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex justify-center items-center gap-1 border ${
                                 isSelected 
-                                  ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20' 
-                                  : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-300 hover:bg-blue-50'
+                                  ? 'bg-blue-600 border-blue-600 text-primary-foreground shadow-md shadow-blue-600/20' 
+                                  : 'bg-card border-border text-muted-foreground hover:border-blue-300 hover:bg-blue-50'
                               }`}
                             >
                               {slot.start}
@@ -259,24 +263,53 @@ export function BookAppointmentModal({
             </div>
 
             {selectedSlot && (
-              <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 pt-4 border-t border-zinc-200">
-                <Label className="text-zinc-700 font-semibold text-base">Un mot pour le coach ? (Optionnel)</Label>
-                <Textarea 
-                  value={notes} 
-                  onChange={e => setNotes(e.target.value)} 
-                  placeholder="Ex: J'aimerais qu'on parle de ma nutrition..." 
-                  className="bg-zinc-50 border-zinc-300 text-zinc-900 rounded-xl focus:border-blue-500/50 min-h-[100px]" 
-                />
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 pt-4 border-t border-border">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground font-semibold text-base">Type de rendez-vous</Label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" value="remote" checked={locationType === 'remote'} onChange={(e) => setLocationType(e.target.value)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-border" />
+                      <span className="text-muted-foreground">À distance (Visio)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" value="in_person" checked={locationType === 'in_person'} onChange={(e) => setLocationType(e.target.value)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-border" />
+                      <span className="text-muted-foreground">En présentiel</span>
+                    </label>
+                  </div>
+                </div>
+                
+                {locationType === 'in_person' && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground font-semibold text-base">Lieu (Optionnel)</Label>
+                    <input 
+                      type="text"
+                      value={locationDetails}
+                      onChange={(e) => setLocationDetails(e.target.value)}
+                      placeholder="Ex: Salle de sport, à domicile..."
+                      className="w-full bg-muted/50 border-border text-foreground rounded-xl h-11 px-3 focus:border-blue-500/50"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground font-semibold text-base">Un mot pour le coach ? (Optionnel)</Label>
+                  <Textarea 
+                    value={notes} 
+                    onChange={e => setNotes(e.target.value)} 
+                    placeholder="Ex: J'aimerais qu'on parle de ma nutrition..." 
+                    className="bg-muted/50 border-border text-foreground rounded-xl focus:border-blue-500/50 min-h-[100px]" 
+                  />
+                </div>
               </div>
             )}
           </div>
 
-          <div className="p-6 border-t border-zinc-200 bg-zinc-50 shrink-0">
+          <div className="p-6 border-t border-border bg-muted/50 shrink-0">
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-200 text-zinc-900">
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                 Annuler
               </Button>
-              <Button type="submit" disabled={isLoading || !selectedSlot} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 font-bold">
+              <Button type="submit" disabled={isLoading || !selectedSlot} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-primary-foreground shadow-lg shadow-blue-600/20 font-bold">
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirmer le RDV'}
               </Button>
             </DialogFooter>

@@ -123,13 +123,13 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Ajouter une disponibilité spécifique */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+        <div className="bg-card p-6 rounded-3xl border border-border shadow-sm space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-primary" />
               Ajouter une disponibilité
             </h3>
-            <p className="text-sm text-zinc-500 mt-1">Ouvrez un créneau à une date précise.</p>
+            <p className="text-sm text-muted-foreground mt-1">Ouvrez un créneau à une date précise.</p>
           </div>
 
           <form onSubmit={handleAdd} className="space-y-4">
@@ -140,7 +140,7 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                 value={date} 
                 onChange={e => setDate(e.target.value)} 
                 required 
-                className="bg-zinc-50 rounded-xl"
+                className="bg-muted/50 rounded-xl"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -151,7 +151,7 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                   value={startTime} 
                   onChange={e => setStartTime(e.target.value)} 
                   required 
-                  className="bg-zinc-50 rounded-xl"
+                  className="bg-muted/50 rounded-xl"
                 />
               </div>
               <div className="space-y-2">
@@ -161,11 +161,11 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                   value={endTime} 
                   onChange={e => setEndTime(e.target.value)} 
                   required 
-                  className="bg-zinc-50 rounded-xl"
+                  className="bg-muted/50 rounded-xl"
                 />
               </div>
             </div>
-            <Button type="submit" disabled={isLoadingAdd} className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-bold">
+            <Button type="submit" disabled={isLoadingAdd} className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
               {isLoadingAdd ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
               Ajouter le créneau
             </Button>
@@ -173,13 +173,13 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
         </div>
 
         {/* Appliquer le modèle de semaine */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-6 flex flex-col">
+        <div className="bg-card p-6 rounded-3xl border border-border shadow-sm space-y-6 flex flex-col">
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Copy className="h-5 w-5 text-blue-500" />
               Générer une semaine
             </h3>
-            <p className="text-sm text-zinc-500 mt-1">Copiez vos "Horaires Types" sur une semaine précise.</p>
+            <p className="text-sm text-muted-foreground mt-1">Copiez vos "Horaires Types" sur une semaine précise.</p>
           </div>
 
           <div className="space-y-4 flex-1">
@@ -189,9 +189,9 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                 type="date" 
                 value={targetWeekDate} 
                 onChange={e => setTargetWeekDate(e.target.value)} 
-                className="bg-zinc-50 rounded-xl"
+                className="bg-muted/50 rounded-xl"
               />
-              <p className="text-xs text-zinc-400">Le système générera les créneaux du Lundi au Dimanche de cette semaine-là.</p>
+              <p className="text-xs text-muted-foreground">Le système générera les créneaux du Lundi au Dimanche de cette semaine-là.</p>
             </div>
           </div>
           
@@ -202,23 +202,23 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
       </div>
 
       {/* Liste des disponibilités spécifiques */}
-      <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
-        <h3 className="text-lg font-bold text-zinc-900 mb-6">Vos créneaux ouverts par date</h3>
+      <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
+        <h3 className="text-lg font-bold text-foreground mb-6">Vos créneaux ouverts par date</h3>
         
         {sortedDates.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 italic bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
+          <div className="text-center py-8 text-muted-foreground italic bg-muted/50 rounded-2xl border border-dashed border-border">
             Aucune disponibilité spécifique enregistrée.
           </div>
         ) : (
           <div className="space-y-6">
             {sortedDates.map(d => (
               <div key={d} className="space-y-3">
-                <div className="font-bold text-zinc-900 border-b border-zinc-100 pb-2">
+                <div className="font-bold text-foreground border-b border-border pb-2">
                   {new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {grouped[d].sort((a: any, b: any) => a.start_time.localeCompare(b.start_time)).map((avail: any) => (
-                    <div key={avail.id} className="flex flex-col gap-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl">
+                    <div key={avail.id} className="flex flex-col gap-2 p-3 bg-muted/50 border border-border rounded-xl">
                       {editingId === avail.id ? (
                         <div className="flex flex-col gap-2">
                           <div className="flex gap-2">
@@ -234,7 +234,7 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-zinc-700">
+                          <span className="text-sm font-medium text-muted-foreground">
                             {avail.start_time.substring(0, 5)} - {avail.end_time.substring(0, 5)}
                           </span>
                           <div className="flex gap-1">
@@ -249,7 +249,7 @@ export function SpecificAvailabilitiesManager({ specificAvailabilities }: { spec
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                              className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-destructive/10 rounded-lg"
                               onClick={() => handleDelete(avail.id)}
                               disabled={deletingId === avail.id}
                             >

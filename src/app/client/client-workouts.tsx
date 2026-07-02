@@ -47,8 +47,8 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
     const dateObj = new Date(session.scheduled_date)
     const formattedDate = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
-    let bgColor = "bg-white border-zinc-300"
-    let icon = <Calendar className="h-5 w-5 text-zinc-600" />
+    let bgColor = "bg-card border-border"
+    let icon = <Calendar className="h-5 w-5 text-muted-foreground" />
     
     if (type === 'pending') {
       bgColor = "bg-yellow-500/10 border-yellow-500/30"
@@ -66,7 +66,7 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
             {icon}
-            <span className="text-sm font-medium text-zinc-700 capitalize">{formattedDate}</span>
+            <span className="text-sm font-medium text-muted-foreground capitalize">{formattedDate}</span>
           </div>
           {type === 'pending' && (
             <span className="text-xs font-bold text-yellow-400 bg-yellow-500/20 px-2 py-1 rounded-md animate-pulse">
@@ -86,19 +86,19 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
         </div>
         
         <div>
-          <h4 className="text-lg font-bold text-zinc-900 leading-tight">{session.title}</h4>
+          <h4 className="text-lg font-bold text-foreground leading-tight">{session.title}</h4>
           <div className="mt-3 space-y-2">
             {session.exercises && session.exercises.length > 0 ? (
               session.exercises.map((ex: any, idx: number) => (
-                <div key={idx} className="bg-black/40 p-2.5 rounded-lg border border-zinc-200">
+                <div key={idx} className="bg-muted/40 p-2.5 rounded-lg border border-border">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-semibold text-zinc-900">{ex.name}</span>
+                    <span className="text-sm font-semibold text-foreground">{ex.name}</span>
                     <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                       {ex.sets}x{ex.reps}
                     </span>
                   </div>
                   {(ex.rest || ex.notes) && (
-                    <div className="text-xs text-zinc-600 flex flex-wrap gap-2">
+                    <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                       {ex.rest && <span>⏳ Repos: {ex.rest}</span>}
                       {ex.notes && <span className="italic truncate" title={ex.notes}>📝 {ex.notes}</span>}
                     </div>
@@ -106,14 +106,14 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-zinc-500 italic">Aucun exercice renseigné.</p>
+              <p className="text-sm text-muted-foreground italic">Aucun exercice renseigné.</p>
             )}
           </div>
         </div>
 
         <div className="flex gap-2 mt-2">
           <Link href={`/client/workout/${session.id}`} className="flex-1">
-            <Button variant="outline" className="w-full bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300">
+            <Button variant="outline" className="w-full bg-card hover:bg-muted/50 text-foreground border-border">
               Voir les détails
             </Button>
           </Link>
@@ -128,7 +128,7 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
         </div>
 
         {type === 'history' && (
-          <div className="mt-2 text-sm text-zinc-700 bg-black/40 p-3 rounded-xl border border-zinc-200 italic relative group">
+          <div className="mt-2 text-sm text-muted-foreground bg-muted/40 p-3 rounded-xl border border-border italic relative group">
             "{session.execution_feedback || "Pas de retour"}"
             <button 
               onClick={() => {
@@ -136,7 +136,7 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
                 setFeedback(session.execution_feedback || '')
                 setStatus(session.status as 'completed' | 'missed')
               }}
-              className="absolute top-2 right-2 p-1.5 text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute top-2 right-2 p-1.5 text-muted-foreground hover:text-foreground bg-muted hover:bg-muted rounded-lg opacity-0 group-hover:opacity-100 transition-all"
             >
               Modifier
             </button>
@@ -151,7 +151,7 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
       {/* En attente de validation */}
       {pending.length > 0 && (
         <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-yellow-500/20 shadow-2xl shadow-yellow-500/5">
-          <h3 className="text-xl font-bold text-zinc-900 flex items-center gap-2 mb-6">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
             <AlertCircle className="h-6 w-6 text-yellow-400" />
             Séances en attente de retour
           </h3>
@@ -162,13 +162,13 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
       )}
 
       {/* À venir */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-zinc-200">
-        <h3 className="text-xl font-bold text-zinc-900 flex items-center gap-2 mb-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-border">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
           <Clock className="h-6 w-6 text-blue-400" />
           Prochains entraînements
         </h3>
         {upcoming.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 bg-white rounded-2xl border border-dashed border-zinc-300">
+          <div className="text-center py-8 text-muted-foreground bg-card rounded-2xl border border-dashed border-border">
             Aucune séance planifiée dans le futur.
           </div>
         ) : (
@@ -180,9 +180,9 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
 
       {/* Historique */}
       {history.length > 0 && (
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-zinc-200 opacity-80 hover:opacity-100 transition-opacity">
-          <h3 className="text-xl font-bold text-zinc-900 flex items-center gap-2 mb-6">
-            <CheckCircle2 className="h-6 w-6 text-zinc-600" />
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-border opacity-80 hover:opacity-100 transition-opacity">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
+            <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
             Historique
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -193,10 +193,10 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
 
       {/* Modal de Validation */}
       <Dialog open={!!validatingSession} onOpenChange={(open) => !open && setValidatingSession(null)}>
-        <DialogContent className="sm:max-w-[500px] bg-white border-zinc-300 text-zinc-900 rounded-2xl">
+        <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Valider la séance</DialogTitle>
-            <DialogDescription className="text-zinc-600">
+            <DialogDescription className="text-muted-foreground">
               Avez-vous réalisé la séance "{validatingSession?.title}" prévue le {validatingSession ? new Date(validatingSession.scheduled_date).toLocaleDateString('fr-FR') : ''} ?
             </DialogDescription>
           </DialogHeader>
@@ -207,7 +207,7 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
                 type="button"
                 variant={status === 'completed' ? 'default' : 'outline'}
                 onClick={() => setStatus('completed')}
-                className={`flex-1 h-12 rounded-xl ${status === 'completed' ? 'bg-green-600 hover:bg-green-700 text-zinc-900 border-none' : 'border-zinc-300 text-zinc-600 hover:text-zinc-900'}`}
+                className={`flex-1 h-12 rounded-xl ${status === 'completed' ? 'bg-green-600 hover:bg-green-700 text-foreground border-none' : 'border-border text-muted-foreground hover:text-foreground'}`}
               >
                 <CheckCircle2 className="mr-2 h-5 w-5" /> Oui, réalisée
               </Button>
@@ -215,29 +215,29 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
                 type="button"
                 variant={status === 'missed' ? 'default' : 'outline'}
                 onClick={() => setStatus('missed')}
-                className={`flex-1 h-12 rounded-xl ${status === 'missed' ? 'bg-red-600 hover:bg-red-700 text-zinc-900 border-none' : 'border-zinc-300 text-zinc-600 hover:text-zinc-900'}`}
+                className={`flex-1 h-12 rounded-xl ${status === 'missed' ? 'bg-red-600 hover:bg-red-700 text-foreground border-none' : 'border-border text-muted-foreground hover:text-foreground'}`}
               >
                 <XCircle className="mr-2 h-5 w-5" /> Non, ratée
               </Button>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-zinc-700">
+              <label className="text-sm text-muted-foreground">
                 {status === 'completed' ? "Quels sont vos ressentis ? (Difficulté, douleurs, perfs...)" : "Une raison particulière ? (Optionnel)"}
               </label>
               <Textarea 
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder={status === 'completed' ? "Ex: Bonne séance, mais le squat était lourd..." : "Ex: Manque de temps..."}
-                className="bg-white border-zinc-300 text-zinc-900 rounded-xl min-h-[100px] focus:border-primary/50"
+                className="bg-card border-border text-foreground rounded-xl min-h-[100px] focus:border-primary/50"
               />
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setValidatingSession(null)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+              <Button type="button" variant="ghost" onClick={() => setValidatingSession(null)} className="rounded-xl hover:bg-muted text-foreground">
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-primary hover:bg-primary/90 text-white">
+              <Button type="submit" disabled={isSubmitting} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground">
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Enregistrer mon retour'}
               </Button>
             </DialogFooter>

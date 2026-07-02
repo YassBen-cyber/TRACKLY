@@ -17,8 +17,8 @@ export default async function ClientPaymentsPage() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Facturation & Paiements</h1>
-        <p className="text-zinc-600 mt-1">Gérez vos paiements et consultez vos factures.</p>
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Facturation & Paiements</h1>
+        <p className="text-muted-foreground mt-1">Gérez vos paiements et consultez vos factures.</p>
       </div>
       <ClientPayments payments={payments || []} />
     </div>

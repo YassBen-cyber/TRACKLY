@@ -14,8 +14,8 @@ export default async function ClientMetricsPage() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Suivi détaillé</h1>
-        <p className="text-zinc-600 mt-1">Consultez et ajoutez vos mesures et photos de progression.</p>
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Suivi détaillé</h1>
+        <p className="text-muted-foreground mt-1">Consultez et ajoutez vos mesures et photos de progression.</p>
       </div>
       <ClientMetrics metricTypes={metricTypes || []} metricValues={metricValues || []} />
     </div>

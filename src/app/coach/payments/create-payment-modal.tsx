@@ -53,11 +53,11 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20">
+        <Button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-primary-foreground shadow-lg shadow-emerald-600/20">
           <Plus className="h-4 w-4 mr-2" /> Demander un paiement
         </Button>
       } />
-      <DialogContent className="sm:max-w-[425px] bg-white border-zinc-300 text-zinc-900 rounded-2xl">
+      <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-emerald-400" />
@@ -69,16 +69,16 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
           {error && <div className="p-3 bg-red-500/10 text-red-400 rounded-xl text-sm">{error}</div>}
           
           <div className="space-y-2">
-            <Label className="text-zinc-700">Client</Label>
+            <Label className="text-muted-foreground">Client</Label>
             <select 
               value={clientId} 
               onChange={e => setClientId(e.target.value)}
               required
-              className="flex h-11 w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
-              <option value="" disabled className="bg-zinc-50 text-zinc-600">Sélectionner un athlète...</option>
+              <option value="" disabled className="bg-muted/50 text-muted-foreground">Sélectionner un athlète...</option>
               {clients.map(c => (
-                <option key={c.id} value={c.id} className="bg-zinc-50 text-zinc-900 py-2">
+                <option key={c.id} value={c.id} className="bg-muted/50 text-foreground py-2">
                   {c.full_name}
                 </option>
               ))}
@@ -86,23 +86,23 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-zinc-700">Titre (Ex: Coaching Juin)</Label>
-            <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 focus:border-emerald-500/50" />
+            <Label className="text-muted-foreground">Titre (Ex: Coaching Juin)</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-emerald-500/50" />
           </div>
           
           <div className="space-y-2">
-            <Label className="text-zinc-700">Montant (€)</Label>
-            <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 focus:border-emerald-500/50" />
+            <Label className="text-muted-foreground">Montant (€)</Label>
+            <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-emerald-500/50" />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-zinc-700">Date d'échéance (Optionnel)</Label>
-            <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 focus:border-emerald-500/50 [color-scheme:dark]" />
+            <Label className="text-muted-foreground">Date d'échéance (Optionnel)</Label>
+            <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="bg-card border-border h-11 rounded-xl text-foreground focus:border-emerald-500/50 dark:[color-scheme:dark]" />
           </div>
 
           <DialogFooter className="pt-4">
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">Annuler</Button>
-            <Button type="submit" disabled={isLoading} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">Annuler</Button>
+            <Button type="submit" disabled={isLoading} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Créer'}
             </Button>
           </DialogFooter>

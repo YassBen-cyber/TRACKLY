@@ -19,8 +19,8 @@ export default async function CoachSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-zinc-900">Profil & Paramètres</h2>
-        <p className="text-zinc-600 mt-1">Gérez vos informations personnelles et de sécurité.</p>
+        <h2 className="text-2xl font-bold text-foreground">Profil & Paramètres</h2>
+        <p className="text-muted-foreground mt-1">Gérez vos informations personnelles et de sécurité.</p>
       </div>
 
       <ProfileSettings profile={profile} />

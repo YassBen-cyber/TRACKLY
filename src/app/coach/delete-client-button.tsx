@@ -41,7 +41,7 @@ export function DeleteClientButton({ clientId, clientName }: { clientId: string,
         handleDelete()
       }}
       disabled={isLoading}
-      className="rounded-full hover:bg-red-500/20 text-zinc-600 hover:text-red-400 transition-colors mr-1"
+      className="rounded-full hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors mr-1"
       title="Supprimer le client"
     >
       {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}

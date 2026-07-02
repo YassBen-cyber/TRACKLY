@@ -23,6 +23,7 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('18:00')
   const [endTime, setEndTime] = useState('19:00')
+  const [availabilityType, setAvailabilityType] = useState('workout')
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -44,6 +45,7 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
     fd.append('date', date)
     fd.append('startTime', startTime)
     fd.append('endTime', endTime)
+    fd.append('availabilityType', availabilityType)
 
     try {
       await addAvailability(fd)
@@ -77,15 +79,15 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
   const sortedDates = Object.keys(grouped).sort()
 
   return (
-    <div className={readOnly ? "" : "glass-panel p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-2xl"}>
+    <div className={readOnly ? "" : "glass-panel p-6 sm:p-8 rounded-3xl border border-border shadow-2xl"}>
       {!readOnly && (
         <>
           <div className="flex items-center gap-3 mb-6">
             <CalendarIcon className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-zinc-900">Mes Disponibilités</h2>
+            <h2 className="text-2xl font-bold text-foreground">Mes Disponibilités</h2>
           </div>
-          <p className="text-zinc-600 text-sm mb-6">
-            Indiquez les jours exacts où vous êtes disponible pour vous entraîner.
+          <p className="text-muted-foreground text-sm mb-6">
+            Indiquez les jours exacts où vous êtes disponible pour vous entraîner ou pour un appel.
           </p>
 
           {error && (
@@ -94,47 +96,61 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
             </div>
           )}
 
-          <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-4 mb-8 bg-white p-4 rounded-2xl border border-zinc-300">
-            <div className="flex-1">
-              <Input 
-                type="date" 
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]} 
-                required 
-                className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 [color-scheme:dark] w-full" 
-              />
+          <form onSubmit={handleAdd} className="flex flex-col gap-4 mb-8 bg-card p-4 rounded-2xl border border-border">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <Input 
+                  type="date" 
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]} 
+                  required 
+                  className="bg-card border-border h-11 rounded-xl text-foreground w-full dark:[color-scheme:dark]" 
+                />
+              </div>
+              <div className="flex-1 flex items-center gap-2">
+                <Select value={startTime} onValueChange={(val) => setStartTime(val || '')}>
+                  <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted/50 border-border text-foreground max-h-60">
+                    {TIME_SLOTS.map(t => <SelectItem key={`start-${t}`} value={t} className="hover:bg-muted focus:bg-muted focus:text-foreground">{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground">à</span>
+                <Select value={endTime} onValueChange={(val) => setEndTime(val || '')}>
+                  <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted/50 border-border text-foreground max-h-60">
+                    {TIME_SLOTS.map(t => <SelectItem key={`end-${t}`} value={t} className="hover:bg-muted focus:bg-muted focus:text-foreground">{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <Select value={availabilityType} onValueChange={(val) => setAvailabilityType(val || 'workout')}>
+                  <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted/50 border-border text-foreground">
+                    <SelectItem value="workout">Entraînement</SelectItem>
+                    <SelectItem value="appointment">Appel / Visio</SelectItem>
+                    <SelectItem value="both">Les deux</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" disabled={loadingAdd} className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 sm:w-auto w-full">
+                {loadingAdd ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                Ajouter
+              </Button>
             </div>
-            <div className="flex-1 flex items-center gap-2">
-              <Select value={startTime} onValueChange={(val) => setStartTime(val || '')}>
-                <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-50 border-zinc-300 text-zinc-900 max-h-60">
-                  {TIME_SLOTS.map(t => <SelectItem key={`start-${t}`} value={t} className="hover:bg-zinc-100 focus:bg-zinc-100 focus:text-zinc-900">{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <span className="text-zinc-600">à</span>
-              <Select value={endTime} onValueChange={(val) => setEndTime(val || '')}>
-                <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-50 border-zinc-300 text-zinc-900 max-h-60">
-                  {TIME_SLOTS.map(t => <SelectItem key={`end-${t}`} value={t} className="hover:bg-zinc-100 focus:bg-zinc-100 focus:text-zinc-900">{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" disabled={loadingAdd} className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 sm:w-auto w-full">
-              {loadingAdd ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-              Ajouter
-            </Button>
           </form>
         </>
       )}
 
       <div className="space-y-4">
         {sortedDates.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 bg-white rounded-2xl border border-dashed border-zinc-300">
+          <div className="text-center py-8 text-muted-foreground bg-card rounded-2xl border border-dashed border-border">
             Aucune disponibilité renseignée.
           </div>
         ) : (
@@ -143,24 +159,29 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
             const formattedDate = new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
             
             return (
-              <div key={dateStr} className="bg-white p-4 rounded-2xl border border-zinc-200 flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="w-40 font-semibold text-zinc-900 capitalize">
+              <div key={dateStr} className="bg-card p-4 rounded-2xl border border-border flex flex-col sm:flex-row sm:items-start gap-4">
+                <div className="w-40 font-semibold text-foreground capitalize mt-1.5">
                   {formattedDate}
                 </div>
                 <div className="flex-1 flex flex-wrap gap-2">
                   {slots.map((slot: any) => (
-                    <div key={slot.id} className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm">
-                      <span>{slot.start_time.substring(0,5)} - {slot.end_time.substring(0,5)}</span>
-                      {!readOnly && (
-                        <button 
-                          onClick={() => handleDelete(slot.id)}
-                          disabled={deletingId === slot.id}
-                          className="ml-2 hover:text-red-400 transition-colors disabled:opacity-50"
-                          title="Supprimer"
-                        >
-                          {deletingId === slot.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                        </button>
-                      )}
+                    <div key={slot.id} className="flex flex-col bg-primary/10 text-primary border border-primary/20 px-3 py-2 rounded-lg text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{slot.start_time.substring(0,5)} - {slot.end_time.substring(0,5)}</span>
+                        {!readOnly && (
+                          <button 
+                            onClick={() => handleDelete(slot.id)}
+                            disabled={deletingId === slot.id}
+                            className="ml-4 hover:text-red-400 transition-colors disabled:opacity-50"
+                            title="Supprimer"
+                          >
+                            {deletingId === slot.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-xs mt-1 text-primary/70">
+                        {slot.availability_type === 'workout' ? 'Entraînement' : slot.availability_type === 'appointment' ? 'Appel / Visio' : 'Entraînement & Appel'}
+                      </span>
                     </div>
                   ))}
                 </div>

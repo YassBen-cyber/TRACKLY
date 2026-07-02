@@ -53,14 +53,14 @@ export function AddMetricModal({ clientId }: { clientId: string }) {
           Ajouter une métrique
         </Button>
       } />
-      <DialogContent className="sm:max-w-[425px] bg-white border-zinc-300 text-zinc-900 rounded-2xl">
+      <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground rounded-2xl">
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
               Nouvelle métrique
             </DialogTitle>
-            <DialogDescription className="text-zinc-600">
+            <DialogDescription className="text-muted-foreground">
               Ajoutez une métrique personnalisée pour ce client.
             </DialogDescription>
           </DialogHeader>
@@ -73,24 +73,24 @@ export function AddMetricModal({ clientId }: { clientId: string }) {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-zinc-700">Nom de la métrique</Label>
+              <Label htmlFor="name" className="text-muted-foreground">Nom de la métrique</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="ex: Poids, Tour de taille..."
-                className="bg-white border-zinc-300 rounded-xl"
+                className="bg-card border-border rounded-xl"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="unit" className="text-zinc-700">Unité (optionnel)</Label>
+              <Label htmlFor="unit" className="text-muted-foreground">Unité (optionnel)</Label>
               <Input
                 id="unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="ex: kg, cm..."
-                className="bg-white border-zinc-300 rounded-xl"
+                className="bg-card border-border rounded-xl"
               />
             </div>
           </div>
@@ -100,14 +100,14 @@ export function AddMetricModal({ clientId }: { clientId: string }) {
               type="button"
               variant="ghost"
               onClick={() => setOpen(false)}
-              className="rounded-xl text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+              className="rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               Annuler
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="rounded-xl bg-primary hover:bg-primary/90 text-white"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Ajouter'}
             </Button>

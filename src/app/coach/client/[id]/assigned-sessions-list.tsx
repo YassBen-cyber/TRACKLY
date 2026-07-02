@@ -30,7 +30,7 @@ export function AssignedSessionsList({
   return (
     <div className="glass-panel p-6 sm:p-8 rounded-3xl">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h3 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-blue-500" />
           Séances planifiées
         </h3>
@@ -43,22 +43,22 @@ export function AssignedSessionsList({
   alignContent: 'end' 
 }}>
           <Select value={filter} onValueChange={(val) => setFilter(val || '')}>
-            <SelectTrigger className="bg-white border-zinc-300 h-10 rounded-xl text-zinc-900">
+            <SelectTrigger className="bg-card border-border h-10 rounded-xl text-foreground">
               <SelectValue placeholder="Filtrer par statut..." />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-50 border-zinc-300 text-zinc-900">
-              <SelectItem value="all" className="hover:bg-zinc-100 focus:bg-zinc-100">Toutes les séances</SelectItem>
-              <SelectItem value="upcoming" className="hover:bg-zinc-100 focus:bg-zinc-100">À venir</SelectItem>
-              <SelectItem value="pending" className="hover:bg-zinc-100 focus:bg-zinc-100 text-yellow-500">Retour à donner</SelectItem>
-              <SelectItem value="completed" className="hover:bg-zinc-100 focus:bg-zinc-100 text-green-500">Réalisées</SelectItem>
-              <SelectItem value="missed" className="hover:bg-zinc-100 focus:bg-zinc-100 text-red-500">Ratées</SelectItem>
+            <SelectContent className="bg-muted/50 border-border text-foreground">
+              <SelectItem value="all" className="hover:bg-muted focus:bg-muted">Toutes les séances</SelectItem>
+              <SelectItem value="upcoming" className="hover:bg-muted focus:bg-muted">À venir</SelectItem>
+              <SelectItem value="pending" className="hover:bg-muted focus:bg-muted text-yellow-500">Retour à donner</SelectItem>
+              <SelectItem value="completed" className="hover:bg-muted focus:bg-muted text-green-500">Réalisées</SelectItem>
+              <SelectItem value="missed" className="hover:bg-muted focus:bg-muted text-red-500">Ratées</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       
       {filteredSessions.length === 0 ? (
-        <div className="text-center p-6 border border-dashed border-zinc-300 rounded-xl bg-white text-zinc-600">
+        <div className="text-center p-6 border border-dashed border-border rounded-xl bg-card text-muted-foreground">
           Aucune séance ne correspond à ce filtre.
         </div>
       ) : (
@@ -68,7 +68,7 @@ export function AssignedSessionsList({
             const isPast = session.scheduled_date <= todayStr
             const isPending = session.status === 'planned' && isPast
 
-            let bgColor = isPast ? 'bg-white border-zinc-200' : 'bg-blue-500/10 border-blue-500/20'
+            let bgColor = isPast ? 'bg-card border-border' : 'bg-blue-500/10 border-blue-500/20'
             let statusBadge = null
 
             if (session.status === 'completed') {
@@ -79,27 +79,27 @@ export function AssignedSessionsList({
               bgColor = 'bg-yellow-500/10 border-yellow-500/20'
               statusBadge = <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 animate-pulse">Retour en attente</span>
             } else {
-              statusBadge = <span className="text-xs px-2 py-1 rounded-full bg-zinc-100 text-zinc-700">À venir</span>
+              statusBadge = <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">À venir</span>
             }
 
             return (
               <div key={session.id} className={`p-4 rounded-2xl border ${bgColor}`}>
-                <div className="text-xs font-medium text-zinc-600 mb-1 flex items-center gap-1">
+                <div className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}
                 </div>
-                <div className={`font-bold ${isPast ? 'text-zinc-700' : 'text-blue-400'} flex items-start justify-between`}>
+                <div className={`font-bold ${isPast ? 'text-muted-foreground' : 'text-blue-400'} flex items-start justify-between`}>
                   <span>{session.title}</span>
                   <EditAssignedSessionModal clientId={clientId} session={session} />
                 </div>
-                <div className="text-sm text-zinc-600 mt-2">
+                <div className="text-sm text-muted-foreground mt-2">
                   {session.exercises?.length || 0} exercices
                 </div>
                 <div className="mt-3 flex items-center justify-between">
                   {statusBadge}
                 </div>
                 {session.execution_feedback && (
-                  <div className="mt-3 text-xs text-zinc-600 bg-black/40 p-2 rounded-lg italic border border-zinc-200 line-clamp-2" title={session.execution_feedback}>
+                  <div className="mt-3 text-xs text-muted-foreground bg-muted/40 p-2 rounded-lg italic border border-border line-clamp-2" title={session.execution_feedback}>
                     "{session.execution_feedback}"
                   </div>
                 )}

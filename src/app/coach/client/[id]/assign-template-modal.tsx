@@ -56,15 +56,15 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
           Appliquer un template d'objectif
         </Button>
       } />
-      <DialogContent className="sm:max-w-[500px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full">
-          <div className="p-6 pb-2 border-b border-zinc-200 bg-white">
+          <div className="p-6 pb-2 border-b border-border bg-card">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Target className="h-5 w-5 text-primary" />
                 Assigner un Objectif
               </DialogTitle>
-              <DialogDescription className="text-zinc-600">
+              <DialogDescription className="text-muted-foreground">
                 Sélectionnez un template pour initialiser automatiquement les métriques de cet athlète.
               </DialogDescription>
             </DialogHeader>
@@ -85,18 +85,18 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
                 )}
 
                 {templates.length === 0 ? (
-                  <div className="text-center p-6 border border-dashed border-zinc-300 rounded-xl bg-white">
-                    <p className="text-zinc-600 text-sm">Vous n'avez créé aucun template. Allez dans l'onglet "Templates" pour en créer un.</p>
+                  <div className="text-center p-6 border border-dashed border-border rounded-xl bg-card">
+                    <p className="text-muted-foreground text-sm">Vous n'avez créé aucun template. Allez dans l'onglet "Templates" pour en créer un.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Select value={selectedTemplateId} onValueChange={(val) => setSelectedTemplateId(val || '')}>
-                      <SelectTrigger className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900">
+                      <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
                         <SelectValue placeholder="Choisir un template..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-50 border-zinc-300 text-zinc-900">
+                      <SelectContent className="bg-muted/50 border-border text-foreground">
                         {templates.map(t => (
-                          <SelectItem key={t.id} value={t.id} className="hover:bg-zinc-100 focus:bg-zinc-100 focus:text-zinc-900">
+                          <SelectItem key={t.id} value={t.id} className="hover:bg-muted focus:bg-muted focus:text-foreground">
                             {t.name} ({Array.isArray(t.metrics) ? t.metrics.length : 0} métriques)
                           </SelectItem>
                         ))}
@@ -109,12 +109,12 @@ export function AssignTemplateModal({ clientId, templates }: { clientId: string,
           </div>
 
           {!success && (
-            <div className="p-6 border-t border-zinc-200 bg-white mt-auto">
+            <div className="p-6 border-t border-border bg-card mt-auto">
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+                <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading || templates.length === 0} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
+                <Button type="submit" disabled={isLoading || templates.length === 0} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Appliquer'}
                 </Button>
               </DialogFooter>

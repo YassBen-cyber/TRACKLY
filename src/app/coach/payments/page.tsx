@@ -28,11 +28,11 @@ export default async function PaymentsPage() {
     <div className="space-y-8">
       <div className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-emerald-400" />
             Paiements & Facturation
           </h2>
-          <p className="text-zinc-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Gérez vos demandes de paiements pour l'ensemble de vos athlètes.
           </p>
         </div>

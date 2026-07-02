@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Download, Loader2, Plus, Pencil, Trash2, Activity } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { addMetricValue, updateCoachMetricValue, deleteCoachMetricValue } from './actions'
+import { addMetricValue, updateCoachMetricValue, deleteCoachMetricValue, deleteMetricType } from './actions'
 
 import jsPDF from 'jspdf'
 
@@ -22,7 +22,7 @@ type MetricValue = {
   }
 }
 
-export function ClientMetricsView({ values, clientName, clientId, metricTypes }: { values: MetricValue[], clientName: string, clientId: string, metricTypes: any[] }) {
+export function ClientMetricsView({ values, clientName, clientId, metricTypes, headerActions }: { values: MetricValue[], clientName: string, clientId: string, metricTypes: any[], headerActions?: React.ReactNode }) {
   const [isExporting, setIsExporting] = useState(false)
   
   // Add Metric Modal State
@@ -39,13 +39,18 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
 
   // Group values by metric type name
   const groupedMetrics = useMemo(() => {
-    const groups: Record<string, { unit: string, data: any[] }> = {}
+    const groups: Record<string, { id: string, unit: string, data: any[] }> = {}
     
+    // Initialize groups for all assigned metric types
+    metricTypes.forEach(mt => {
+      groups[mt.name] = { id: mt.id, unit: mt.unit, data: [] }
+    })
+
     values.forEach(v => {
       if (!v.metric_types) return
       const name = v.metric_types.name
       if (!groups[name]) {
-        groups[name] = { unit: v.metric_types.unit, data: [] }
+        groups[name] = { id: v.metric_type_id, unit: v.metric_types.unit, data: [] }
       }
       
       groups[name].data.push({
@@ -102,6 +107,15 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
       alert("Erreur lors de la modification")
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteMetricType = async (typeId: string, name: string) => {
+    if (!confirm(`Voulez-vous vraiment supprimer la métrique "${name}" et toutes ses données associées ?`)) return
+    try {
+      await deleteMetricType(typeId, clientId)
+    } catch (err: any) {
+      alert("Erreur: " + err.message)
     }
   }
 
@@ -198,8 +212,9 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-zinc-900">Évolution des métriques</h2>
-        <div className="flex gap-2">
+        <h2 className="text-2xl font-bold text-foreground">Évolution des métriques</h2>
+        <div className="flex gap-2 flex-wrap">
+          {headerActions}
           {metricTypes.length > 0 && (
             <Dialog open={isAdding} onOpenChange={setIsAdding}>
               <DialogTrigger render={
@@ -207,7 +222,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                   <Plus className="mr-2 h-4 w-4" /> Ajouter une mesure
                 </Button>
               } />
-              <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+              <DialogContent className="sm:max-w-md bg-card border-border text-foreground rounded-3xl">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold">Nouvelle mesure</DialogTitle>
                 </DialogHeader>
@@ -215,7 +230,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                   <div className="space-y-2">
                     <Label>Métrique</Label>
                     <select 
-                      className="w-full h-11 px-3 rounded-xl border border-zinc-300 bg-white"
+                      className="w-full h-11 px-3 rounded-xl border border-border bg-card"
                       value={addTypeId}
                       onChange={(e) => setAddTypeId(e.target.value)}
                       required
@@ -233,7 +248,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                       required 
                       value={addDate}
                       onChange={(e) => setAddDate(e.target.value)}
-                      className="h-11 rounded-xl bg-white border-zinc-300" 
+                      className="h-11 rounded-xl bg-card border-border" 
                     />
                   </div>
                   <div className="space-y-2">
@@ -244,7 +259,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                       required 
                       value={addVal}
                       onChange={(e) => setAddVal(e.target.value)}
-                      className="h-11 rounded-xl bg-white border-zinc-300" 
+                      className="h-11 rounded-xl bg-card border-border" 
                       placeholder="Ex: 75.5"
                     />
                   </div>
@@ -259,7 +274,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
           <Button 
             onClick={exportPDF} 
             disabled={isExporting || metricNames.length === 0}
-            className="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-300 rounded-xl"
+            className="bg-muted hover:bg-muted text-foreground border border-border rounded-xl"
           >
             {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Exporter
@@ -267,25 +282,36 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
         </div>
       </div>
 
-      <div id="metrics-pdf-content" className="p-4 sm:p-6 bg-zinc-50 rounded-3xl border border-zinc-200 shadow-2xl">
+      <div id="metrics-pdf-content" className="p-4 sm:p-6 bg-muted/50 rounded-3xl border border-border shadow-2xl">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-zinc-900">Performances de {clientName}</h1>
-          <p className="text-zinc-600 mt-1">Généré le {new Date().toLocaleDateString('fr-FR')}</p>
+          <h1 className="text-2xl font-bold text-foreground">Performances de {clientName}</h1>
+          <p className="text-muted-foreground mt-1">Généré le {new Date().toLocaleDateString('fr-FR')}</p>
         </div>
 
         {metricNames.length === 0 ? (
-          <div className="glass-panel p-8 rounded-3xl text-center border border-zinc-200">
-            <p className="text-zinc-600">Aucune métrique enregistrée pour le moment.</p>
+          <div className="glass-panel p-8 rounded-3xl text-center border border-border">
+            <p className="text-muted-foreground">Aucune métrique enregistrée pour le moment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8">
             {metricNames.map(name => (
-              <div key={name} className="glass-panel p-6 rounded-3xl border border-zinc-200 bg-white backdrop-blur-sm">
+              <div key={name} className="glass-panel p-6 rounded-3xl border border-border bg-card backdrop-blur-sm">
                 <div className="mb-6 flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-zinc-900">{name}</h3>
-                  <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                    {groupedMetrics[name].unit}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-foreground">{name}</h3>
+                    <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                      {groupedMetrics[name].unit}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => handleDeleteMetricType(groupedMetrics[name].id, name)} 
+                    className="text-muted-foreground hover:text-red-500 hover:bg-destructive/10 transition-colors"
+                    title="Supprimer cette métrique"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 
                 <div className="h-64 w-full mb-6">
@@ -331,7 +357,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {groupedMetrics[name].data.map((v: any) => (
-                    <div key={v.id} className="bg-zinc-50 p-3 rounded-2xl border border-zinc-200 flex flex-col items-center text-center relative group">
+                    <div key={v.id} className="bg-muted/50 p-3 rounded-2xl border border-border flex flex-col items-center text-center relative group">
                       <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => {
                             setEditingValue(v)
@@ -352,8 +378,8 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                           <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
-                      <span className="text-xs font-medium text-zinc-500 mb-1">{v.date}</span>
-                      <span className="text-lg font-black text-zinc-900">{v.value}</span>
+                      <span className="text-xs font-medium text-muted-foreground mb-1">{v.date}</span>
+                      <span className="text-lg font-black text-foreground">{v.value}</span>
                     </div>
                   ))}
                 </div>
@@ -366,7 +392,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
 
       {/* Modal d'édition */}
       <Dialog open={!!editingValue} onOpenChange={(open) => !open && setEditingValue(null)}>
-        <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Modifier la mesure</DialogTitle>
           </DialogHeader>
@@ -378,7 +404,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                 required 
                 value={editDate}
                 onChange={(e) => setEditDate(e.target.value)}
-                className="h-11 rounded-xl bg-white border-zinc-300" 
+                className="h-11 rounded-xl bg-card border-border" 
               />
             </div>
             <div className="space-y-2">
@@ -389,7 +415,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes }:
                 required 
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                className="h-11 rounded-xl bg-white border-zinc-300" 
+                className="h-11 rounded-xl bg-card border-border" 
               />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold">

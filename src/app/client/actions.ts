@@ -11,6 +11,7 @@ export async function addAvailability(formData: FormData) {
   const date = formData.get('date') as string
   const startTime = formData.get('startTime') as string
   const endTime = formData.get('endTime') as string
+  const availabilityType = (formData.get('availabilityType') as string) || 'workout'
 
   const { error } = await supabase
     .from('client_availabilities')
@@ -18,7 +19,8 @@ export async function addAvailability(formData: FormData) {
       client_id: user.id,
       date: date,
       start_time: startTime,
-      end_time: endTime
+      end_time: endTime,
+      availability_type: availabilityType
     })
 
   if (error) {
@@ -148,7 +150,7 @@ export async function updateClientMetricValue(metricValueId: string, value: numb
   revalidatePath('/client')
 }
 
-export async function createAppointmentAsClient(coachId: string, title: string, startTime: string, endTime: string, notes: string) {
+export async function createAppointmentAsClient(coachId: string, title: string, startTime: string, endTime: string, notes: string, locationType: string = 'remote', locationDetails: string = '') {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
@@ -162,7 +164,9 @@ export async function createAppointmentAsClient(coachId: string, title: string, 
       start_time: startTime,
       end_time: endTime,
       notes: notes,
-      status: 'scheduled'
+      status: 'scheduled',
+      location_type: locationType,
+      location_details: locationDetails
     })
 
   if (error) {

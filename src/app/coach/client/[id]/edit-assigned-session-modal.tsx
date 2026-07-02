@@ -87,19 +87,19 @@ export function EditAssignedSessionModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <button className="text-zinc-600 hover:text-zinc-900 transition-colors" title="Modifier ou supprimer">
+        <button className="text-muted-foreground hover:text-foreground transition-colors" title="Modifier ou supprimer">
           <Edit className="h-4 w-4" />
         </button>
       } />
-      <DialogContent className="sm:max-w-[700px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[700px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
-          <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">
+          <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Edit className="h-5 w-5 text-blue-500" />
                 Modifier la séance assignée
               </DialogTitle>
-              <DialogDescription className="text-zinc-600">
+              <DialogDescription className="text-muted-foreground">
                 Ajustez les exercices spécifiquement pour cet athlète ou supprimez la séance.
               </DialogDescription>
             </DialogHeader>
@@ -114,48 +114,48 @@ export function EditAssignedSessionModal({
 
             <div className="space-y-4">
               <div className="space-y-2 group">
-                <Label className="text-zinc-700 group-focus-within:text-blue-500 transition-colors">Nom de la séance</Label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 focus:border-blue-500/50" />
+                <Label className="text-muted-foreground group-focus-within:text-blue-500 transition-colors">Nom de la séance</Label>
+                <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50" />
               </div>
               <div className="space-y-2 group">
-                <Label className="text-zinc-700 group-focus-within:text-blue-500 transition-colors">Date de la séance</Label>
-                <Input type="date" value={date} onChange={e => setDate(e.target.value)} required className="bg-white border-zinc-300 h-11 rounded-xl text-zinc-900 focus:border-blue-500/50 [color-scheme:dark]" />
+                <Label className="text-muted-foreground group-focus-within:text-blue-500 transition-colors">Date de la séance</Label>
+                <Input type="date" value={date} onChange={e => setDate(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50 dark:[color-scheme:dark]" />
               </div>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-zinc-200">
+            <div className="space-y-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
-                <Label className="text-lg font-semibold text-zinc-900">Exercices</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-zinc-300 text-blue-500 hover:bg-blue-500/10 hover:text-blue-400">
+                <Label className="text-lg font-semibold text-foreground">Exercices</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-blue-500 hover:bg-blue-500/10 hover:text-blue-400">
                   <Plus className="h-4 w-4 mr-1" /> Ajouter
                 </Button>
               </div>
 
               <div className="space-y-3">
-                {exercises.length === 0 && <p className="text-sm text-zinc-500 italic">Aucun exercice.</p>}
+                {exercises.length === 0 && <p className="text-sm text-muted-foreground italic">Aucun exercice.</p>}
                 {exercises.map((ex, idx) => (
-                  <div key={idx} className="bg-white border border-zinc-300 rounded-xl p-4 space-y-3 relative group transition-all hover:border-white/20">
-                    <button type="button" onClick={() => removeExercise(idx)} className="absolute top-3 right-3 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all hover:border-white/20">
+                    <button type="button" onClick={() => removeExercise(idx)} className="absolute top-3 right-3 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Trash2 className="h-4 w-4" />
                     </button>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-8">
                       <div className="space-y-1 md:col-span-2">
-                        <Label className="text-xs text-zinc-600">Nom de l'exercice</Label>
-                        <Input value={ex.name} onChange={(e) => updateExercise(idx, 'name', e.target.value)} required placeholder="Ex: Squat" className="h-9 bg-black/40 border-zinc-200 text-zinc-900 rounded-lg" />
+                        <Label className="text-xs text-muted-foreground">Nom de l'exercice</Label>
+                        <Input value={ex.name} onChange={(e) => updateExercise(idx, 'name', e.target.value)} required placeholder="Ex: Squat" className="h-9 bg-muted/40 border-border text-foreground rounded-lg" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-zinc-600">Séries & Répétitions</Label>
+                        <Label className="text-xs text-muted-foreground">Séries & Répétitions</Label>
                         <div className="flex gap-2">
-                          <Input value={ex.sets} onChange={(e) => updateExercise(idx, 'sets', e.target.value)} placeholder="Séries" className="h-9 bg-black/40 border-zinc-200 text-zinc-900 rounded-lg w-1/2" />
-                          <Input value={ex.reps} onChange={(e) => updateExercise(idx, 'reps', e.target.value)} placeholder="Reps" className="h-9 bg-black/40 border-zinc-200 text-zinc-900 rounded-lg w-1/2" />
+                          <Input value={ex.sets} onChange={(e) => updateExercise(idx, 'sets', e.target.value)} placeholder="Séries" className="h-9 bg-muted/40 border-border text-foreground rounded-lg w-1/2" />
+                          <Input value={ex.reps} onChange={(e) => updateExercise(idx, 'reps', e.target.value)} placeholder="Reps" className="h-9 bg-muted/40 border-border text-foreground rounded-lg w-1/2" />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-zinc-600">Repos & Notes</Label>
+                        <Label className="text-xs text-muted-foreground">Repos & Notes</Label>
                         <div className="flex gap-2">
-                          <Input value={ex.rest} onChange={(e) => updateExercise(idx, 'rest', e.target.value)} placeholder="Repos" className="h-9 bg-black/40 border-zinc-200 text-zinc-900 rounded-lg w-1/3" />
-                          <Input value={ex.notes} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes" className="h-9 bg-black/40 border-zinc-200 text-zinc-900 rounded-lg flex-1" />
+                          <Input value={ex.rest} onChange={(e) => updateExercise(idx, 'rest', e.target.value)} placeholder="Repos" className="h-9 bg-muted/40 border-border text-foreground rounded-lg w-1/3" />
+                          <Input value={ex.notes} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes" className="h-9 bg-muted/40 border-border text-foreground rounded-lg flex-1" />
                         </div>
                       </div>
                     </div>
@@ -165,17 +165,17 @@ export function EditAssignedSessionModal({
             </div>
           </div>
 
-          <div className="p-6 border-t border-zinc-200 bg-white shrink-0">
+          <div className="p-6 border-t border-border bg-card shrink-0">
             <DialogFooter className="flex justify-between sm:justify-between w-full">
               <Button type="button" onClick={handleDelete} disabled={isDeleting || isLoading} className="rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border-none shadow-none">
                 {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
                 Supprimer la séance
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+                <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading || isDeleting} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-zinc-900 shadow-lg shadow-blue-600/20">
+                <Button type="submit" disabled={isLoading || isDeleting} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20">
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sauvegarder'}
                 </Button>
               </div>

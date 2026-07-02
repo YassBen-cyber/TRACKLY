@@ -142,22 +142,22 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
 
   if (metricTypes.length === 0) {
     return (
-      <div className="glass-panel p-8 rounded-3xl text-center border border-zinc-200">
-        <Activity className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-zinc-900 mb-2">Suivi de progression</h3>
-        <p className="text-zinc-500">Votre coach n'a pas encore défini d'objectifs de suivi pour vous.</p>
+      <div className="glass-panel p-8 rounded-3xl text-center border border-border">
+        <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-foreground mb-2">Suivi de progression</h3>
+        <p className="text-muted-foreground">Votre coach n'a pas encore défini d'objectifs de suivi pour vous.</p>
       </div>
     )
   }
 
   return (
-    <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/20">
+    <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-border shadow-xl shadow-foreground/5">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div className="flex items-center gap-3">
           <div className="bg-primary/20 p-2.5 rounded-xl border border-primary/30">
             <Activity className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Ma Progression</h3>
+          <h3 className="text-2xl font-black text-foreground tracking-tight">Ma Progression</h3>
         </div>
 
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
@@ -166,7 +166,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
               <Plus className="mr-2 h-4 w-4" /> Ajouter une mesure
             </Button>
           } />
-          <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+          <DialogContent className="sm:max-w-md bg-card border-border text-foreground rounded-3xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold">Nouvelle mesure</DialogTitle>
             </DialogHeader>
@@ -174,7 +174,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
               <div className="space-y-2">
                 <Label>Métrique</Label>
                 <select 
-                  className="w-full h-11 px-3 rounded-xl border border-zinc-300 bg-white"
+                  className="w-full h-11 px-3 rounded-xl border border-border bg-card"
                   value={selectedType?.id || ''}
                   onChange={(e) => setSelectedType(metricTypes.find((t: any) => t.id === e.target.value))}
                 >
@@ -192,7 +192,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
                   required 
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
-                  className="h-11 rounded-xl bg-white border-zinc-300" 
+                  className="h-11 rounded-xl bg-card border-border" 
                   placeholder="Ex: 75.5"
                 />
               </div>
@@ -200,14 +200,14 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
               <div className="space-y-2">
                 <Label>Photo de progression (Optionnel)</Label>
                 <div className="flex items-center gap-4">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-zinc-300 border-dashed rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-border border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {photoPreview ? (
                         <img src={photoPreview} alt="Preview" className="h-24 object-cover rounded-lg" />
                       ) : (
                         <>
-                          <Camera className="w-8 h-8 mb-2 text-zinc-400" />
-                          <p className="text-sm text-zinc-500 font-medium">Ajouter une photo</p>
+                          <Camera className="w-8 h-8 mb-2 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground font-medium">Ajouter une photo</p>
                         </>
                       )}
                     </div>
@@ -232,8 +232,8 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
             onClick={() => setSelectedType(type)}
             className={`rounded-full px-6 transition-all ${
               selectedType?.id === type.id 
-                ? 'bg-zinc-900 hover:bg-zinc-800 text-white shadow-md' 
-                : 'border-zinc-300 text-zinc-600 hover:text-zinc-900 bg-white'
+                ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-md' 
+                : 'border-border text-muted-foreground hover:text-foreground bg-card'
             }`}
           >
             {type.name}
@@ -243,7 +243,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
 
       {currentValues.length > 0 ? (
         <div className="space-y-8">
-          <div className="h-[300px] w-full bg-white p-4 rounded-2xl border border-zinc-200">
+          <div className="h-[300px] w-full bg-card p-4 rounded-2xl border border-border">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={currentValues}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
@@ -267,7 +267,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {currentValues.map((v: any) => (
-              <div key={v.id} className="bg-white p-4 rounded-2xl border border-zinc-200 flex flex-col items-center text-center relative group">
+              <div key={v.id} className="bg-card p-4 rounded-2xl border border-border flex flex-col items-center text-center relative group">
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => {
                       setEditingValue(v)
@@ -291,16 +291,16 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
                   </button>
                 </div>
                 
-                <span className="text-sm font-medium text-zinc-500 mb-1">{v.formattedDate}</span>
-                <span className="text-2xl font-black text-zinc-900">{v.value} <span className="text-sm font-semibold text-zinc-400">{selectedType.unit}</span></span>
+                <span className="text-sm font-medium text-muted-foreground mb-1">{v.formattedDate}</span>
+                <span className="text-2xl font-black text-foreground">{v.value} <span className="text-sm font-semibold text-muted-foreground">{selectedType.unit}</span></span>
                 {v.photo_url && (
                   <Dialog>
                     <DialogTrigger render={
                       <button className="mt-3 text-primary hover:text-primary/80 transition-colors">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden border border-zinc-200 shadow-sm relative group/img">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden border border-border shadow-sm relative group/img">
                           <img src={v.photo_url} alt="Progression" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                            <ImageIcon className="w-5 h-5 text-white" />
+                          <div className="absolute inset-0 bg-muted/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                            <ImageIcon className="w-5 h-5 text-primary-foreground" />
                           </div>
                         </div>
                       </button>
@@ -315,15 +315,15 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
           </div>
         </div>
       ) : (
-        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-zinc-300">
-          <Activity className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
-          <p className="text-zinc-500">Aucune donnée enregistrée pour cette métrique.</p>
+        <div className="text-center py-12 bg-card rounded-2xl border border-dashed border-border">
+          <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">Aucune donnée enregistrée pour cette métrique.</p>
         </div>
       )}
 
       {/* Modal d'édition */}
       <Dialog open={!!editingValue} onOpenChange={(open) => !open && setEditingValue(null)}>
-        <DialogContent className="sm:max-w-md bg-white border-zinc-300 text-zinc-900 rounded-3xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Modifier la mesure</DialogTitle>
           </DialogHeader>
@@ -335,7 +335,7 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
                 required 
                 value={editDate}
                 onChange={(e) => setEditDate(e.target.value)}
-                className="h-11 rounded-xl bg-white border-zinc-300" 
+                className="h-11 rounded-xl bg-card border-border" 
               />
             </div>
             <div className="space-y-2">
@@ -346,20 +346,20 @@ export function ClientMetrics({ metricTypes, metricValues }: { metricTypes: any[
                 required 
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                className="h-11 rounded-xl bg-white border-zinc-300" 
+                className="h-11 rounded-xl bg-card border-border" 
               />
             </div>
             <div className="space-y-2">
               <Label>Photo de progression (Optionnel)</Label>
               <div className="flex items-center gap-4">
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-zinc-300 border-dashed rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors relative overflow-hidden">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-border border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors relative overflow-hidden">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     {editPhotoPreview ? (
                       <img src={editPhotoPreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
                       <>
-                        <Camera className="w-8 h-8 mb-2 text-zinc-400" />
-                        <p className="text-sm text-zinc-500 font-medium">Modifier la photo</p>
+                        <Camera className="w-8 h-8 mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground font-medium">Modifier la photo</p>
                       </>
                     )}
                   </div>

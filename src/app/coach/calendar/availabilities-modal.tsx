@@ -81,20 +81,20 @@ export function AvailabilitiesModal({ initialAvailabilities }: { initialAvailabi
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button variant="outline" className="rounded-xl border-zinc-300 hover:bg-zinc-100 text-zinc-900">
+        <Button variant="outline" className="rounded-xl border-border hover:bg-muted text-foreground">
           <Settings2 className="mr-2 h-4 w-4" />
           Mes Horaires Types
         </Button>
       } />
-      <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
-          <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">
+          <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Settings2 className="h-5 w-5 text-primary" />
                 Semaine Type
               </DialogTitle>
-              <DialogDescription className="text-zinc-600">
+              <DialogDescription className="text-muted-foreground">
                 Définissez vos horaires de travail récurrents. Les clients ne pourront prendre rendez-vous que sur ces plages.
               </DialogDescription>
             </DialogHeader>
@@ -112,16 +112,16 @@ export function AvailabilitiesModal({ initialAvailabilities }: { initialAvailabi
                 const daySlots = slots.map((s, idx) => ({ ...s, originalIndex: idx })).filter(s => s.day_of_week === day.id)
                 
                 return (
-                  <div key={day.id} className="border-b border-zinc-200 pb-4 last:border-0">
+                  <div key={day.id} className="border-b border-border pb-4 last:border-0">
                     <div className="flex items-center justify-between mb-3">
-                      <Label className="text-md font-semibold text-zinc-900 w-24">{day.name}</Label>
+                      <Label className="text-md font-semibold text-foreground w-24">{day.name}</Label>
                       <Button type="button" variant="ghost" size="sm" onClick={() => addSlot(day.id)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-8 px-2 rounded-lg">
                         <Plus className="h-4 w-4 mr-1" /> Ajouter
                       </Button>
                     </div>
 
                     {daySlots.length === 0 ? (
-                      <div className="text-sm text-zinc-500 italic pl-24">Non disponible</div>
+                      <div className="text-sm text-muted-foreground italic pl-24">Non disponible</div>
                     ) : (
                       <div className="space-y-2 pl-2 sm:pl-24">
                         {daySlots.map((slot) => (
@@ -131,17 +131,17 @@ export function AvailabilitiesModal({ initialAvailabilities }: { initialAvailabi
                               value={slot.start_time} 
                               onChange={e => updateSlot(slot.originalIndex, 'start_time', e.target.value)}
                               required 
-                              className="w-32 bg-black/40 border-zinc-300 text-zinc-900 rounded-lg h-9 [color-scheme:dark]" 
+                              className="w-32 bg-muted/40 border-border text-foreground rounded-lg h-9 dark:[color-scheme:dark]" 
                             />
-                            <span className="text-zinc-500">-</span>
+                            <span className="text-muted-foreground">-</span>
                             <Input 
                               type="time" 
                               value={slot.end_time} 
                               onChange={e => updateSlot(slot.originalIndex, 'end_time', e.target.value)}
                               required 
-                              className="w-32 bg-black/40 border-zinc-300 text-zinc-900 rounded-lg h-9 [color-scheme:dark]" 
+                              className="w-32 bg-muted/40 border-border text-foreground rounded-lg h-9 dark:[color-scheme:dark]" 
                             />
-                            <button type="button" onClick={() => removeSlot(slot.originalIndex)} className="text-zinc-500 hover:text-red-400 p-2">
+                            <button type="button" onClick={() => removeSlot(slot.originalIndex)} className="text-muted-foreground hover:text-red-400 p-2">
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
@@ -154,12 +154,12 @@ export function AvailabilitiesModal({ initialAvailabilities }: { initialAvailabi
             </div>
           </div>
 
-          <div className="p-6 border-t border-zinc-200 bg-white shrink-0">
+          <div className="p-6 border-t border-border bg-card shrink-0">
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                 Annuler
               </Button>
-              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
+              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Enregistrer mes horaires'}
               </Button>
             </DialogFooter>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,11 +10,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Loader2, Plus, Trash2, Dumbbell } from 'lucide-react'
-import { createWorkoutTemplate } from './actions'
+import { createCustomSessionToClient } from './actions'
 
 type Exercise = {
   name: string;
@@ -24,12 +23,33 @@ type Exercise = {
   notes: string;
 }
 
-export function CreateWorkoutModal() {
-  const [open, setOpen] = useState(false)
+export function CreateAssignedSessionModal({ 
+  clientId,
+  date,
+  open,
+  onOpenChange,
+  onSuccess
+}: { 
+  clientId: string, 
+  date: string,
+  open: boolean,
+  onOpenChange: (open: boolean) => void,
+  onSuccess?: () => void
+}) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
+  const [title, setTitle] = useState("Nouvelle séance")
   const [exercises, setExercises] = useState<Exercise[]>([{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+
+  // Reset form when opened
+  useEffect(() => {
+    if (open) {
+      setTitle("Nouvelle séance")
+      setExercises([{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+      setError(null)
+    }
+  }, [open, date])
 
   const addExercise = () => {
     setExercises([...exercises, { name: '', sets: '', reps: '', rest: '', notes: '' }])
@@ -50,19 +70,12 @@ export function CreateWorkoutModal() {
     setIsLoading(true)
     setError(null)
 
-    // Validation basique
     const validExercises = exercises.filter(ex => ex.name.trim() !== '')
-    if (validExercises.length === 0) {
-      setError('Veuillez ajouter au moins un exercice valide.')
-      setIsLoading(false)
-      return
-    }
 
-    const formData = new FormData(e.currentTarget)
     try {
-      await createWorkoutTemplate(formData, validExercises)
-      setOpen(false)
-      setExercises([{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+      await createCustomSessionToClient(clientId, title, date, validExercises)
+      onOpenChange(false)
+      if (onSuccess) onSuccess()
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -71,23 +84,17 @@ export function CreateWorkoutModal() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={
-        <Button className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 transition-all">
-          <Plus className="mr-2 h-4 w-4" />
-          Nouveau Template
-        </Button>
-      } />
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
           <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <Dumbbell className="h-5 w-5 text-primary" />
-                Créer un Template de Séance
+                <Dumbbell className="h-5 w-5 text-blue-500" />
+                Créer une séance manuellement
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                Créez un modèle d'entraînement réutilisable pour l'assigner rapidement à vos athlètes.
+                Ajoutez les exercices de la séance prévue pour le {new Date(date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -101,31 +108,26 @@ export function CreateWorkoutModal() {
 
             <div className="space-y-4">
               <div className="space-y-2 group">
-                <Label htmlFor="title" className="text-muted-foreground group-focus-within:text-primary transition-colors">Nom de la séance</Label>
-                <Input id="title" name="title" required placeholder="Ex: Full Body Hypertrophie" className="bg-card border-border h-11 rounded-xl text-foreground focus:border-primary/50" />
-              </div>
-              <div className="space-y-2 group">
-                <Label htmlFor="description" className="text-muted-foreground group-focus-within:text-primary transition-colors">Description (Optionnelle)</Label>
-                <Input id="description" name="description" placeholder="Ex: Séance axée sur le volume musculaire" className="bg-card border-border h-11 rounded-xl text-foreground focus:border-primary/50" />
+                <Label className="text-muted-foreground group-focus-within:text-blue-500 transition-colors">Nom de la séance</Label>
+                <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50" />
               </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
                 <Label className="text-lg font-semibold text-foreground">Exercices</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-primary hover:bg-primary/10">
+                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-blue-500 hover:bg-blue-500/10 hover:text-blue-400">
                   <Plus className="h-4 w-4 mr-1" /> Ajouter
                 </Button>
               </div>
 
               <div className="space-y-3">
+                {exercises.length === 0 && <p className="text-sm text-muted-foreground italic">Aucun exercice.</p>}
                 {exercises.map((ex, idx) => (
                   <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all hover:border-white/20">
-                    {exercises.length > 1 && (
-                      <button type="button" onClick={() => removeExercise(idx)} className="absolute top-3 right-3 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
+                    <button type="button" onClick={() => removeExercise(idx)} className="absolute top-3 right-3 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-8">
                       <div className="space-y-1 md:col-span-2">
@@ -154,13 +156,15 @@ export function CreateWorkoutModal() {
           </div>
 
           <div className="p-6 border-t border-border bg-card shrink-0">
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
-                Annuler
-              </Button>
-              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Créer le template'}
-              </Button>
+            <DialogFooter className="flex justify-end w-full">
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl hover:bg-muted text-foreground">
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={isLoading} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20">
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Créer la séance'}
+                </Button>
+              </div>
             </DialogFooter>
           </div>
         </form>

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Camera, User, Lock, Save, CheckCircle2 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { createClient } from '@/utils/supabase/client'
@@ -13,6 +14,10 @@ export function ProfileSettings({ profile }: { profile: any }) {
   const [password, setPassword] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(profile.photo_url || null)
+  
+  const [dateOfBirth, setDateOfBirth] = useState(profile.date_of_birth || '')
+  const [address, setAddress] = useState(profile.address || '')
+  const [medicalHistory, setMedicalHistory] = useState(profile.medical_history || '')
   
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,6 +66,9 @@ export function ProfileSettings({ profile }: { profile: any }) {
 
       const formData = new FormData()
       formData.append('fullName', fullName)
+      formData.append('dateOfBirth', dateOfBirth)
+      formData.append('address', address)
+      formData.append('medicalHistory', medicalHistory)
       if (finalPhotoUrl) {
         formData.append('photoUrl', finalPhotoUrl)
       }
@@ -80,12 +88,12 @@ export function ProfileSettings({ profile }: { profile: any }) {
   }
 
   return (
-    <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/20 max-w-2xl mx-auto">
+    <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-border shadow-xl shadow-foreground/5 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-8">
         <div className="bg-primary/20 p-2.5 rounded-xl border border-primary/30">
           <User className="h-6 w-6 text-primary" />
         </div>
-        <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Profil & Paramètres</h3>
+        <h3 className="text-2xl font-black text-foreground tracking-tight">Profil & Paramètres</h3>
       </div>
 
       {success && (
@@ -104,44 +112,80 @@ export function ProfileSettings({ profile }: { profile: any }) {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center">
           <label className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-zinc-100 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-muted flex items-center justify-center">
               {photoPreview ? (
                 <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-10 h-10 text-zinc-300" />
+                <User className="w-10 h-10 text-muted-foreground" />
               )}
             </div>
-            <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-semibold">
+            <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-primary-foreground text-xs font-semibold">
               <Camera className="w-5 h-5 mb-1" />
               Modifier
             </div>
             <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
           </label>
           <div className="flex-1 space-y-2 w-full">
-            <Label htmlFor="fullName" className="text-zinc-700">Nom complet</Label>
+            <Label htmlFor="fullName" className="text-muted-foreground">Nom complet</Label>
             <Input 
               id="fullName"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="h-11 rounded-xl bg-white border-zinc-300 w-full"
+              className="h-11 rounded-xl bg-card border-border w-full"
               required
             />
           </div>
         </div>
 
-        <div className="pt-6 border-t border-zinc-200">
-          <h4 className="text-lg font-bold text-zinc-900 mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-zinc-500" />
+        {profile.role === 'client' && (
+          <div className="pt-6 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth" className="text-muted-foreground">Date de naissance</Label>
+              <Input 
+                id="dateOfBirth"
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                className="h-11 rounded-xl bg-card border-border"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address" className="text-muted-foreground">Adresse (Optionnel)</Label>
+              <Input 
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="h-11 rounded-xl bg-card border-border"
+                placeholder="Votre adresse complète"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="medicalHistory" className="text-muted-foreground">Antécédents médicaux / Blessures</Label>
+              <Textarea 
+                id="medicalHistory"
+                value={medicalHistory}
+                onChange={(e) => setMedicalHistory(e.target.value)}
+                className="min-h-[100px] rounded-xl bg-card border-border"
+                placeholder="Renseignez ici vos allergies, anciennes blessures ou conditions médicales dont le coach devrait être informé..."
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="pt-6 border-t border-border">
+          <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Lock className="w-5 h-5 text-muted-foreground" />
             Sécurité
           </h4>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-zinc-700">Nouveau mot de passe (optionnel)</Label>
+            <Label htmlFor="password" className="text-muted-foreground">Nouveau mot de passe (optionnel)</Label>
             <Input 
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-11 rounded-xl bg-white border-zinc-300"
+              className="h-11 rounded-xl bg-card border-border"
               placeholder="Laissez vide pour conserver l'actuel"
               minLength={6}
             />

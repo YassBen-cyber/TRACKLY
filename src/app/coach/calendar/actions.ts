@@ -32,10 +32,22 @@ export async function setAvailabilities(availabilities: { day_of_week: number, s
   return { success: true }
 }
 
-export async function createAppointment(clientId: string, title: string, startTime: string, endTime: string, notes: string, meetingUrl: string) {
+export async function createAppointment(clientId: string, title: string, startTime: string, endTime: string, notes: string, meetingUrl: string, locationType: string = 'remote', locationDetails: string = '') {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
+
+  // Check for overlapping appointments
+  const { data: overlapping } = await supabase
+    .from('appointments')
+    .select('id')
+    .eq('coach_id', user.id)
+    .lt('start_time', endTime)
+    .gt('end_time', startTime)
+
+  if (overlapping && overlapping.length > 0) {
+    throw new Error('Vous avez déjà un rendez-vous prévu sur ce créneau horaire.')
+  }
 
   const { error } = await supabase
     .from('appointments')
@@ -47,12 +59,15 @@ export async function createAppointment(clientId: string, title: string, startTi
       end_time: endTime,
       notes,
       meeting_url: meetingUrl,
-      status: 'scheduled'
+      status: 'scheduled',
+      location_type: locationType,
+      location_details: locationDetails
     })
 
   if (error) throw new Error('Erreur lors de la création du rendez-vous')
 
   revalidatePath('/coach/calendar')
+  revalidatePath(`/coach/client/${clientId}`) // Revalidate client page too
   return { success: true }
 }
 

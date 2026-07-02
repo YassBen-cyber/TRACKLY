@@ -2,14 +2,15 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, User, Calendar } from 'lucide-react'
+import { ChevronLeft, User, Calendar, MapPin, AlertTriangle } from 'lucide-react'
 import { ClientMetricsView } from './client-metrics-view'
 import { AssignTemplateModal } from './assign-template-modal'
 import { AddMetricModal } from './add-metric-modal'
-import { AssignWorkoutModal } from './assign-workout-modal'
 import { AssignedSessionsList } from './assigned-sessions-list'
+import { WeeklyPlanner } from './weekly-planner'
 import { ClientAvailabilities } from '@/app/client/client-availabilities'
 import { AppointmentHistory } from './appointment-history'
+import { CreateAppointmentModal } from '../../calendar/create-appointment-modal'
 
 export default async function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -45,13 +46,24 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
     .eq('client_id', id)
     .order('start_time', { ascending: false })
 
+  const calculateAge = (dob: string) => {
+    const today = new Date()
+    const birthDate = new Date(dob)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const m = today.getMonth() - birthDate.getMonth()
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    return age
+  }
+
   return (
-    <div className="min-h-screen bg-[#F2F1ED] p-4 sm:p-8 animated-gradient-bg">
+    <div className="p-4 sm:p-0">
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         
         <div className="flex flex-col gap-4">
           <Link href="/coach">
-            <Button variant="ghost" className="text-zinc-600 hover:text-zinc-900 px-0 -ml-2 hover:bg-transparent">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-0 -ml-2 hover:bg-transparent">
               <ChevronLeft className="mr-1 h-4 w-4" /> Retour au tableau de bord
             </Button>
           </Link>
@@ -65,44 +77,76 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
                   <User className="h-10 w-10 text-primary" />
                 )}
               </div>
-              <div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">{client.full_name}</h1>
-                <p className="text-zinc-600 mt-1 flex items-center gap-2">
-                  <Calendar className="h-4 w-4" /> Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
-                </p>
+              <div className="space-y-2">
+                <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{client.full_name}</h1>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  <p className="text-muted-foreground text-sm flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4" /> Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
+                  </p>
+                  {client.date_of_birth && (
+                    <p className="text-muted-foreground text-sm flex items-center gap-1.5">
+                      <User className="h-4 w-4" /> Né(e) le {new Date(client.date_of_birth).toLocaleDateString('fr-FR')} ({calculateAge(client.date_of_birth)} ans)
+                    </p>
+                  )}
+                  {client.address && (
+                    <p className="text-muted-foreground text-sm flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" /> {client.address}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-              <AssignWorkoutModal clientId={client.id} templates={sessionTemplates || []} availabilities={availabilities || []} />
-              <AssignTemplateModal clientId={client.id} templates={metricTemplates || []} />
-              <AddMetricModal clientId={client.id} />
-            </div>
+
           </div>
+
+          {client.medical_history && (
+            <div className="glass-panel p-6 rounded-3xl border border-red-200 bg-red-50 flex gap-4 items-start">
+              <div className="bg-red-100 p-3 rounded-2xl flex-shrink-0">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-red-900 mb-1">Antécédents médicaux et blessures</h3>
+                <p className="text-red-800 text-sm whitespace-pre-wrap">{client.medical_history}</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-900">Disponibilités de l'athlète</h2>
-            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/20">
-              <ClientAvailabilities availabilities={availabilities || []} readOnly />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-900">Entraînements planifiés</h2>
-            <AssignedSessionsList clientId={client.id} assignedSessions={assignedSessions || []} />
+            <h2 className="text-xl font-bold text-foreground">Entraînements planifiés</h2>
+            <WeeklyPlanner 
+              clientId={client.id} 
+              assignedSessions={assignedSessions || []} 
+              availabilities={availabilities || []} 
+              templates={sessionTemplates || []} 
+            />
           </div>
         </div>
 
         <div className="pt-2">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-foreground">Rendez-vous</h2>
+            <CreateAppointmentModal clients={[client]} clientAvailabilities={availabilities || []} defaultClientId={client.id} />
+          </div>
           <AppointmentHistory clientId={client.id} appointments={appointments || []} />
         </div>
 
 
 
-        <div className="pt-2 border-t border-zinc-200">
-          <ClientMetricsView values={allValues || []} clientName={client.full_name} clientId={client.id} metricTypes={metricTypes || []} />
+        <div className="pt-2 border-t border-border">
+          <ClientMetricsView 
+            values={allValues || []} 
+            clientName={client.full_name} 
+            clientId={client.id} 
+            metricTypes={metricTypes || []} 
+            headerActions={
+              <>
+                <AssignTemplateModal clientId={client.id} templates={metricTemplates || []} />
+                <AddMetricModal clientId={client.id} />
+              </>
+            }
+          />
         </div>
 
       </div>

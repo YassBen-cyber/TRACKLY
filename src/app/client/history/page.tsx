@@ -27,12 +27,12 @@ export default async function ClientHistoryPage() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Historique des séances</h1>
-        <p className="text-zinc-600 mt-1">Retrouvez toutes vos séances passées et vos retours.</p>
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Historique des séances</h1>
+        <p className="text-muted-foreground mt-1">Retrouvez toutes vos séances passées et vos retours.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-500" />
             Entraînements terminés
           </h2>
@@ -40,23 +40,23 @@ export default async function ClientHistoryPage() {
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-500" />
             Historique des Rendez-vous
           </h2>
           <div className="grid gap-4">
             {pastAppointments.length === 0 ? (
-              <div className="text-zinc-500 italic p-4 bg-white rounded-2xl border border-zinc-200 text-center">Aucun rendez-vous passé.</div>
+              <div className="text-muted-foreground italic p-4 bg-card rounded-2xl border border-border text-center">Aucun rendez-vous passé.</div>
             ) : (
               pastAppointments.map(apt => {
                 const summary = apt.training_reports?.[0]?.public_summary
                 return (
-                  <div key={apt.id} className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-3">
-                    <div className="font-bold text-zinc-900 capitalize flex justify-between items-center">
+                  <div key={apt.id} className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3">
+                    <div className="font-bold text-foreground capitalize flex justify-between items-center">
                       {new Date(apt.start_time).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                      <span className="text-xs bg-zinc-100 px-2 py-1 rounded-full text-zinc-600 font-medium">Terminé</span>
+                      <span className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground font-medium">Terminé</span>
                     </div>
-                    <div className="text-sm font-medium text-zinc-700">{apt.title}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{apt.title}</div>
                     
                     {summary ? (
                       <div className="mt-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
@@ -64,10 +64,10 @@ export default async function ClientHistoryPage() {
                           <FileText className="h-4 w-4" />
                           Bilan du coach
                         </div>
-                        <p className="text-sm text-zinc-700 whitespace-pre-wrap">{summary}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{summary}</p>
                       </div>
                     ) : (
-                      <div className="text-xs text-zinc-400 italic">Aucun bilan rédigé pour le moment.</div>
+                      <div className="text-xs text-muted-foreground italic">Aucun bilan rédigé pour le moment.</div>
                     )}
                   </div>
                 )

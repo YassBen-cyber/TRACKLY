@@ -57,8 +57,8 @@ export default async function ClientDashboard() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Bonjour, {profile?.full_name || user.email} 👋</h1>
-          <p className="text-zinc-600 mt-1">Voici votre résumé du jour.</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Bonjour, {profile?.full_name || user.email} 👋</h1>
+          <p className="text-muted-foreground mt-1">Voici votre résumé du jour.</p>
           
           {profile?.coach_id && (
             <div className="mt-4">
@@ -72,21 +72,21 @@ export default async function ClientDashboard() {
         </div>
         
         {coachProfile && (
-          <div className="flex items-center gap-4 bg-white px-5 py-3 rounded-2xl border border-zinc-200 shadow-sm">
+          <div className="flex items-center gap-4 bg-card px-5 py-3 rounded-2xl border border-border shadow-sm">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Votre Coach</p>
-              <p className="font-semibold text-zinc-900">{coachProfile.full_name}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Votre Coach</p>
+              <p className="font-semibold text-foreground">{coachProfile.full_name}</p>
             </div>
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-100 flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
               {coachProfile.photo_url ? (
                 <img src={coachProfile.photo_url} alt={coachProfile.full_name} className="w-full h-full object-cover" />
               ) : (
-                <UserIcon className="w-6 h-6 text-zinc-400" />
+                <UserIcon className="w-6 h-6 text-muted-foreground" />
               )}
             </div>
             <div className="sm:hidden">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Votre Coach</p>
-              <p className="font-semibold text-zinc-900">{coachProfile.full_name}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Votre Coach</p>
+              <p className="font-semibold text-foreground">{coachProfile.full_name}</p>
             </div>
           </div>
         )}
@@ -95,22 +95,22 @@ export default async function ClientDashboard() {
       <div className="grid grid-cols-1  gap-8">
         {/* Next Workouts */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-zinc-900">Prochains Entraînements</h2>
+          <h2 className="text-xl font-bold text-foreground">Prochains Entraînements</h2>
           <ClientWorkouts sessions={pendingSessions} />
         </div>
 
         {/* RDV & Payments */}
         <div className="space-y-8">
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-900">Mes Rendez-vous / Dispos</h2>
-            <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/20">
+            <h2 className="text-xl font-bold text-foreground">Mes Rendez-vous / Dispos</h2>
+            <div className="bg-card p-6 rounded-3xl border border-border shadow-xl shadow-foreground/5">
               <ClientAvailabilities availabilities={availabilities || []} />
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-zinc-900">Derniers Paiements</h2>
+              <h2 className="text-xl font-bold text-foreground">Derniers Paiements</h2>
               <Link href="/client/payments">
                 <Button variant="link" className="text-primary p-0">Voir tout</Button>
               </Link>

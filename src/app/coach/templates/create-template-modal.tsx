@@ -90,15 +90,15 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
           Nouveau Template
         </Button>
       } />
-      <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
+      <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full max-h-[85vh]">
-          <div className="p-6 pb-2 border-b border-zinc-200 bg-white">
+          <div className="p-6 pb-2 border-b border-border bg-card">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Target className="h-5 w-5 text-primary" />
                 Créer un template d'objectif
               </DialogTitle>
-              <DialogDescription className="text-zinc-600">
+              <DialogDescription className="text-muted-foreground">
                 Définissez un groupe de métriques pour un objectif précis (ex: Prise de masse) pour pouvoir l'assigner à vos clients.
               </DialogDescription>
             </DialogHeader>
@@ -113,54 +113,54 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-zinc-700">Nom de l'objectif</Label>
+                <Label htmlFor="name" className="text-muted-foreground">Nom de l'objectif</Label>
                 <Input
                   id="name"
                   placeholder="Ex: Basket, Prise de Masse, Remise en forme..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white border-zinc-300 text-zinc-900 focus-visible:ring-primary h-11 rounded-xl"
+                  className="bg-card border-border text-foreground focus-visible:ring-primary h-11 rounded-xl"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-zinc-700">Description (optionnel)</Label>
+                <Label htmlFor="description" className="text-muted-foreground">Description (optionnel)</Label>
                 <Input
                   id="description"
                   placeholder="Ex: Suivi des performances pour les meneurs"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="bg-white border-zinc-300 text-zinc-900 focus-visible:ring-primary h-11 rounded-xl"
+                  className="bg-card border-border text-foreground focus-visible:ring-primary h-11 rounded-xl"
                 />
               </div>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-zinc-200">
+            <div className="space-y-4 pt-4 border-t border-border">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-semibold text-zinc-900">Métriques à suivre</h3>
-                  <p className="text-sm text-zinc-600">Ex: Poids (kg), Note globale (/10), Réussite 3pts (%)</p>
+                  <h3 className="font-semibold text-foreground">Métriques à suivre</h3>
+                  <p className="text-sm text-muted-foreground">Ex: Poids (kg), Note globale (/10), Réussite 3pts (%)</p>
                 </div>
-                <Button type="button" onClick={addField} variant="outline" size="sm" className="border-zinc-300 hover:bg-zinc-100 text-zinc-900 rounded-xl">
+                <Button type="button" onClick={addField} variant="outline" size="sm" className="border-border hover:bg-muted text-foreground rounded-xl">
                   <Plus className="mr-2 h-4 w-4" /> Ajouter
                 </Button>
               </div>
 
               {metrics.length === 0 ? (
-                <div className="text-center p-6 border border-dashed border-zinc-300 rounded-xl bg-white">
-                  <p className="text-zinc-600 text-sm">Aucune métrique. Cliquez sur Ajouter pour commencer.</p>
+                <div className="text-center p-6 border border-dashed border-border rounded-xl bg-card">
+                  <p className="text-muted-foreground text-sm">Aucune métrique. Cliquez sur Ajouter pour commencer.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {metrics.map((field) => (
-                    <div key={field.id} className="flex gap-2 items-start bg-white p-3 rounded-xl border border-zinc-200">
+                    <div key={field.id} className="flex gap-2 items-start bg-card p-3 rounded-xl border border-border">
                       <div className="flex-1 space-y-2">
                         <Input
                           placeholder="Nom (ex: Poids, Note technique...)"
                           value={field.name}
                           onChange={(e) => updateField(field.id, { name: e.target.value })}
-                          className="bg-white border-zinc-300 h-10 rounded-lg text-sm"
+                          className="bg-card border-border h-10 rounded-lg text-sm"
                         />
                       </div>
                       <div className="w-32">
@@ -168,7 +168,7 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
                           placeholder="Unité (ex: kg, /10)"
                           value={field.unit}
                           onChange={(e) => updateField(field.id, { unit: e.target.value })}
-                          className="bg-white border-zinc-300 h-10 rounded-lg text-sm"
+                          className="bg-card border-border h-10 rounded-lg text-sm"
                         />
                       </div>
                       <Button type="button" variant="ghost" size="icon" onClick={() => removeField(field.id)} className="h-10 w-10 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg flex-shrink-0">
@@ -181,12 +181,12 @@ export function CreateTemplateModal({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <div className="p-6 border-t border-zinc-200 bg-white mt-auto">
+          <div className="p-6 border-t border-border bg-card mt-auto">
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                 Annuler
               </Button>
-              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
+              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Créer le template
               </Button>

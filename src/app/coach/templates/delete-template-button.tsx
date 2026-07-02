@@ -24,7 +24,7 @@ export function DeleteTemplateButton({ templateId, templateName }: { templateId:
       size="icon"
       onClick={handleDelete}
       disabled={isDeleting}
-      className="rounded-full text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+      className="rounded-full text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
       title="Supprimer ce template"
     >
       {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

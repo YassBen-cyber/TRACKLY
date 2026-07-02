@@ -67,14 +67,14 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/20">
-        <div className="flex items-center gap-3 mb-6 border-b border-zinc-100 pb-4">
+      <div className="bg-card p-6 rounded-3xl border border-border shadow-xl shadow-foreground/5">
+        <div className="flex items-center gap-3 mb-6 border-b border-border pb-4">
           <Calendar className="h-6 w-6 text-primary" />
-          <h2 className="text-xl font-bold text-zinc-900">Historique des Rendez-vous</h2>
+          <h2 className="text-xl font-bold text-foreground">Historique des Rendez-vous</h2>
         </div>
 
         {appointments.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-200 rounded-2xl bg-zinc-50">
+          <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/50">
             Aucun rendez-vous planifié.
           </div>
         ) : (
@@ -83,16 +83,16 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
             {/* Rendez-vous à venir */}
             {upcoming.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider">À venir</h3>
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">À venir</h3>
                 <div className="grid gap-4">
                   {upcoming.map(apt => (
                     <div key={apt.id} className="bg-blue-50/50 border border-blue-200/50 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div>
-                        <div className="font-bold text-zinc-900 capitalize">{formatDate(apt.start_time)}</div>
-                        <div className="text-sm text-zinc-600 flex items-center gap-2 mt-1">
+                        <div className="font-bold text-foreground capitalize">{formatDate(apt.start_time)}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                           <Clock className="h-4 w-4" /> {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
-                          <span className="mx-2 text-zinc-300">•</span>
-                          <span className="font-medium text-zinc-800">{apt.title}</span>
+                          <span className="mx-2 text-muted-foreground">•</span>
+                          <span className="font-medium text-foreground">{apt.title}</span>
                         </div>
                       </div>
                       <div className="text-xs font-bold px-3 py-1 bg-blue-100 text-blue-600 rounded-full">
@@ -107,25 +107,25 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
             {/* Rendez-vous passés */}
             {past.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Passés</h3>
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Passés</h3>
                 <div className="grid gap-4">
                   {past.map(apt => {
                     const hasReport = apt.training_reports && apt.training_reports.length > 0
                     
                     return (
-                      <div key={apt.id} className="bg-white border border-zinc-200 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors hover:bg-zinc-50">
+                      <div key={apt.id} className="bg-card border border-border p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors hover:bg-muted/50">
                         <div>
-                          <div className="font-bold text-zinc-900 capitalize">{formatDate(apt.start_time)}</div>
-                          <div className="text-sm text-zinc-500 flex items-center gap-2 mt-1">
+                          <div className="font-bold text-foreground capitalize">{formatDate(apt.start_time)}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                             <Clock className="h-4 w-4" /> {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
-                            <span className="mx-2 text-zinc-300">•</span>
-                            <span className="font-medium text-zinc-700">{apt.title}</span>
+                            <span className="mx-2 text-muted-foreground">•</span>
+                            <span className="font-medium text-muted-foreground">{apt.title}</span>
                           </div>
                         </div>
                         
                         <Button 
                           variant={hasReport ? "outline" : "default"}
-                          className={`rounded-xl shadow-sm ${hasReport ? 'border-green-200 text-green-700 hover:bg-green-50' : 'bg-primary hover:bg-primary/90 text-white'}`}
+                          className={`rounded-xl shadow-sm ${hasReport ? 'border-green-200 text-green-700 hover:bg-green-50' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
                           onClick={() => openReportModal(apt)}
                         >
                           {hasReport ? (
@@ -152,15 +152,15 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
 
       {/* Modal pour rédiger le compte rendu */}
       <Dialog open={openModal} onOpenChange={setOpenModal}>
-        <DialogContent className="sm:max-w-[600px] bg-white border-zinc-300 text-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl">
+        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
           <form onSubmit={onSubmit} className="flex flex-col h-full max-h-[90vh]">
-            <div className="p-6 pb-4 border-b border-zinc-200 bg-white shrink-0">
+            <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold flex items-center gap-2">
                   <FileText className="h-5 w-5 text-primary" />
                   Bilan de séance
                 </DialogTitle>
-                <DialogDescription className="text-zinc-600">
+                <DialogDescription className="text-muted-foreground">
                   {selectedAppointment ? `${formatDate(selectedAppointment.start_time)} - ${selectedAppointment.title}` : ''}
                 </DialogDescription>
               </DialogHeader>
@@ -174,20 +174,20 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
               )}
 
               <div className="space-y-3">
-                <Label className="text-zinc-700 font-semibold text-base flex items-center gap-2">
+                <Label className="text-muted-foreground font-semibold text-base flex items-center gap-2">
                   Résumé public
-                  <span className="text-xs font-normal text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">Visible par le client</span>
+                  <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Visible par le client</span>
                 </Label>
                 <Textarea 
                   value={publicSummary} 
                   onChange={e => setPublicSummary(e.target.value)} 
                   placeholder="Points positifs de la séance, ressentis, encouragements..." 
-                  className="bg-zinc-50 border-zinc-300 text-zinc-900 rounded-xl focus:border-primary/50 min-h-[100px]" 
+                  className="bg-muted/50 border-border text-foreground rounded-xl focus:border-primary/50 min-h-[100px]" 
                 />
               </div>
 
               <div className="space-y-3">
-                <Label className="text-zinc-700 font-semibold text-base flex items-center gap-2">
+                <Label className="text-muted-foreground font-semibold text-base flex items-center gap-2">
                   Notes privées
                   <span className="text-xs font-normal text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Seulement pour vous</span>
                 </Label>
@@ -195,17 +195,17 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
                   value={privateNotes} 
                   onChange={e => setPrivateNotes(e.target.value)} 
                   placeholder="Détails techniques, blessures, rappels pour la prochaine fois..." 
-                  className="bg-amber-50/30 border-amber-200 text-zinc-900 rounded-xl focus:border-amber-400/50 min-h-[100px] placeholder:text-amber-900/30" 
+                  className="bg-amber-50/30 border-amber-200 text-foreground rounded-xl focus:border-amber-400/50 min-h-[100px] placeholder:text-amber-900/30" 
                 />
               </div>
             </div>
 
-            <div className="p-6 border-t border-zinc-200 bg-white shrink-0">
+            <div className="p-6 border-t border-border bg-card shrink-0">
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setOpenModal(false)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">
+                <Button type="button" variant="ghost" onClick={() => setOpenModal(false)} className="rounded-xl hover:bg-muted text-foreground">
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-bold">
+                <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 font-bold">
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Enregistrer le bilan'}
                 </Button>
               </DialogFooter>

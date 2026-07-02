@@ -55,10 +55,10 @@ export function AddClientModal() {
           Ajouter un athlète
         </Button>
       } />
-      <DialogContent className="sm:max-w-md border-zinc-300 bg-zinc-50 text-zinc-900 shadow-2xl shadow-primary/10 rounded-3xl">
+      <DialogContent className="sm:max-w-md border-border bg-muted/50 text-foreground shadow-2xl shadow-primary/10 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-xl">Inviter un nouvel athlète</DialogTitle>
-          <DialogDescription className="text-zinc-600">
+          <DialogDescription className="text-muted-foreground">
             {inviteLink 
               ? "Le compte a été créé. Copiez ce lien et envoyez-le à votre athlète pour qu'il puisse se connecter."
               : "Générez un lien d'invitation pour votre athlète afin qu'il puisse rejoindre votre équipe."}
@@ -67,12 +67,12 @@ export function AddClientModal() {
         {!inviteLink ? (
           <form onSubmit={onSubmit} className="space-y-5 mt-4">
             <div className="space-y-2 group">
-              <Label htmlFor="fullName" className="text-zinc-700 group-focus-within:text-primary transition-colors">Nom complet</Label>
-              <Input id="fullName" name="fullName" required placeholder="Ex: Teddy Riner" className="bg-white border-zinc-300 h-11 rounded-xl focus:border-primary/50" />
+              <Label htmlFor="fullName" className="text-muted-foreground group-focus-within:text-primary transition-colors">Nom complet</Label>
+              <Input id="fullName" name="fullName" required placeholder="Ex: Teddy Riner" className="bg-card border-border h-11 rounded-xl focus:border-primary/50" />
             </div>
             <div className="space-y-2 group">
-              <Label htmlFor="email" className="text-zinc-700 group-focus-within:text-primary transition-colors">Adresse e-mail</Label>
-              <Input id="email" name="email" type="email" placeholder="athlete@example.com" required className="bg-white border-zinc-300 h-11 rounded-xl focus:border-primary/50" />
+              <Label htmlFor="email" className="text-muted-foreground group-focus-within:text-primary transition-colors">Adresse e-mail</Label>
+              <Input id="email" name="email" type="email" placeholder="athlete@example.com" required className="bg-card border-border h-11 rounded-xl focus:border-primary/50" />
             </div>
             {error && <p className="text-red-400 text-sm font-medium bg-red-400/10 p-2 rounded-lg">{error}</p>}
             <Button type="submit" disabled={isLoading} className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90">
@@ -85,7 +85,7 @@ export function AddClientModal() {
               <Input 
                 readOnly 
                 value={inviteLink} 
-                className="bg-white border-zinc-300 h-11 rounded-xl text-primary font-mono text-sm"
+                className="bg-card border-border h-11 rounded-xl text-primary font-mono text-sm"
               />
               <Button 
                 onClick={() => {
@@ -93,7 +93,7 @@ export function AddClientModal() {
                   setCopied(true)
                   setTimeout(() => setCopied(false), 2000)
                 }}
-                className="h-11 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900"
+                className="h-11 px-3 rounded-xl bg-muted hover:bg-muted text-foreground"
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>

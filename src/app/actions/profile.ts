@@ -11,6 +11,10 @@ export async function updateProfile(formData: FormData) {
   const fullName = formData.get('fullName') as string
   const photoUrl = formData.get('photoUrl') as string | null
   const password = formData.get('password') as string | null
+  
+  const dateOfBirth = formData.get('dateOfBirth') as string | null
+  const address = formData.get('address') as string | null
+  const medicalHistory = formData.get('medicalHistory') as string | null
 
   // Update auth password if provided
   if (password) {
@@ -26,6 +30,15 @@ export async function updateProfile(formData: FormData) {
   }
   if (photoUrl !== null) {
     updateData.photo_url = photoUrl
+  }
+  if (dateOfBirth !== null) {
+    updateData.date_of_birth = dateOfBirth || null
+  }
+  if (address !== null) {
+    updateData.address = address || null
+  }
+  if (medicalHistory !== null) {
+    updateData.medical_history = medicalHistory || null
   }
 
   const { error: profileError } = await supabase

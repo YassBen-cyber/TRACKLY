@@ -39,6 +39,15 @@ export default async function CalendarPage() {
     .eq('coach_id', user.id)
     .order('date', { ascending: true })
 
+  // Fetch client availabilities
+  const clientIds = clients?.map(c => c.id) || []
+  const { data: clientAvailabilities } = await supabase
+    .from('client_availabilities')
+    .select('*')
+    .in('client_id', clientIds)
+    .in('availability_type', ['appointment', 'both'])
+    .order('date')
+
   // Fetch appointments (upcoming & recent)
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -59,17 +68,17 @@ export default async function CalendarPage() {
     <div className="space-y-8">
       <div className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <CalendarIcon className="h-6 w-6 text-primary" />
             Calendrier & Rendez-vous
           </h2>
-          <p className="text-zinc-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Gérez vos disponibilités et vos séances en direct avec vos athlètes.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <AvailabilitiesModal initialAvailabilities={availabilities || []} />
-          <CreateAppointmentModal clients={clients || []} />
+          <CreateAppointmentModal clients={clients || []} clientAvailabilities={clientAvailabilities || []} />
         </div>
       </div>
 
@@ -77,15 +86,15 @@ export default async function CalendarPage() {
         
         {/* Colonne de gauche : Prochains RDV */}
         <div className="lg:col-span-2 space-y-6">
-          <h3 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
             <Clock className="h-5 w-5 text-blue-400" />
             Prochains rendez-vous
           </h3>
           
           {upcoming.length === 0 ? (
-            <div className="glass-panel p-12 rounded-3xl text-center border border-zinc-200 border-dashed">
+            <div className="glass-panel p-12 rounded-3xl text-center border border-border border-dashed">
               <CalendarIcon className="h-12 w-12 text-primary/30 mx-auto mb-4" />
-              <p className="text-zinc-600">Aucun rendez-vous à venir.</p>
+              <p className="text-muted-foreground">Aucun rendez-vous à venir.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,17 +105,17 @@ export default async function CalendarPage() {
                     À venir
                   </span>
 
-                  <div className="text-sm font-medium text-zinc-700 mb-1 capitalize">
+                  <div className="text-sm font-medium text-muted-foreground mb-1 capitalize">
                     {new Date(apt.start_time).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </div>
-                  <div className="text-xl font-bold text-zinc-900 mb-1">{apt.title}</div>
+                  <div className="text-xl font-bold text-foreground mb-1">{apt.title}</div>
                   <div className="text-sm text-blue-300 font-medium flex items-center gap-1 mb-4">
                     <Clock className="h-3 w-3" /> {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
                   </div>
                   
-                  <div className="space-y-2 border-t border-zinc-300 pt-3">
-                    <div className="flex items-center gap-2 text-sm text-zinc-700">
-                      <Users className="h-4 w-4 text-zinc-600" />
+                  <div className="space-y-2 border-t border-border pt-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 text-muted-foreground" />
                       {apt.profiles?.full_name}
                     </div>
                     {apt.meeting_url && (
@@ -118,7 +127,7 @@ export default async function CalendarPage() {
                       </div>
                     )}
                     {apt.notes && (
-                      <div className="text-xs text-zinc-500 mt-2 italic bg-black/30 p-2 rounded-lg">
+                      <div className="text-xs text-muted-foreground mt-2 italic bg-black/30 p-2 rounded-lg">
                         "{apt.notes}"
                       </div>
                     )}
@@ -131,20 +140,20 @@ export default async function CalendarPage() {
           {/* Historique récent */}
           {past.length > 0 && (
             <div className="pt-8">
-              <h3 className="text-lg font-bold text-zinc-600 flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-bold text-muted-foreground flex items-center gap-2 mb-4">
                 Historique récent
               </h3>
               <div className="space-y-3">
                 {past.slice(0, 5).map(apt => (
-                  <div key={apt.id} className="glass-panel p-4 rounded-2xl border border-zinc-200 opacity-70 hover:opacity-100 transition-opacity flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div key={apt.id} className="glass-panel p-4 rounded-2xl border border-border opacity-70 hover:opacity-100 transition-opacity flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <div className="font-bold text-zinc-700">{apt.title}</div>
-                      <div className="text-sm text-zinc-500 flex items-center gap-2">
+                      <div className="font-bold text-muted-foreground">{apt.title}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-2">
                         {new Date(apt.start_time).toLocaleDateString('fr-FR')} • {formatTime(apt.start_time)} 
                         <span>({apt.profiles?.full_name})</span>
                       </div>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-zinc-100 text-zinc-600">
+                    <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
                       Passé
                     </span>
                   </div>
@@ -156,10 +165,10 @@ export default async function CalendarPage() {
 
         {/* Colonne de droite : Rappel des dispos */}
         <div className="lg:col-span-1">
-          <div className="glass-panel p-6 rounded-3xl border border-zinc-200 sticky top-8">
-            <h3 className="text-lg font-bold text-zinc-900 mb-6">Vos disponibilités</h3>
+          <div className="glass-panel p-6 rounded-3xl border border-border sticky top-8">
+            <h3 className="text-lg font-bold text-foreground mb-6">Vos disponibilités</h3>
             {(!availabilities || availabilities.length === 0) ? (
-              <p className="text-sm text-zinc-600 text-center py-4 bg-white rounded-xl">
+              <p className="text-sm text-muted-foreground text-center py-4 bg-card rounded-xl">
                 Vous n'avez pas encore défini vos horaires.
               </p>
             ) : (
@@ -171,8 +180,8 @@ export default async function CalendarPage() {
                   if (slots.length === 0) return null
 
                   return (
-                    <div key={dayId} className="flex flex-col gap-1 border-b border-zinc-200 pb-2 last:border-0 last:pb-0">
-                      <span className="text-sm font-bold text-zinc-700">{dayName}</span>
+                    <div key={dayId} className="flex flex-col gap-1 border-b border-border pb-2 last:border-0 last:pb-0">
+                      <span className="text-sm font-bold text-muted-foreground">{dayName}</span>
                       <div className="flex flex-wrap gap-2">
                         {slots.map((slot, idx) => (
                           <span key={idx} className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-md">
@@ -190,7 +199,7 @@ export default async function CalendarPage() {
 
       </div>
 
-      <div className="pt-4 border-t border-zinc-200">
+      <div className="pt-4 border-t border-border">
         <div className="glass-panel p-6 sm:p-8 rounded-3xl">
           <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-6 text-sm text-blue-800 flex gap-3">
             <Info className="h-5 w-5 shrink-0" />

@@ -89,17 +89,17 @@ export function PaymentsListClient({ initialPayments }: { initialPayments: any[]
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-zinc-200">
+      <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-2xl border border-border">
         <div className="flex-1 space-y-2">
-          <Label className="text-zinc-600 text-xs uppercase tracking-wider">Filtrer par athlète</Label>
+          <Label className="text-muted-foreground text-xs uppercase tracking-wider">Filtrer par athlète</Label>
           <select 
             value={filterClient} 
             onChange={e => setFilterClient(e.target.value)}
-            className="flex h-10 w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="flex h-10 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           >
-            <option value="all" className="bg-zinc-50">Tous les athlètes</option>
+            <option value="all" className="bg-muted/50">Tous les athlètes</option>
             {uniqueClients.map(c => (
-              <option key={c.id} value={c.id} className="bg-zinc-50">
+              <option key={c.id} value={c.id} className="bg-muted/50">
                 {c.name}
               </option>
             ))}
@@ -107,36 +107,36 @@ export function PaymentsListClient({ initialPayments }: { initialPayments: any[]
         </div>
 
         <div className="flex-1 space-y-2">
-          <Label className="text-zinc-600 text-xs uppercase tracking-wider">Filtrer par statut</Label>
+          <Label className="text-muted-foreground text-xs uppercase tracking-wider">Filtrer par statut</Label>
           <select 
             value={filterStatus} 
             onChange={e => setFilterStatus(e.target.value)}
-            className="flex h-10 w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="flex h-10 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           >
-            <option value="all" className="bg-zinc-50">Tous les statuts</option>
-            <option value="pending" className="bg-zinc-50">En attente</option>
-            <option value="paid" className="bg-zinc-50">Validé (Payé)</option>
-            <option value="cancelled" className="bg-zinc-50">Annulé</option>
+            <option value="all" className="bg-muted/50">Tous les statuts</option>
+            <option value="pending" className="bg-muted/50">En attente</option>
+            <option value="paid" className="bg-muted/50">Validé (Payé)</option>
+            <option value="cancelled" className="bg-muted/50">Annulé</option>
           </select>
         </div>
       </div>
 
       {/* List */}
       {filteredPayments.length === 0 ? (
-        <div className="text-center p-8 border border-dashed border-zinc-300 rounded-xl bg-white text-zinc-600">
+        <div className="text-center p-8 border border-dashed border-border rounded-xl bg-card text-muted-foreground">
           Aucun paiement ne correspond à ces critères.
         </div>
       ) : (
         <div className="space-y-3">
           {filteredPayments.map(payment => (
-            <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border border-zinc-300 rounded-2xl gap-4 hover:border-white/20 transition-colors">
+            <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-card border border-border rounded-2xl gap-4 hover:border-white/20 transition-colors">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-bold text-zinc-900 text-lg">{payment.title}</span>
+                  <span className="font-bold text-foreground text-lg">{payment.title}</span>
                   <span className="font-mono text-emerald-400 font-bold bg-emerald-400/10 px-2 py-0.5 rounded-lg">{payment.amount} €</span>
                 </div>
-                <div className="text-sm text-zinc-600 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <span className="flex items-center gap-1 text-zinc-700">
+                <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span className="flex items-center gap-1 text-muted-foreground">
                     <Users className="h-3 w-3" /> {payment.profiles?.full_name}
                   </span>
                   {payment.due_date && <span>Échéance: {new Date(payment.due_date).toLocaleDateString('fr-FR')}</span>}
@@ -169,7 +169,7 @@ export function PaymentsListClient({ initialPayments }: { initialPayments: any[]
                    <><Clock className="h-4 w-4" /> En attente</>}
                   <Edit2 className="h-3 w-3 ml-1 opacity-50" />
                 </button>
-                <button onClick={() => handleDelete(payment.id)} className="p-2 text-zinc-500 hover:text-red-400 bg-white rounded-xl hover:bg-black/40 transition-colors">
+                <button onClick={() => handleDelete(payment.id)} className="p-2 text-muted-foreground hover:text-red-400 bg-card rounded-xl hover:bg-muted/40 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -180,33 +180,33 @@ export function PaymentsListClient({ initialPayments }: { initialPayments: any[]
 
       {/* Edit Status Modal */}
       <Dialog open={!!editingPayment} onOpenChange={(open) => !open && setEditingPayment(null)}>
-        <DialogContent className="sm:max-w-[425px] bg-white border-zinc-300 text-zinc-900 rounded-2xl">
+        <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Modifier le statut</DialogTitle>
           </DialogHeader>
 
           <div className="py-6 space-y-4">
-            <p className="text-zinc-600 text-sm">
-              Mettez à jour le statut du paiement <strong className="text-zinc-900">"{editingPayment?.title}"</strong> pour <strong className="text-zinc-900">{editingPayment?.profiles?.full_name}</strong>.
+            <p className="text-muted-foreground text-sm">
+              Mettez à jour le statut du paiement <strong className="text-foreground">"{editingPayment?.title}"</strong> pour <strong className="text-foreground">{editingPayment?.profiles?.full_name}</strong>.
             </p>
             
             <div className="space-y-2">
-              <Label className="text-zinc-700">Nouveau Statut</Label>
+              <Label className="text-muted-foreground">Nouveau Statut</Label>
               <select 
                 value={newStatus} 
                 onChange={e => setNewStatus(e.target.value as any)}
-                className="flex h-11 w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               >
-                <option value="pending" className="bg-zinc-50">En attente</option>
-                <option value="paid" className="bg-zinc-50">Validé (Payé)</option>
-                <option value="cancelled" className="bg-zinc-50">Annulé</option>
+                <option value="pending" className="bg-muted/50">En attente</option>
+                <option value="paid" className="bg-muted/50">Validé (Payé)</option>
+                <option value="cancelled" className="bg-muted/50">Annulé</option>
               </select>
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setEditingPayment(null)} className="rounded-xl hover:bg-zinc-100 text-zinc-900">Annuler</Button>
-            <Button type="button" onClick={handleUpdateStatus} disabled={isUpdating} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button type="button" variant="ghost" onClick={() => setEditingPayment(null)} className="rounded-xl hover:bg-muted text-foreground">Annuler</Button>
+            <Button type="button" onClick={handleUpdateStatus} disabled={isUpdating} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">
               Enregistrer
             </Button>
           </DialogFooter>
