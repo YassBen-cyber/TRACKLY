@@ -124,7 +124,7 @@ export default function LandingPage() {
             <div className="relative  h-[20vw]  overflow-hidden flex items-center justify-center">
 
 
-                    <Image src="/web-app.png  " alt="Trackly logo" fill  className="  h-[30vw] object-contain overflow-hidden rounded-2xl md:rounded-[2rem]" priority />
+                    <Image src="/web-app.png" alt="Trackly logo" fill  className="  h-[30vw] object-contain overflow-hidden rounded-2xl md:rounded-[2rem]" priority />
 
             </div>
           </div>
