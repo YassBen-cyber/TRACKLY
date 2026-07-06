@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, Video, MapPin } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChevronLeft, ChevronRight, Calendar, Clock, Video, MapPin, User, Plus } from 'lucide-react'
 import { CreateAppointmentModal } from './create-appointment-modal'
 
 function getMonday(d: Date) {
@@ -12,8 +13,20 @@ function getMonday(d: Date) {
   return new Date(date.setDate(diff))
 }
 
-function formatTime(isoString: string) {
-  return new Date(isoString).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+const HOUR_HEIGHT = 60 // px
+
+function getTimeStrFromIso(isoString: string) {
+  const d = new Date(isoString)
+  return `${d.getHours()}:${d.getMinutes()}`
+}
+
+function getTop(timeStr: string) {
+  const [h, m] = timeStr.split(':').map(Number)
+  return (h + (m || 0) / 60) * HOUR_HEIGHT
+}
+
+function getHeight(startStr: string, endStr: string) {
+  return getTop(endStr) - getTop(startStr)
 }
 
 export function CoachWeeklyPlanner({ 
@@ -35,27 +48,15 @@ export function CoachWeeklyPlanner({
     return getMonday(today)
   })
 
-  // Drag to scroll logic
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [scrollLeft, setScrollLeft] = useState(0)
+  const [filterClient, setFilterClient] = useState('all')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const onMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return
-    setIsDragging(true)
-    setStartX(e.pageX - scrollRef.current.offsetLeft)
-    setScrollLeft(scrollRef.current.scrollLeft)
-  }
-  const onMouseLeave = () => setIsDragging(false)
-  const onMouseUp = () => setIsDragging(false)
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return
-    e.preventDefault()
-    const x = e.pageX - scrollRef.current.offsetLeft
-    const walk = (x - startX) * 2
-    scrollRef.current.scrollLeft = scrollLeft - walk
-  }
+  // Auto-scroll to 8 AM on mount
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 8 * HOUR_HEIGHT
+    }
+  }, [])
 
   const nextWeek = () => {
     const next = new Date(weekStart)
@@ -80,164 +81,209 @@ export function CoachWeeklyPlanner({
       const dayStr = String(currentDate.getDate()).padStart(2, '0')
       const dateIso = `${year}-${month}-${dayStr}`
       
-      // Calculate day of week (0 = Monday, ..., 6 = Sunday for our DB structure)
-      // Javascript getDay() is 0=Sunday, 1=Monday...
       const jsDay = currentDate.getDay()
       const dbDay = jsDay === 0 ? 6 : jsDay - 1
       
-      // Get availabilities for this day
-      // 1. Check if there are specific availabilities for this exact date
+      // Coach availabilities
       const spec = specificAvailabilities.filter(s => s.date === dateIso)
-      let dayAvails: any[] = []
-      
+      let coachAvails: any[] = []
       if (spec.length > 0) {
-        dayAvails = spec.map(s => ({ start_time: s.start_time, end_time: s.end_time, type: 'specific' }))
+        coachAvails = spec.map(s => ({ start_time: s.start_time, end_time: s.end_time, type: 'specific' }))
       } else {
-        // Fallback to recurring availabilities
-        dayAvails = availabilities.filter(a => a.day_of_week === dbDay).map(a => ({ start_time: a.start_time, end_time: a.end_time, type: 'recurring' }))
+        coachAvails = availabilities.filter(a => a.day_of_week === dbDay).map(a => ({ start_time: a.start_time, end_time: a.end_time, type: 'recurring' }))
       }
 
-      const dayAppointments = appointments.filter(a => a.start_time.startsWith(dateIso)).sort((a, b) => a.start_time.localeCompare(b.start_time))
+      // Client availabilities
+      const cAvails = clientAvailabilities.filter(ca => ca.date === dateIso && (filterClient === 'all' || ca.client_id === filterClient))
+
+      // Appointments
+      const dayAppointments = appointments.filter(a => {
+        const d = new Date(a.start_time)
+        return d.getFullYear() === year && d.getMonth() + 1 === parseInt(month) && d.getDate() === parseInt(dayStr)
+      })
 
       arr.push({
         date: currentDate,
         dateStr: dateIso,
-        availabilities: dayAvails,
+        coachAvails,
+        clientAvails: cAvails,
         appointments: dayAppointments
       })
     }
     return arr
-  }, [weekStart, availabilities, specificAvailabilities, appointments])
+  }, [weekStart, availabilities, specificAvailabilities, clientAvailabilities, appointments, filterClient])
 
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekEnd.getDate() + 6)
 
+  const hoursArray = Array.from({ length: 24 }, (_, i) => i)
+
   return (
-    <div className="glass-panel p-6 rounded-3xl overflow-hidden border border-border">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-500" />
-          Mon Planning
-        </h3>
-        <div className="flex items-center gap-4 bg-card px-4 py-2 rounded-xl border border-border shadow-sm">
-          <Button variant="ghost" size="icon" onClick={prevWeek} className="h-8 w-8 hover:bg-muted">
-            <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-          </Button>
-          <span className="font-bold text-muted-foreground text-sm cursor-default">
-            Du {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au {weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-          </span>
-          <Button variant="ghost" size="icon" onClick={nextWeek} className="h-8 w-8 hover:bg-muted">
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </Button>
+    <div className="glass-panel p-4 sm:p-6 rounded-3xl overflow-hidden border border-border flex flex-col h-[800px] max-h-[85vh]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 shrink-0">
+        <div>
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Agenda Global
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">Gérez vos rendez-vous et croisez vos dispos avec celles des athlètes.</p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Select value={filterClient} onValueChange={(val) => setFilterClient(val || 'all')}>
+            <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl border-border bg-card font-medium">
+              <SelectValue placeholder="Dispos d'un athlète..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border bg-card">
+              <SelectItem value="all">Tous les athlètes</SelectItem>
+              {clients.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-2 bg-card p-1 rounded-xl border border-border shadow-sm">
+            <Button variant="ghost" size="icon" onClick={prevWeek} className="h-8 w-8 hover:bg-muted rounded-lg">
+              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+            </Button>
+            <span className="font-bold text-foreground text-sm cursor-default px-2">
+              {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - {weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+            </span>
+            <Button variant="ghost" size="icon" onClick={nextWeek} className="h-8 w-8 hover:bg-muted rounded-lg">
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div 
-        ref={scrollRef}
-        onMouseDown={onMouseDown}
-        onMouseLeave={onMouseLeave}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
-        className={`flex gap-4 overflow-x-auto pb-4 custom-scrollbar ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab snap-x'}`}
-      >
-        {days.map((day, i) => (
-          <div key={i} className="min-w-[300px] flex-1 bg-card border border-border rounded-2xl flex flex-col shrink-0 snap-start">
-            <div className="p-4 border-b border-border text-center bg-muted/50 rounded-t-2xl pointer-events-none flex justify-between items-center">
-              <div className="flex flex-col items-start">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+      <div className="flex-1 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shadow-inner">
+        {/* En-tête des jours */}
+        <div className="flex border-b border-border bg-muted/30 shrink-0">
+          <div className="w-16 shrink-0 border-r border-border"></div>
+          <div className="flex-1 grid grid-cols-7">
+            {days.map((day, i) => (
+              <div key={i} className={`p-3 text-center border-border ${i !== 6 ? 'border-r' : ''}`}>
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   {day.date.toLocaleDateString('fr-FR', { weekday: 'short' })}
                 </div>
-                <div className="text-lg font-black text-foreground">
-                  {day.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                <div className={`text-lg font-black mt-1 ${day.date.toDateString() === new Date().toDateString() ? 'text-primary bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center mx-auto' : 'text-foreground'}`}>
+                  {day.date.getDate()}
                 </div>
               </div>
-              
-              <div className="pointer-events-auto">
-                <CreateAppointmentModal 
-                  clients={clients} 
-                  clientAvailabilities={clientAvailabilities} 
-                  defaultDate={day.dateStr} 
-                  triggerButton={
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-blue-500/10 hover:text-blue-500">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  } 
-                />
-              </div>
-            </div>
-            
-            <div className="p-4 flex-1 flex flex-col gap-4">
-              {/* Mes disponibilités */}
-              <div className="space-y-2 pointer-events-none">
-                <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> Mes Dispos
-                </div>
-                {day.availabilities.length === 0 ? (
-                  <div className="text-xs text-muted-foreground italic bg-muted/50 p-2 rounded-lg text-center">Aucune dispo</div>
-                ) : (
-                  <div className="flex flex-wrap gap-1">
-                    {day.availabilities.map((av, idx) => (
-                      <span key={idx} className="text-xs bg-green-100/50 text-green-700 border border-green-200 px-2 py-1 rounded-md font-medium">
-                        {av.start_time.substring(0,5)} - {av.end_time.substring(0,5)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+            ))}
+          </div>
+        </div>
 
-              {/* Rendez-vous du jour */}
-              <div className="space-y-2 flex-1 pt-2 border-t border-border/50">
-                <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> Rendez-vous
+        {/* Grille défilante */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar" ref={scrollContainerRef}>
+          <div className="flex relative" style={{ height: 24 * HOUR_HEIGHT }}>
+            
+            {/* Colonne des heures */}
+            <div className="w-16 shrink-0 border-r border-border bg-card relative">
+              {hoursArray.map(hour => (
+                <div key={hour} className="absolute w-full text-right pr-2 text-xs text-muted-foreground font-medium -translate-y-1/2" style={{ top: hour * HOUR_HEIGHT }}>
+                  {hour === 0 ? '' : `${hour}:00`}
                 </div>
-                {day.appointments.length === 0 ? (
-                  <div className="text-xs text-muted-foreground italic text-center py-6 pointer-events-none">Rien de prévu</div>
-                ) : (
-                  <div className="space-y-2">
-                    {day.appointments.map((apt: any, idx: number) => {
-                      const isPast = new Date(apt.start_time) < new Date()
-                      return (
-                        <div key={idx} className={`p-3 rounded-xl border flex flex-col gap-2 transition-opacity ${isPast ? 'bg-muted/50 border-border opacity-70' : 'bg-blue-500/5 border-blue-500/20'}`}>
-                          <div className="flex items-start justify-between">
-                            <span className={`font-bold text-sm ${isPast ? 'text-muted-foreground' : 'text-blue-400'}`}>{apt.title}</span>
-                          </div>
+              ))}
+            </div>
+
+            {/* Grille des jours */}
+            <div className="flex-1 grid grid-cols-7 relative">
+              {/* Lignes horizontales pour les heures */}
+              {hoursArray.map(hour => (
+                <div key={hour} className="absolute w-full border-t border-border/50 pointer-events-none" style={{ top: hour * HOUR_HEIGHT }}></div>
+              ))}
+
+              {days.map((day, dayIndex) => (
+                <div key={dayIndex} className={`relative border-border ${dayIndex !== 6 ? 'border-r' : ''}`}>
+                  
+                  {/* Clic sur fond vide pour créer (optionnel, on garde l'ajout via les dispos client) */}
+
+                  {/* Dispos du coach (Gris transparent) */}
+                  {day.coachAvails.map((av, i) => {
+                    const top = getTop(av.start_time)
+                    const h = getHeight(av.start_time, av.end_time)
+                    return (
+                      <div 
+                        key={`coach-${i}`} 
+                        className="absolute inset-x-0 bg-muted/30 border-l-2 border-primary/20 pointer-events-none"
+                        style={{ top, height: h }}
+                        title="Ma disponibilité"
+                      />
+                    )
+                  })}
+
+                  {/* Dispos du client (Zone hachurée verte) */}
+                  {day.clientAvails.map((ca, i) => {
+                    const top = getTop(ca.start_time)
+                    const h = Math.max(getHeight(ca.start_time, ca.end_time), 20) // min height
+                    const clientName = clients.find(c => c.id === ca.client_id)?.full_name || 'Client'
+                    
+                    return (
+                      <div 
+                        key={`client-${i}`} 
+                        className="absolute inset-x-1 sm:inset-x-2 border-2 border-dashed border-green-500/50 bg-green-500/5 rounded-xl group transition-all hover:bg-green-500/10 z-0 flex flex-col items-center justify-center overflow-hidden"
+                        style={{ top, height: h }}
+                      >
+                        {/* Hachures en CSS */}
+                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #22c55e 10px, #22c55e 20px)' }}></div>
+                        
+                        <div className="relative z-10 flex flex-col items-center justify-center p-1 w-full h-full">
+                          {h >= 40 && <span className="text-[10px] font-bold text-green-700/70 uppercase text-center leading-tight hidden sm:block">{clientName}</span>}
                           
-                          <div className="text-xs font-medium text-foreground flex flex-col gap-1">
-                            <div className="flex items-center justify-between">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3 text-muted-foreground" />
-                                {formatTime(apt.start_time)} - {formatTime(apt.end_time)}
-                              </span>
-                              <span className="bg-background border border-border px-1.5 py-0.5 rounded text-[10px] uppercase font-bold text-muted-foreground">
-                                {apt.location_type === 'remote' ? 'Visio' : 'IRL'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-1 text-muted-foreground">
-                              {apt.profiles?.full_name}
-                            </div>
+                          <div className="mt-auto mb-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            <CreateAppointmentModal 
+                              clients={clients} 
+                              clientAvailabilities={clientAvailabilities} 
+                              defaultDate={day.dateStr}
+                              defaultStartTime={ca.start_time.substring(0,5)}
+                              defaultEndTime={ca.end_time.substring(0,5)}
+                              defaultClientId={ca.client_id}
+                              triggerButton={
+                                <Button size="sm" className="h-6 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs rounded-lg shadow-md bg-green-600 hover:bg-green-700 text-white">
+                                  <Plus className="h-3 w-3 sm:mr-1" />
+                                  <span className="hidden sm:inline">Planifier</span>
+                                </Button>
+                              } 
+                            />
                           </div>
-                          
-                          {!isPast && apt.meeting_url && apt.location_type === 'remote' && (
-                            <div className="pt-2 mt-1 border-t border-border/50">
-                              <a href={apt.meeting_url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-green-500 hover:underline flex items-center gap-1">
-                                <Video className="h-3 w-3" /> Rejoindre la visio
-                              </a>
-                            </div>
-                          )}
-                          {!isPast && apt.location_details && apt.location_type === 'in_person' && (
-                            <div className="pt-2 mt-1 border-t border-border/50 text-xs text-muted-foreground flex items-center gap-1">
-                              <MapPin className="h-3 w-3" /> {apt.location_details}
-                            </div>
-                          )}
                         </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Rendez-vous (Blocs solides) */}
+                  {day.appointments.map((apt: any, i: number) => {
+                    const top = getTop(getTimeStrFromIso(apt.start_time))
+                    const h = Math.max(getHeight(getTimeStrFromIso(apt.start_time), getTimeStrFromIso(apt.end_time)), 30)
+                    const isPast = new Date(apt.start_time) < new Date()
+                    
+                    return (
+                      <div 
+                        key={`apt-${i}`} 
+                        className={`absolute inset-x-1 sm:inset-x-2 rounded-xl p-2 sm:p-3 flex flex-col gap-1 overflow-hidden shadow-sm border z-10 transition-all hover:shadow-md ${isPast ? 'bg-muted border-border opacity-70' : 'bg-primary border-primary text-primary-foreground shadow-primary/20'}`}
+                        style={{ top, height: h }}
+                      >
+                        <div className="font-bold text-[10px] sm:text-xs leading-tight line-clamp-1">{apt.title}</div>
+                        <div className={`text-[9px] sm:text-[10px] flex items-center gap-1 opacity-90 truncate`}>
+                          <Clock className="h-2.5 w-2.5 shrink-0" />
+                          {getTimeStrFromIso(apt.start_time)} - {getTimeStrFromIso(apt.end_time)}
+                        </div>
+                        {h >= 60 && apt.profiles?.full_name && (
+                          <div className="mt-1 text-[10px] sm:text-xs font-medium truncate flex items-center gap-1">
+                            <User className="h-3 w-3 shrink-0" />
+                            {apt.profiles.full_name}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   )

@@ -273,7 +273,7 @@ export async function deleteCoachMetricValue(metricValueId: string, clientId: st
 export async function saveTrainingReport(appointmentId: string, publicSummary: string, privateNotes: string, clientId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Non autorisé')
+  if (!user) return { error: 'Non autorisé' }
 
   // Verify coach owns this appointment
   const { data: appointment } = await supabase
@@ -283,7 +283,7 @@ export async function saveTrainingReport(appointmentId: string, publicSummary: s
     .single()
 
   if (appointment?.coach_id !== user.id) {
-    throw new Error('Non autorisé')
+    return { error: 'Non autorisé' }
   }
 
   // Upsert the training report
@@ -297,7 +297,8 @@ export async function saveTrainingReport(appointmentId: string, publicSummary: s
     }, { onConflict: 'appointment_id' })
 
   if (reportError) {
-    throw new Error('Erreur lors de la sauvegarde du compte rendu')
+    console.error('Supabase error saving report:', reportError)
+    return { error: `Erreur DB: ${reportError.message}` }
   }
 
   // Update appointment status to completed if not already
@@ -306,6 +307,26 @@ export async function saveTrainingReport(appointmentId: string, publicSummary: s
       .from('appointments')
       .update({ status: 'completed' })
       .eq('id', appointmentId)
+  }
+
+  revalidatePath(`/coach/client/${clientId}`)
+  return { success: true }
+}
+
+export async function updateAppointmentStatus(appointmentId: string, status: string, clientId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non autorisé' }
+
+  const { error } = await supabase
+    .from('appointments')
+    .update({ status })
+    .eq('id', appointmentId)
+    .eq('coach_id', user.id)
+
+  if (error) {
+    console.error('Error updating status:', error)
+    return { error: 'Erreur lors de la mise à jour du statut' }
   }
 
   revalidatePath(`/coach/client/${clientId}`)

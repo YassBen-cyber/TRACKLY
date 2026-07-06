@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, User, Calendar, MapPin, AlertTriangle } from 'lucide-react'
 import { ClientMetricsView } from './client-metrics-view'
 import { AssignTemplateModal } from './assign-template-modal'
+import { AssignProgramModal } from './assign-program-modal'
 import { AddMetricModal } from './add-metric-modal'
 import { AssignedSessionsList } from './assigned-sessions-list'
 import { WeeklyPlanner } from './weekly-planner'
@@ -36,6 +37,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
 
   // Entraînements
   const { data: sessionTemplates } = await supabase.from('session_templates').select('*').eq('coach_id', user.id).order('title')
+  const { data: coachPrograms } = await supabase.from('programs').select('*').eq('coach_id', user.id).order('title')
   const { data: availabilities } = await supabase.from('client_availabilities').select('*').eq('client_id', id).order('date').order('start_time')
   const { data: assignedSessions } = await supabase.from('assigned_sessions').select('*').eq('client_id', id).order('scheduled_date', { ascending: true })
 
@@ -114,7 +116,10 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
 
         <div className="grid grid-cols-1 gap-8">
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-foreground">Entraînements planifiés</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-foreground">Entraînements planifiés</h2>
+              <AssignProgramModal clientId={client.id} programs={coachPrograms || []} />
+            </div>
             <WeeklyPlanner 
               clientId={client.id} 
               assignedSessions={assignedSessions || []} 

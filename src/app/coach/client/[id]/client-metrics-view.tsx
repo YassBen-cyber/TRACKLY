@@ -218,7 +218,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes, h
           {metricTypes.length > 0 && (
             <Dialog open={isAdding} onOpenChange={setIsAdding}>
               <DialogTrigger render={
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl">
+                <Button className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl">
                   <Plus className="mr-2 h-4 w-4" /> Ajouter une mesure
                 </Button>
               } />
@@ -274,7 +274,7 @@ export function ClientMetricsView({ values, clientName, clientId, metricTypes, h
           <Button 
             onClick={exportPDF} 
             disabled={isExporting || metricNames.length === 0}
-            className="bg-muted hover:bg-muted text-foreground border border-border rounded-xl"
+            className="h-11 bg-muted hover:bg-muted text-foreground border border-border rounded-xl"
           >
             {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Exporter

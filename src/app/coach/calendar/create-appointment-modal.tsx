@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ import {
 import { Loader2, Plus, Calendar } from 'lucide-react'
 import { createAppointment } from './actions'
 
-export function CreateAppointmentModal({ clients, clientAvailabilities, defaultClientId, defaultDate, triggerButton }: { clients: any[], clientAvailabilities: any[], defaultClientId?: string, defaultDate?: string, triggerButton?: React.ReactElement }) {
+export function CreateAppointmentModal({ clients, clientAvailabilities, defaultClientId, defaultDate, defaultStartTime, defaultEndTime, triggerButton }: { clients: any[], clientAvailabilities: any[], defaultClientId?: string, defaultDate?: string, defaultStartTime?: string, defaultEndTime?: string, triggerButton?: React.ReactElement }) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,6 +32,22 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, defaultC
   const [locationType, setLocationType] = useState('remote')
   const [locationDetails, setLocationDetails] = useState('')
   const [notes, setNotes] = useState('')
+
+  // Sync default values when modal opens
+  useEffect(() => {
+    if (open) {
+      setClientId(defaultClientId || '')
+      setDate(defaultDate || '')
+      setStartTime(defaultStartTime || '')
+      setEndTime(defaultEndTime || '')
+      setTitle('')
+      setMeetingUrl('')
+      setLocationType('remote')
+      setLocationDetails('')
+      setNotes('')
+      setError(null)
+    }
+  }, [open, defaultClientId, defaultDate, defaultStartTime, defaultEndTime])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,7 +94,7 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, defaultC
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
         triggerButton || (
-          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20 transition-all">
+          <Button className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all">
             <Plus className="mr-2 h-4 w-4" />
             Nouveau Rendez-vous
           </Button>

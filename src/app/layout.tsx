@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body className={`${dmSans.variable} font-sans tracking-tight antialiased bg-background text-foreground transition-colors duration-300`}>
+    <html lang="fr" className={dmSans.variable} suppressHydrationWarning>
+      <body className="font-sans tracking-tight antialiased bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

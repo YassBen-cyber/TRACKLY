@@ -13,7 +13,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Calendar, Clock, FileText, CheckCircle, Loader2 } from 'lucide-react'
-import { saveTrainingReport } from './actions'
+import { saveTrainingReport, updateAppointmentStatus } from './actions'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 function formatTime(isoString: string) {
   return new Date(isoString).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
@@ -35,8 +36,11 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
   const openReportModal = (appointment: any) => {
     setSelectedAppointment(appointment)
     
-    // Si un rapport existe déjà, on le pré-remplit
-    const report = appointment.training_reports?.[0]
+    // Si un rapport existe déjà, on le pré-remplit (peut être un objet ou un tableau selon PostgREST)
+    const report = Array.isArray(appointment.training_reports) 
+      ? appointment.training_reports[0] 
+      : appointment.training_reports
+      
     setPublicSummary(report?.public_summary || '')
     setPrivateNotes(report?.private_notes || '')
     
@@ -50,8 +54,12 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
     setError(null)
 
     try {
-      await saveTrainingReport(selectedAppointment.id, publicSummary, privateNotes, clientId)
-      setOpenModal(false)
+      const res = await saveTrainingReport(selectedAppointment.id, publicSummary, privateNotes, clientId)
+      if (res?.error) {
+        setError(res.error)
+      } else {
+        setOpenModal(false)
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -59,23 +67,64 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
     }
   }
 
+  const [filter, setFilter] = useState('all')
+
+  const handleStatusChange = async (appointmentId: string, status: string) => {
+    await updateAppointmentStatus(appointmentId, status, clientId)
+  }
+
   const now = new Date()
 
+  // On filtre d'abord selon le statut sélectionné
+  const filteredAppointments = appointments.filter(apt => {
+    if (filter === 'all') return true
+    return (apt.status || 'scheduled') === filter
+  })
+
   // On sépare en deux: à venir et passés
-  const upcoming = appointments.filter(a => new Date(a.start_time) >= now).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-  const past = appointments.filter(a => new Date(a.start_time) < now).sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+  const upcoming = filteredAppointments.filter(a => new Date(a.start_time) >= now).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+  const past = filteredAppointments.filter(a => new Date(a.start_time) < now).sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'text-green-600 bg-green-100 border-green-200'
+      case 'cancelled': return 'text-red-600 bg-red-100 border-red-200'
+      default: return 'text-blue-600 bg-blue-100 border-blue-200'
+    }
+  }
 
   return (
     <div className="space-y-6">
       <div className="bg-card p-6 rounded-3xl border border-border shadow-xl shadow-foreground/5">
-        <div className="flex items-center gap-3 mb-6 border-b border-border pb-4">
-          <Calendar className="h-6 w-6 text-primary" />
-          <h2 className="text-xl font-bold text-foreground">Historique des Rendez-vous</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-border pb-4">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Historique des Rendez-vous</h2>
+          </div>
+          
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Label className="text-sm text-muted-foreground whitespace-nowrap">Filtrer :</Label>
+            <Select value={filter} onValueChange={(val) => setFilter(val || 'all')}>
+              <SelectTrigger className="w-full sm:w-[160px] h-9 text-xs font-semibold rounded-xl border-border bg-card">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border bg-card">
+                <SelectItem value="all">Tous les rdv</SelectItem>
+                <SelectItem value="scheduled">En attente / À venir</SelectItem>
+                <SelectItem value="completed">Réalisés</SelectItem>
+                <SelectItem value="cancelled">Annulés / Ratés</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {appointments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/50">
             Aucun rendez-vous planifié.
+          </div>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/50">
+            Aucun rendez-vous ne correspond à ce filtre.
           </div>
         ) : (
           <div className="space-y-8">
@@ -95,8 +144,20 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
                           <span className="font-medium text-foreground">{apt.title}</span>
                         </div>
                       </div>
-                      <div className="text-xs font-bold px-3 py-1 bg-blue-100 text-blue-600 rounded-full">
-                        Planifié
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <Select 
+                          defaultValue={apt.status || 'scheduled'}
+                          onValueChange={(val) => handleStatusChange(apt.id, val)}
+                        >
+                          <SelectTrigger className={`w-[140px] h-9 text-xs font-semibold rounded-xl border ${getStatusColor(apt.status || 'scheduled')}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl border-border">
+                            <SelectItem value="scheduled">À venir</SelectItem>
+                            <SelectItem value="completed">Réalisé</SelectItem>
+                            <SelectItem value="cancelled">Annulé / Raté</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   ))}
@@ -110,7 +171,8 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
                 <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Passés</h3>
                 <div className="grid gap-4">
                   {past.map(apt => {
-                    const hasReport = apt.training_reports && apt.training_reports.length > 0
+                    const report = Array.isArray(apt.training_reports) ? apt.training_reports[0] : apt.training_reports;
+                    const hasReport = !!report;
                     
                     return (
                       <div key={apt.id} className="bg-card border border-border p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors hover:bg-muted/50">
@@ -123,23 +185,39 @@ export function AppointmentHistory({ clientId, appointments }: { clientId: strin
                           </div>
                         </div>
                         
-                        <Button 
-                          variant={hasReport ? "outline" : "default"}
-                          className={`rounded-xl shadow-sm ${hasReport ? 'border-green-200 text-green-700 hover:bg-green-50' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
-                          onClick={() => openReportModal(apt)}
-                        >
-                          {hasReport ? (
-                            <>
-                              <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                              Voir / Modifier le bilan
-                            </>
-                          ) : (
-                            <>
-                              <FileText className="mr-2 h-4 w-4" />
-                              Rédiger un bilan
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                          <Select 
+                            defaultValue={apt.status || 'scheduled'}
+                            onValueChange={(val) => handleStatusChange(apt.id, val)}
+                          >
+                            <SelectTrigger className={`w-[140px] h-9 text-xs font-semibold rounded-xl border bg-card ${getStatusColor(apt.status || 'scheduled')}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border bg-card">
+                              <SelectItem value="scheduled">En attente</SelectItem>
+                              <SelectItem value="completed">Réalisé</SelectItem>
+                              <SelectItem value="cancelled">Raté / Annulé</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Button 
+                            variant={hasReport ? "outline" : "default"}
+                            className={`rounded-xl shadow-sm ${hasReport ? 'border-green-200 text-green-700 hover:bg-green-50' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
+                            onClick={() => openReportModal(apt)}
+                          >
+                            {hasReport ? (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                Voir / Modifier le bilan
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Rédiger un bilan
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     )
                   })}
