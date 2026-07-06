@@ -28,8 +28,8 @@ export default function RootLayout({
       <body className="font-sans tracking-tight antialiased bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange={false}
         >
           {children}
