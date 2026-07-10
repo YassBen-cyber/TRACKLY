@@ -6,6 +6,8 @@ import { LogOut, LayoutDashboard, Settings2, Calendar, CalendarRange, Dumbbell, 
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 
+import { MobileNav } from '@/components/mobile-nav'
+
 export default async function CoachLayout({
   children,
 }: {
@@ -116,13 +118,47 @@ export default async function CoachLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="md:hidden bg-background border-b border-border p-4 flex justify-between items-center transition-colors duration-300">
-          <Link href="/coach" className="flex items-center gap-2">
-            <Image src="/TRACKLY_LOGO.webp" alt="Trackly logo" width={32} height={32} className="object-contain" priority />
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">TRACKLY</span>
-          </Link>
-          <ThemeToggle />
-        </div>
+        <MobileNav 
+          links={[
+            { href: '/coach', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+            { href: '/coach/clients', label: 'Athlètes', icon: <Users className="h-5 w-5" /> },
+            { href: '/coach/workouts', label: 'Séances', icon: <Dumbbell className="h-5 w-5" /> },
+            { href: '/coach/programs', label: 'Programmes', icon: <CalendarRange className="h-5 w-5" /> },
+            { href: '/coach/calendar', label: 'Calendrier', icon: <Calendar className="h-5 w-5" /> },
+            { href: '/coach/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
+            { href: '/coach/templates', label: 'Objectifs', icon: <Settings2 className="h-5 w-5" /> },
+            { href: '/coach/settings', label: 'Profil & Paramètres', icon: <Settings className="h-5 w-5" /> },
+          ]}
+          profileNode={
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0 border-2 border-primary/20">
+                {profile?.photo_url ? (
+                  <img src={profile.photo_url} alt={profile.full_name || 'Coach'} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-primary/20 text-primary">
+                    <User className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+              <div className="text-sm font-bold text-foreground truncate">
+                {profile?.full_name || 'Coach'}
+              </div>
+            </div>
+          }
+          logoutNode={
+            <form action={async () => {
+              'use server'
+              const sb = await createClient()
+              await sb.auth.signOut()
+              redirect('/login')
+            }}>
+              <Button type="submit" variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+                <LogOut className="mr-3 h-5 w-5" />
+                Déconnexion
+              </Button>
+            </form>
+          }
+        />
         
         <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 relative z-10">
           {children}

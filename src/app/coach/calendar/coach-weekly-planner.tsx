@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight, Calendar, Clock, Video, MapPin, User, Plus } from 'lucide-react'
 import { CreateAppointmentModal } from './create-appointment-modal'
+import { EditAppointmentModal } from './edit-appointment-modal'
 
 function getMonday(d: Date) {
   const date = new Date(d)
@@ -15,9 +16,28 @@ function getMonday(d: Date) {
 
 const HOUR_HEIGHT = 60 // px
 
+const COLORS = [
+  'bg-blue-500 border-blue-600 text-white shadow-blue-500/20',
+  'bg-purple-500 border-purple-600 text-white shadow-purple-500/20',
+  'bg-pink-500 border-pink-600 text-white shadow-pink-500/20',
+  'bg-amber-500 border-amber-600 text-white shadow-amber-500/20',
+  'bg-emerald-500 border-emerald-600 text-white shadow-emerald-500/20',
+  'bg-rose-500 border-rose-600 text-white shadow-rose-500/20',
+  'bg-indigo-500 border-indigo-600 text-white shadow-indigo-500/20',
+  'bg-cyan-500 border-cyan-600 text-white shadow-cyan-500/20'
+]
+
+const hashString = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash);
+};
+
 function getTimeStrFromIso(isoString: string) {
   const d = new Date(isoString)
-  return `${d.getHours()}:${d.getMinutes()}`
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 }
 
 function getTop(timeStr: string) {
@@ -197,7 +217,42 @@ export function CoachWeeklyPlanner({
               {days.map((day, dayIndex) => (
                 <div key={dayIndex} className={`relative border-border ${dayIndex !== 6 ? 'border-r' : ''}`}>
                   
-                  {/* Clic sur fond vide pour créer (optionnel, on garde l'ajout via les dispos client) */}
+                  {/* Grille interactive pour créer un RDV sur une case vide */}
+                  {hoursArray.map(hour => {
+                    const slotStartVal = hour * 60
+                    const slotEndVal = (hour + 1) * 60
+                    
+                    const isOccupied = day.appointments.some((apt: any) => {
+                       const dStart = new Date(apt.start_time)
+                       const dEnd = new Date(apt.end_time)
+                       const aptStartVal = dStart.getHours() * 60 + dStart.getMinutes()
+                       const aptEndVal = dEnd.getHours() * 60 + dEnd.getMinutes()
+                       return (aptStartVal < slotEndVal && aptEndVal > slotStartVal)
+                    })
+
+                    if (isOccupied) return null; // Cache le slot vide si déjà pris
+
+                    return (
+                      <CreateAppointmentModal 
+                        key={`empty-${hour}`}
+                        clients={clients}
+                        coachAppointments={appointments}
+                        clientAvailabilities={clientAvailabilities}
+                        defaultDate={day.dateStr}
+                        defaultStartTime={`${hour.toString().padStart(2, '0')}:00`}
+                        defaultEndTime={`${(hour + 1).toString().padStart(2, '0')}:00`}
+                        triggerButton={
+                          <div 
+                            className="absolute w-full cursor-pointer transition-all flex items-center justify-center opacity-0 hover:opacity-100 hover:bg-primary/10 z-0"
+                            style={{ top: hour * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+                            title={`Créer un RDV à ${hour}h00`}
+                          >
+                            <Plus className="h-6 w-6 text-primary drop-shadow-sm bg-background/80 rounded-full p-0.5" />
+                          </div>
+                        }
+                      />
+                    )
+                  })}
 
                   {/* Dispos du coach (Gris transparent) */}
                   {day.coachAvails.map((av, i) => {
@@ -234,6 +289,7 @@ export function CoachWeeklyPlanner({
                           <div className="mt-auto mb-auto opacity-0 group-hover:opacity-100 transition-opacity">
                             <CreateAppointmentModal 
                               clients={clients} 
+                              coachAppointments={appointments}
                               clientAvailabilities={clientAvailabilities} 
                               defaultDate={day.dateStr}
                               defaultStartTime={ca.start_time.substring(0,5)}
@@ -255,27 +311,40 @@ export function CoachWeeklyPlanner({
                   {/* Rendez-vous (Blocs solides) */}
                   {day.appointments.map((apt: any, i: number) => {
                     const top = getTop(getTimeStrFromIso(apt.start_time))
-                    const h = Math.max(getHeight(getTimeStrFromIso(apt.start_time), getTimeStrFromIso(apt.end_time)), 30)
+                    const rawHeight = getHeight(getTimeStrFromIso(apt.start_time), getTimeStrFromIso(apt.end_time))
+                    const h = Math.max(rawHeight, 20) // Minimum 20px pour rester lisible
                     const isPast = new Date(apt.start_time) < new Date()
                     
+                    const colorIndex = apt.client_id ? hashString(apt.client_id) % COLORS.length : i % COLORS.length
+                    const aptColor = COLORS[colorIndex]
+                    const isShort = h <= 35 // Si <= 35px (~30 mins), on change de disposition
+
                     return (
-                      <div 
-                        key={`apt-${i}`} 
-                        className={`absolute inset-x-1 sm:inset-x-2 rounded-xl p-2 sm:p-3 flex flex-col gap-1 overflow-hidden shadow-sm border z-10 transition-all hover:shadow-md ${isPast ? 'bg-muted border-border opacity-70' : 'bg-primary border-primary text-primary-foreground shadow-primary/20'}`}
-                        style={{ top, height: h }}
-                      >
-                        <div className="font-bold text-[10px] sm:text-xs leading-tight line-clamp-1">{apt.title}</div>
-                        <div className={`text-[9px] sm:text-[10px] flex items-center gap-1 opacity-90 truncate`}>
-                          <Clock className="h-2.5 w-2.5 shrink-0" />
-                          {getTimeStrFromIso(apt.start_time)} - {getTimeStrFromIso(apt.end_time)}
-                        </div>
-                        {h >= 60 && apt.profiles?.full_name && (
-                          <div className="mt-1 text-[10px] sm:text-xs font-medium truncate flex items-center gap-1">
-                            <User className="h-3 w-3 shrink-0" />
-                            {apt.profiles.full_name}
+                      <EditAppointmentModal
+                        key={`apt-${i}`}
+                        clients={clients}
+                        coachAppointments={appointments}
+                        appointment={apt}
+                        triggerButton={
+                          <div 
+                            className={`absolute inset-x-1 sm:inset-x-2 rounded-xl overflow-hidden shadow-sm border z-10 transition-all hover:shadow-md hover:z-20 flex cursor-pointer ${isShort ? 'flex-row items-center justify-between p-1 px-2 gap-2' : 'flex-col p-2 sm:p-3 gap-1'} ${isPast ? 'bg-muted border-border opacity-70 text-muted-foreground' : aptColor}`}
+                            style={{ top, height: h }}
+                            title={`${apt.title}\n${getTimeStrFromIso(apt.start_time)} - ${getTimeStrFromIso(apt.end_time)}`}
+                          >
+                            <div className="font-bold text-[10px] sm:text-xs leading-tight line-clamp-1 truncate">{apt.title}</div>
+                            <div className={`text-[9px] sm:text-[10px] flex items-center gap-1 opacity-90 shrink-0`}>
+                              <Clock className={`h-2.5 w-2.5 shrink-0 ${isShort ? 'hidden sm:block' : ''}`} />
+                              {getTimeStrFromIso(apt.start_time)} - {getTimeStrFromIso(apt.end_time)}
+                            </div>
+                            {!isShort && h >= 60 && apt.profiles?.full_name && (
+                              <div className="mt-1 text-[10px] sm:text-xs font-medium truncate flex items-center gap-1">
+                                <User className="h-3 w-3 shrink-0" />
+                                {apt.profiles.full_name}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        }
+                      />
                     )
                   })}
 

@@ -15,17 +15,18 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Loader2, Plus, Calendar } from 'lucide-react'
-import { createAppointment } from './actions'
+import { Loader2, Calendar, Trash2 } from 'lucide-react'
+import { updateAppointment, deleteAppointment } from './actions'
 
-export function CreateAppointmentModal({ clients, clientAvailabilities, coachAppointments = [], defaultClientId, defaultDate, defaultStartTime, defaultEndTime, triggerButton }: { clients: any[], clientAvailabilities: any[], coachAppointments?: any[], defaultClientId?: string, defaultDate?: string, defaultStartTime?: string, defaultEndTime?: string, triggerButton?: React.ReactElement }) {
+export function EditAppointmentModal({ clients, appointment, coachAppointments = [], triggerButton }: { clients: any[], appointment: any, coachAppointments?: any[], triggerButton: React.ReactElement }) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [clientId, setClientId] = useState(defaultClientId || '')
+  const [clientId, setClientId] = useState('')
   const [title, setTitle] = useState('')
-  const [date, setDate] = useState(defaultDate || '')
+  const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [meetingUrl, setMeetingUrl] = useState('')
@@ -33,21 +34,25 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
   const [locationDetails, setLocationDetails] = useState('')
   const [notes, setNotes] = useState('')
 
-  // Sync default values when modal opens
   useEffect(() => {
-    if (open) {
-      setClientId(defaultClientId || '')
-      setDate(defaultDate || '')
-      setStartTime(defaultStartTime || '')
-      setEndTime(defaultEndTime || '')
-      setTitle('')
-      setMeetingUrl('')
-      setLocationType('remote')
-      setLocationDetails('')
-      setNotes('')
+    if (open && appointment) {
+      setClientId(appointment.client_id || '')
+      setTitle(appointment.title || '')
+      
+      const startD = new Date(appointment.start_time)
+      const endD = new Date(appointment.end_time)
+      
+      setDate(`${startD.getFullYear()}-${String(startD.getMonth() + 1).padStart(2, '0')}-${String(startD.getDate()).padStart(2, '0')}`)
+      setStartTime(`${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')}`)
+      setEndTime(`${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`)
+      
+      setMeetingUrl(appointment.meeting_url || '')
+      setLocationType(appointment.location_type || 'remote')
+      setLocationDetails(appointment.location_details || '')
+      setNotes(appointment.notes || '')
       setError(null)
     }
-  }, [open, defaultClientId, defaultDate, defaultStartTime, defaultEndTime])
+  }, [open, appointment])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +75,7 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
     const endVal = new Date(`${date}T${endTime}:00`).getTime()
 
     const isConflict = coachAppointments.some(apt => {
+      if (apt.id === appointment.id) return false
       if (apt.status === 'cancelled') return false
       const aptStart = new Date(apt.start_time).getTime()
       const aptEnd = new Date(apt.end_time).getTime()
@@ -82,23 +88,12 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
       return
     }
 
-    // Création des TIMESTAMPTZ
     const startIso = new Date(`${date}T${startTime}:00`).toISOString()
     const endIso = new Date(`${date}T${endTime}:00`).toISOString()
 
     try {
-      await createAppointment(clientId, title || 'Rendez-vous', startIso, endIso, notes, meetingUrl, locationType, locationDetails)
+      await updateAppointment(appointment.id, clientId, title || 'Rendez-vous', startIso, endIso, notes, meetingUrl, locationType, locationDetails)
       setOpen(false)
-      // Reset form
-      setClientId('')
-      setTitle('')
-      setDate('')
-      setStartTime('')
-      setEndTime('')
-      setMeetingUrl('')
-      setLocationType('remote')
-      setLocationDetails('')
-      setNotes('')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -106,26 +101,33 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirm("Voulez-vous vraiment annuler et supprimer ce rendez-vous ?")) return
+    setIsDeleting(true)
+    setError(null)
+    try {
+      await deleteAppointment(appointment.id)
+      setOpen(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={
-        triggerButton || (
-          <Button className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau Rendez-vous
-          </Button>
-        )
-      } />
+      <DialogTrigger render={triggerButton} />
       <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl">
         <form onSubmit={onSubmit} className="flex flex-col h-full">
           <div className="p-6 pb-4 border-b border-border bg-card">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-blue-500" />
-                Planifier un rendez-vous
+                Modifier le rendez-vous
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                Fixez une séance en direct, un bilan ou une visio avec un athlète.
+                Ajustez les détails ou annulez ce rendez-vous.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -143,7 +145,6 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
                   value={clientId} 
                   onChange={e => setClientId(e.target.value)}
                   required
-                  disabled={!!defaultClientId}
                   className="flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:bg-muted disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                 <option value="" disabled className="bg-muted/50 text-muted-foreground">Sélectionner un athlète...</option>
@@ -175,33 +176,6 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
                   required 
                   className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50 dark:[color-scheme:dark]" 
                 />
-                
-                {clientId && date && (
-                  <div className="mt-2 text-sm">
-                    {clientAvailabilities.filter(a => a.client_id === clientId && a.date === date).length > 0 ? (
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className="text-muted-foreground">Dispos de l'athlète ce jour :</span>
-                        {clientAvailabilities.filter(a => a.client_id === clientId && a.date === date).map((avail, idx) => (
-                          <button 
-                            key={idx} 
-                            type="button"
-                            onClick={() => {
-                              setStartTime(avail.start_time.substring(0,5))
-                              setEndTime(avail.end_time.substring(0,5))
-                            }}
-                            className="bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200 hover:bg-green-200 transition-colors text-xs font-bold"
-                          >
-                            {avail.start_time.substring(0,5)} - {avail.end_time.substring(0,5)}
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-amber-600 bg-amber-50 p-2 rounded border border-amber-200 text-xs">
-                        Cet athlète n'a pas indiqué de disponibilité pour cette date. Vous pouvez tout de même forcer l'assignation.
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Heure de début</Label>
@@ -260,15 +234,19 @@ export function CreateAppointmentModal({ clients, clientAvailabilities, coachApp
             </div>
           </div>
 
-          <div className="p-6 border-t border-border bg-card mt-auto">
-            <DialogFooter>
+          <div className="p-6 border-t border-border bg-card mt-auto flex justify-between items-center">
+            <Button type="button" variant="ghost" onClick={handleDelete} disabled={isDeleting} className="rounded-xl hover:bg-red-500/10 hover:text-red-500 text-muted-foreground">
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              Supprimer
+            </Button>
+            <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
                 Annuler
               </Button>
               <Button type="submit" disabled={isLoading} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Planifier'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Mettre à jour'}
               </Button>
-            </DialogFooter>
+            </div>
           </div>
         </form>
       </DialogContent>

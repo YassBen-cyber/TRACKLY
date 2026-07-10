@@ -91,6 +91,50 @@ export async function deleteAppointment(appointmentId: string) {
   return { success: true }
 }
 
+export async function updateAppointment(appointmentId: string, clientId: string, title: string, startTime: string, endTime: string, notes: string, meetingUrl: string, locationType: string = 'remote', locationDetails: string = '') {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  // Check for overlapping appointments (excluding current one)
+  const { data: overlapping } = await supabase
+    .from('appointments')
+    .select('id')
+    .eq('coach_id', user.id)
+    .neq('id', appointmentId)
+    .lt('start_time', endTime)
+    .gt('end_time', startTime)
+
+  if (overlapping && overlapping.length > 0) {
+    throw new Error('Vous avez déjà un rendez-vous prévu sur ce créneau horaire.')
+  }
+
+  const { error } = await supabase
+    .from('appointments')
+    .update({
+      client_id: clientId,
+      title,
+      start_time: startTime,
+      end_time: endTime,
+      notes,
+      meeting_url: meetingUrl,
+      location_type: locationType,
+      location_details: locationDetails
+    })
+    .eq('id', appointmentId)
+    .eq('coach_id', user.id)
+
+  if (error) {
+    console.error("Supabase update error:", error)
+    throw new Error(error.message || 'Erreur lors de la modification du rendez-vous')
+  }
+
+  revalidatePath('/coach/calendar')
+  revalidatePath(`/coach/client/${clientId}`)
+  return { success: true }
+}
+
+
 export async function addSpecificAvailability(date: string, startTime: string, endTime: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

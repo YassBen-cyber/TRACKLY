@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={dmSans.variable} suppressHydrationWarning>
-      <body className="font-sans tracking-tight antialiased bg-background text-foreground transition-colors duration-300">
+      <body className="font-sans tracking-tight antialiased bg-background text-foreground transition-colors duration-300" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
