@@ -2,11 +2,12 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Settings2, Calendar, CalendarRange, Dumbbell, CreditCard, Settings, User, Users } from 'lucide-react'
+import { LogOut, LayoutDashboard, Settings2, Calendar, CalendarRange, Dumbbell, CreditCard, Settings, User, Users, BookOpen } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 
 import { MobileNav } from '@/components/mobile-nav'
+import { SidebarNav } from '@/components/sidebar-nav'
 
 export default async function CoachLayout({
   children,
@@ -21,6 +22,18 @@ export default async function CoachLayout({
   }
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+
+  const links = [
+    { href: '/coach', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { href: '/coach/clients', label: 'Athlètes', icon: <Users className="h-5 w-5" /> },
+    { href: '/coach/workouts', label: 'Séances', icon: <Dumbbell className="h-5 w-5" /> },
+    { href: '/coach/programs', label: 'Programmes', icon: <CalendarRange className="h-5 w-5" /> },
+    { href: '/coach/calendar', label: 'Calendrier', icon: <Calendar className="h-5 w-5" /> },
+    { href: '/coach/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
+    { href: '/coach/templates', label: 'Objectifs', icon: <Settings2 className="h-5 w-5" /> },
+    { href: '/coach/settings', label: 'Profil & Paramètres', icon: <Settings className="h-5 w-5" /> },
+    { href: '/coach/help', label: "Centre d'Aide", icon: <BookOpen className="h-5 w-5" /> },
+  ]
 
   return (
     <div className="flex h-screen bg-muted/30 overflow-hidden transition-colors duration-300">
@@ -37,54 +50,7 @@ export default async function CoachLayout({
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
-          <Link href="/coach">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <LayoutDashboard className="mr-3 h-5 w-5" />
-              Dashboard
-            </Button>
-          </Link>
-          <Link href="/coach/clients">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Users className="mr-3 h-5 w-5" />
-              Athlètes
-            </Button>
-          </Link>
-          <Link href="/coach/workouts">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Dumbbell className="mr-3 h-5 w-5" />
-              Séances
-            </Button>
-          </Link>
-          <Link href="/coach/programs">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <CalendarRange className="mr-3 h-5 w-5" />
-              Programmes
-            </Button>
-          </Link>
-          <Link href="/coach/calendar">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Calendar className="mr-3 h-5 w-5" />
-              Calendrier
-            </Button>
-          </Link>
-          <Link href="/coach/payments">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <CreditCard className="mr-3 h-5 w-5" />
-              Paiements
-            </Button>
-          </Link>
-          <Link href="/coach/templates">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Settings2 className="mr-3 h-5 w-5" />
-              Objectifs
-            </Button>
-          </Link>
-          <Link href="/coach/settings">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Settings className="mr-3 h-5 w-5" />
-              Profil & Paramètres
-            </Button>
-          </Link>
+          <SidebarNav links={links} />
         </div>
 
         <div className="p-4 border-t border-border bg-background">

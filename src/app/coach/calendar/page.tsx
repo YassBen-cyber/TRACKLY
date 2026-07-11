@@ -1,8 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Calendar as CalendarIcon, Clock, Video, Users, Trash2, Info } from 'lucide-react'
-import { AvailabilitiesModal } from './availabilities-modal'
-import { SpecificAvailabilitiesManager } from './specific-availabilities-manager'
 import { CreateAppointmentModal } from './create-appointment-modal'
 import { CoachWeeklyPlanner } from './coach-weekly-planner'
 import { Button } from '@/components/ui/button'
@@ -24,21 +22,6 @@ export default async function CalendarPage() {
     .select('id, full_name')
     .eq('coach_id', user.id)
     .eq('role', 'client')
-
-  // Fetch coach availabilities
-  const { data: availabilities } = await supabase
-    .from('coach_availabilities')
-    .select('*')
-    .eq('coach_id', user.id)
-    .order('day_of_week')
-    .order('start_time')
-
-  // Fetch coach specific availabilities
-  const { data: specificAvailabilities } = await supabase
-    .from('coach_specific_availabilities')
-    .select('*')
-    .eq('coach_id', user.id)
-    .order('date', { ascending: true })
 
   // Fetch client availabilities
   const clientIds = clients?.map(c => c.id) || []
@@ -74,11 +57,10 @@ export default async function CalendarPage() {
             Calendrier & Rendez-vous
           </h2>
           <p className="text-muted-foreground mt-1">
-            Gérez vos disponibilités et vos séances en direct avec vos athlètes.
+            Gérez vos séances en direct avec vos athlètes en les plaçant directement sur vos créneaux.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <AvailabilitiesModal initialAvailabilities={availabilities || []} />
           <CreateAppointmentModal clients={clients || []} clientAvailabilities={clientAvailabilities || []} />
         </div>
       </div>
@@ -90,8 +72,8 @@ export default async function CalendarPage() {
           <CoachWeeklyPlanner 
             clients={clients || []}
             appointments={appointments || []}
-            availabilities={availabilities || []}
-            specificAvailabilities={specificAvailabilities || []}
+            availabilities={[]}
+            specificAvailabilities={[]}
             clientAvailabilities={clientAvailabilities || []}
           />
 
@@ -119,20 +101,6 @@ export default async function CalendarPage() {
               </div>
             </div>
           )}
-        </div>
-
-
-
-      </div>
-
-      <div className="pt-4 border-t border-border">
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl">
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-6 text-sm text-blue-800 flex gap-3">
-            <Info className="h-5 w-5 shrink-0" />
-            <p>Vos "Horaires types" sont vos disponibilités générales (gérées via le bouton en haut). Pour ouvrir la réservation aux clients, générez vos créneaux spécifiques pour une semaine donnée, ou ajoutez-les manuellement ci-dessous. Le client verra uniquement les créneaux générés ci-dessous.</p>
-          </div>
-
-          <SpecificAvailabilitiesManager specificAvailabilities={specificAvailabilities || []} />
         </div>
       </div>
     </div>

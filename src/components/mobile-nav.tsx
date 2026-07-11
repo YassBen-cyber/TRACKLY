@@ -42,10 +42,14 @@ export function MobileNav({ links, profileNode, logoutNode }: {
             </div>
             <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
               {links.map((link, i) => {
-                const isActive = pathname === link.href || pathname?.startsWith(link.href + '/')
+                const isExactOnly = link.href === '/client' || link.href === '/coach'
+                const isActive = isExactOnly 
+                  ? pathname === link.href 
+                  : pathname === link.href || pathname?.startsWith(link.href + '/')
+                  
                 return (
                   <Link key={i} href={link.href} onClick={() => setOpen(false)}>
-                    <Button variant={isActive ? "secondary" : "ghost"} className="w-full justify-start">
+                    <Button variant={isActive ? "secondary" : "ghost"} className={`w-full justify-start ${isActive ? 'font-bold' : ''}`}>
                       <span className="mr-3">{link.icon}</span>
                       {link.label}
                     </Button>

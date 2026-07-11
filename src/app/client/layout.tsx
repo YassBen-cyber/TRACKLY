@@ -6,6 +6,7 @@ import { Dumbbell, LayoutDashboard, Activity, CreditCard, History, LogOut, Setti
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 import { MobileNav } from '@/components/mobile-nav'
+import { SidebarNav } from '@/components/sidebar-nav'
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,6 +17,16 @@ export default async function ClientLayout({ children }: { children: React.React
   }
 
   const { data: profile } = await supabase.from('profiles').select('full_name, photo_url').eq('id', user.id).single()
+
+  const links = [
+    { href: '/client', label: "Vue d'ensemble", icon: <LayoutDashboard className="h-5 w-5" /> },
+    { href: '/client/workouts', label: 'Entraînements', icon: <Dumbbell className="h-5 w-5" /> },
+    { href: '/client/appointments', label: 'Rendez-vous', icon: <Calendar className="h-5 w-5" /> },
+    { href: '/client/metrics', label: 'Ma Progression', icon: <Activity className="h-5 w-5" /> },
+    { href: '/client/history', label: 'Historique', icon: <History className="h-5 w-5" /> },
+    { href: '/client/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
+    { href: '/client/settings', label: 'Paramètres', icon: <Settings className="h-5 w-5" /> },
+  ]
 
   return (
     <div className="flex h-screen bg-muted/30 overflow-hidden transition-colors duration-300">
@@ -32,48 +43,7 @@ export default async function ClientLayout({ children }: { children: React.React
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
-          <Link href="/client">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <LayoutDashboard className="mr-3 h-5 w-5" />
-              Vue d'ensemble
-            </Button>
-          </Link>
-          <Link href="/client/workouts">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Dumbbell className="mr-3 h-5 w-5" />
-              Entraînements
-            </Button>
-          </Link>
-          <Link href="/client/appointments">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Calendar className="mr-3 h-5 w-5" />
-              Rendez-vous
-            </Button>
-          </Link>
-          <Link href="/client/metrics">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Activity className="mr-3 h-5 w-5" />
-              Ma Progression
-            </Button>
-          </Link>
-          <Link href="/client/history">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <History className="mr-3 h-5 w-5" />
-              Historique
-            </Button>
-          </Link>
-          <Link href="/client/payments">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <CreditCard className="mr-3 h-5 w-5" />
-              Paiements
-            </Button>
-          </Link>
-          <Link href="/client/settings">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted">
-              <Settings className="mr-3 h-5 w-5" />
-              Paramètres
-            </Button>
-          </Link>
+          <SidebarNav links={links} />
         </div>
 
         <div className="p-4 border-t border-border">

@@ -8,7 +8,6 @@ import { ClientWorkouts } from './client-workouts'
 import { ClientPayments } from './client-payments'
 import { SetPasswordCard } from './set-password-card'
 import { ClientMetrics } from './client-metrics'
-import { BookAppointmentModal } from './book-appointment-modal'
 import { ClientAppointments } from './client-appointments'
 
 export default async function ClientDashboard() {
@@ -24,21 +23,9 @@ export default async function ClientDashboard() {
 
   // Récupérer le profil du coach, ses dispos et ses rdv
   let coachProfile = null
-  let coachAvailabilities: any[] = []
-  let coachAppointments: any[] = []
   if (profile?.coach_id) {
     const { data: coachData } = await supabase.from('profiles').select('full_name, photo_url').eq('id', profile.coach_id).single()
     coachProfile = coachData
-
-    const { data: cAvails } = await supabase.from('coach_specific_availabilities').select('*').eq('coach_id', profile.coach_id)
-    coachAvailabilities = cAvails || []
-
-    // Only future appointments for coach validation
-    const { data: cAppts } = await supabase.from('appointments')
-      .select('*')
-      .eq('coach_id', profile.coach_id)
-      .gte('start_time', new Date().toISOString())
-    coachAppointments = cAppts || []
   }
 
   // Rendez-vous du client
@@ -74,16 +61,6 @@ export default async function ClientDashboard() {
         <div>
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Bonjour, {profile?.full_name || user.email} 👋</h1>
           <p className="text-muted-foreground mt-1">Voici votre résumé du jour.</p>
-          
-          {profile?.coach_id && (
-            <div className="mt-4">
-              <BookAppointmentModal 
-                coachId={profile.coach_id} 
-                coachAvailabilities={coachAvailabilities} 
-                coachAppointments={coachAppointments} 
-              />
-            </div>
-          )}
         </div>
         
         {coachProfile && (
@@ -107,7 +84,7 @@ export default async function ClientDashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-6">
         
         {/* Next Workout Card */}
         <div className="bg-card p-6 rounded-3xl border border-border shadow-md hover:shadow-lg transition-shadow flex flex-col gap-4">
@@ -165,9 +142,6 @@ export default async function ClientDashboard() {
           )}
         </div>
 
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Availabilities Widget */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">Mes Dispos / Souhaits de RDV</h2>

@@ -13,6 +13,7 @@ export function AddClientModal() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [inviteLink, setInviteLink] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
   const [copied, setCopied] = useState(false)
   const router = useRouter()
 
@@ -39,6 +40,10 @@ export function AddClientModal() {
       }
 
       setInviteLink(data.link)
+      setEmailSent(data.emailSent || false)
+      if (data.emailError) {
+        setError(data.emailError)
+      }
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -59,9 +64,11 @@ export function AddClientModal() {
         <DialogHeader>
           <DialogTitle className="text-xl">Inviter un nouvel athlète</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {inviteLink 
-              ? "Le compte a été créé. Copiez ce lien et envoyez-le à votre athlète pour qu'il puisse se connecter."
-              : "Générez un lien d'invitation pour votre athlète afin qu'il puisse rejoindre votre équipe."}
+            {inviteLink && emailSent 
+              ? "Un email d'invitation a été envoyé avec succès !"
+              : inviteLink 
+                ? "Le compte a été créé. Copiez ce lien et envoyez-le à votre athlète pour qu'il puisse se connecter."
+                : "Générez un lien d'invitation pour votre athlète afin qu'il puisse rejoindre votre équipe."}
           </DialogDescription>
         </DialogHeader>
         {!inviteLink ? (

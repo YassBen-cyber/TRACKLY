@@ -249,8 +249,34 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran CRM]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                      <div className="font-semibold text-foreground text-sm">Athlètes (3)</div>
+                      <div className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium">Ajouter</div>
+                    </div>
+                    {[
+                      { name: "Thomas Dupont", status: "Actif", obj: "Prise de masse" },
+                      { name: "Sarah Connor", status: "En attente", obj: "Perte de poids" },
+                      { name: "Marc Lewin", status: "Actif", obj: "Préparation Marathon" }
+                    ].map((c, i) => (
+                      <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/40 transition-colors hover:bg-muted/40">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">{c.name[0]}</div>
+                          <div>
+                            <div className="text-sm font-medium text-foreground leading-tight">{c.name}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{c.obj}</div>
+                          </div>
+                        </div>
+                        <div className={`text-[10px] font-medium px-2 py-1 rounded-full ${c.status === 'Actif' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-600'}`}>{c.status}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -267,8 +293,36 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran Planification]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-4 flex gap-3 h-full">
+                    {["Lundi", "Mardi", "Mercredi"].map((day, i) => (
+                      <div key={i} className="flex-1 bg-muted/20 rounded-xl p-3 border border-border/40 flex flex-col gap-3">
+                        <div className="text-xs font-semibold text-center text-muted-foreground uppercase tracking-wider">{day}</div>
+                        {i === 0 && (
+                          <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-lg text-xs text-blue-600 font-medium shadow-sm">
+                            Haut du corps
+                            <div className="text-[10px] opacity-70 mt-1 flex items-center gap-1"><Dumbbell className="w-3 h-3"/> 4 exos</div>
+                          </div>
+                        )}
+                        {i === 2 && (
+                          <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg text-xs text-emerald-600 font-medium shadow-sm">
+                            Cardio HIIT
+                            <div className="text-[10px] opacity-70 mt-1 flex items-center gap-1"><Activity className="w-3 h-3"/> 30 min</div>
+                          </div>
+                        )}
+                        {i === 1 && (
+                          <div className="border border-dashed border-border/60 rounded-lg p-2.5 text-center text-muted-foreground/50 text-[10px] font-medium">
+                            + Repos
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -285,8 +339,30 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran Graphiques]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-5 flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">Évolution Poids</div>
+                        <div className="text-[10px] text-muted-foreground">30 derniers jours</div>
+                      </div>
+                      <div className="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" /> -2.4 kg
+                      </div>
+                    </div>
+                    <div className="flex-1 flex items-end gap-1.5 mt-2">
+                      {[40, 35, 45, 30, 50, 60, 45, 55, 70, 80].map((h, i) => (
+                        <div key={i} className="flex-1 bg-emerald-500/10 rounded-t-md relative group hover:bg-emerald-500/20 transition-colors" style={{ height: `${h}%` }}>
+                          <div className="absolute top-0 inset-x-0 bg-emerald-500 rounded-t-md" style={{ height: '4px' }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -303,8 +379,25 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran Calendrier]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-4 grid grid-cols-5 gap-1.5 h-full">
+                    {Array.from({length: 15}).map((_, i) => (
+                      <div key={i} className="bg-muted/10 border border-border/40 rounded-xl aspect-square flex items-center justify-center relative hover:bg-muted/30 transition-colors">
+                        <span className="text-[10px] font-medium text-muted-foreground/50 absolute top-1.5 left-2">{i+1}</span>
+                        <div className="w-full px-1.5 space-y-1 mt-2">
+                          {i === 4 && <div className="w-full h-2.5 bg-purple-500/20 border border-purple-500/30 rounded-sm" />}
+                          {i === 7 && <div className="w-full h-2.5 bg-blue-500/20 border border-blue-500/30 rounded-sm" />}
+                          {i === 12 && <div className="w-full h-2.5 bg-primary/20 border border-primary/30 rounded-sm" />}
+                          {i === 12 && <div className="w-full h-2.5 bg-emerald-500/20 border border-emerald-500/30 rounded-sm" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -321,8 +414,32 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran Bilan]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-5 flex flex-col justify-center h-full gap-4">
+                    <div className="bg-muted/20 p-4 rounded-xl border border-border/50 shadow-sm relative">
+                      <div className="absolute top-4 right-4 text-[10px] text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">PDF</div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="w-4 h-4 text-orange-500" />
+                        <div className="text-sm font-semibold text-foreground">Bilan Mensuel - T. Dupont</div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 bg-muted rounded-full w-full" />
+                        <div className="h-2 bg-muted rounded-full w-5/6" />
+                        <div className="h-2 bg-muted rounded-full w-4/6" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 px-2">
+                      <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      </div>
+                      <div className="text-xs font-medium text-muted-foreground">Envoyé automatiquement à l'athlète</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -339,8 +456,31 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex-1 w-full">
-              <div className="aspect-[4/3] bg-card rounded-2xl border border-border shadow-xl flex items-center justify-center p-6 text-muted-foreground text-center">
-                [Capture d'écran Facture]
+              <div className="aspect-[4/3] w-full max-w-md mx-auto">
+                <div className="w-full h-full bg-background rounded-2xl flex flex-col overflow-hidden text-left shadow-2xl border border-border/60">
+                  <div className="h-10 border-b border-border/60 bg-muted/30 flex items-center px-4">
+                    <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-400/80"/><div className="w-3 h-3 rounded-full bg-yellow-400/80"/><div className="w-3 h-3 rounded-full bg-green-400/80"/></div>
+                  </div>
+                  <div className="p-5 flex flex-col justify-center h-full gap-3">
+                    {[
+                      { amount: "150,00 €", status: "Payé", date: "01 Juin", color: "text-green-600", bg: "bg-green-500/10", border: "border-green-500/20" },
+                      { amount: "150,00 €", status: "En attente", date: "01 Juil", color: "text-yellow-600", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+                    ].map((p, i) => (
+                      <div key={i} className="flex justify-between items-center p-3.5 rounded-xl border border-border/50 bg-card shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${p.bg} ${p.border} ${p.color}`}>
+                            <CreditCard className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-foreground">{p.amount}</div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5">Facture {p.date}</div>
+                          </div>
+                        </div>
+                        <div className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${p.bg} ${p.color}`}>{p.status}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
