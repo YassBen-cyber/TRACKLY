@@ -59,7 +59,7 @@ export function MobileNav({ links, profileNode, logoutNode }: {
             </div>
             <div className="p-4 border-t border-border flex flex-col gap-4">
               {profileNode}
-              <div onClick={() => setOpen(false)}>
+              <div>
                 {logoutNode}
               </div>
             </div>
