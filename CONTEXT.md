@@ -1,7 +1,13 @@
-# Contexte et Documentation du Projet : CRM Coach
+# Contexte et Documentation du Projet : CRM Coach (Trackly)
 
 ## 🎯 Objectif de l'Application
-L'application "CRM Coach" est une plateforme web complète conçue pour mettre en relation des coachs sportifs et leurs clients/athlètes. Elle permet de digitaliser et centraliser tout le suivi de coaching : de la planification des entraînements à la gestion des paiements, en passant par le suivi des mensurations et la prise de rendez-vous en visio.
+L'application "CRM Coach" (Trackly) est une plateforme web complète conçue pour mettre en relation des coachs sportifs et leurs clients/athlètes. Elle permet de digitaliser et centraliser tout le suivi de coaching : de la planification des entraînements à la gestion des paiements, en passant par le suivi des mensurations et la prise de rendez-vous en visio.
+
+### 💎 Positionnement & Valeur Ajoutée Unique
+Contrairement à des outils généralistes comme **Calendly** (qui ne gère que la prise de rendez-vous) ou **Google Sheets** (qui n'offre aucun rendu visuel professionnel) :
+1. **L'Intégration Verticale (All-in-One)** : Un coach n'a plus besoin de payer 4 abonnements différents (Calendly pour les RDVs, TrueCoach pour les séances, Stripe/Paypal pour la facturation, et WhatsApp pour échanger les rapports de suivi). Tout est réuni dans un seul espace.
+2. **Le Rendu Premium (L'effet Wouah)** : Le design dark mode et glassmorphism est conçu pour les coachs haut de gamme (High-Ticket) qui veulent offrir à leurs athlètes une expérience utilisateur digne d'une marque de luxe, justifiant des tarifs de coaching élevés.
+3. **Le Cycle de Vie de la Séance** : La prise de rendez-vous est directement liée aux bilans d'entraînements et au suivi des métriques physiques du client.
 
 ---
 

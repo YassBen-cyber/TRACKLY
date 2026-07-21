@@ -70,12 +70,12 @@ export default function LandingPage() {
             <a href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden sm:block">
-              <Button variant="ghost" className="text-sm font-medium">Connexion</Button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link href="/login">
+              <Button variant="ghost" className="text-sm font-medium px-3 sm:px-4">Connexion</Button>
             </Link>
             <Link href="/register">
-              <Button className="rounded-full px-6 font-medium tracking-tight shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+              <Button className="rounded-full px-4 sm:px-6 text-sm sm:text-base font-medium tracking-tight shadow-lg shadow-primary/20 hover:scale-105 transition-all">
                 Démarrer
               </Button>
             </Link>
@@ -104,9 +104,6 @@ export default function LandingPage() {
                   Commencer gratuitement
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="h-14 px-8 rounded-full text-lg font-medium tracking-tight border-2 w-full sm:w-auto hover:bg-muted">
-                Voir la démo
-              </Button>
             </div>
 
             <div className="pt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
@@ -738,9 +735,6 @@ export default function LandingPage() {
                 Commencer gratuitement
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="h-16 px-10 rounded-full text-xl font-medium tracking-tight border-2 w-full sm:w-auto hover:bg-muted">
-              Voir une démonstration
-            </Button>
           </div>
         </div>
       </section>
