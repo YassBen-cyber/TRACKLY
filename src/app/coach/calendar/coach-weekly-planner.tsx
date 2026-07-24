@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight, Calendar, Clock, Video, MapPin, User, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Clock, Video, MapPin, User, Plus, Eye, EyeOff } from 'lucide-react'
 import { CreateAppointmentModal } from './create-appointment-modal'
 import { EditAppointmentModal } from './edit-appointment-modal'
 
@@ -49,6 +49,82 @@ function getHeight(startStr: string, endStr: string) {
   return getTop(endStr) - getTop(startStr)
 }
 
+function computeTimeBlocksLayout(blocks: any[]) {
+  const sorted = [...blocks].sort((a, b) => {
+    const aStart = getTop(a.start_time)
+    const bStart = getTop(b.start_time)
+    if (aStart !== bStart) return aStart - bStart
+    return getTop(a.end_time) - getTop(b.end_time)
+  })
+
+  const groups: any[][] = []
+  for (const item of sorted) {
+    let placed = false
+    const itemStart = getTop(item.start_time)
+    const itemEnd = getTop(item.end_time)
+    
+    for (const group of groups) {
+      const overlaps = group.some(member => {
+        const mStart = getTop(member.start_time)
+        const mEnd = getTop(member.end_time)
+        return (itemStart < mEnd && itemEnd > mStart)
+      })
+      if (overlaps) {
+        group.push(item)
+        placed = true
+        break
+      }
+    }
+    if (!placed) {
+      groups.push([item])
+    }
+  }
+
+  const layouts = new Map<string, { width: string, left: string }>()
+  
+  for (const group of groups) {
+    const columns: any[][] = []
+    
+    for (const item of group) {
+      const itemStart = getTop(item.start_time)
+      const itemEnd = getTop(item.end_time)
+      let colIndex = 0
+      
+      while (true) {
+        if (!columns[colIndex]) {
+          columns[colIndex] = []
+        }
+        
+        const hasOverlap = columns[colIndex].some(member => {
+          const mStart = getTop(member.start_time)
+          const mEnd = getTop(member.end_time)
+          return (itemStart < mEnd && itemEnd > mStart)
+        })
+        
+        if (!hasOverlap) {
+          columns[colIndex].push(item)
+          break
+        }
+        colIndex++
+      }
+    }
+
+    const totalCols = columns.length
+    for (let colIndex = 0; colIndex < totalCols; colIndex++) {
+      for (const item of columns[colIndex]) {
+        const width = 100 / totalCols
+        const left = colIndex * width
+        layouts.set(item.id, {
+          width: `${width}%`,
+          left: `${left}%`
+        })
+      }
+    }
+  }
+
+  return layouts
+}
+
 export function CoachWeeklyPlanner({ 
   clients,
   appointments, 
@@ -69,6 +145,7 @@ export function CoachWeeklyPlanner({
   })
 
   const [filterClient, setFilterClient] = useState('all')
+  const [showAvailabilities, setShowAvailabilities] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to 8 AM on mount
@@ -113,14 +190,25 @@ export function CoachWeeklyPlanner({
         coachAvails = availabilities.filter(a => a.day_of_week === dbDay).map(a => ({ start_time: a.start_time, end_time: a.end_time, type: 'recurring' }))
       }
 
-      // Client availabilities
-      const cAvails = clientAvailabilities.filter(ca => ca.date === dateIso && (filterClient === 'all' || ca.client_id === filterClient))
-
       // Appointments
       const dayAppointments = appointments.filter(a => {
         const d = new Date(a.start_time)
         return d.getFullYear() === year && d.getMonth() + 1 === parseInt(month) && d.getDate() === parseInt(dayStr)
       })
+
+      // Client IDs with an active/scheduled appointment on this day
+      const clientsWithAppointmentsThisDay = new Set(
+        dayAppointments
+          .filter(a => a.status !== 'cancelled')
+          .map(a => a.client_id)
+      )
+
+      // Client availabilities (excluding those who already have an appointment on this day)
+      const cAvails = clientAvailabilities.filter(ca => 
+        ca.date === dateIso && 
+        (filterClient === 'all' || ca.client_id === filterClient) &&
+        !clientsWithAppointmentsThisDay.has(ca.client_id)
+      )
 
       arr.push({
         date: currentDate,
@@ -161,6 +249,24 @@ export function CoachWeeklyPlanner({
               ))}
             </SelectContent>
           </Select>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowAvailabilities(!showAvailabilities)}
+            className="h-10 rounded-xl border-border bg-card font-medium flex items-center gap-2 text-sm px-3 hover:bg-muted"
+          >
+            {showAvailabilities ? (
+              <>
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                Masquer dispos
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 text-primary" />
+                Afficher dispos
+              </>
+            )}
+          </Button>
 
           <div className="flex items-center gap-2 bg-card p-1 rounded-xl border border-border shadow-sm">
             <Button variant="ghost" size="icon" onClick={prevWeek} className="h-8 w-8 hover:bg-muted rounded-lg">
@@ -255,7 +361,7 @@ export function CoachWeeklyPlanner({
                   })}
 
                   {/* Dispos du coach (Gris transparent) */}
-                  {day.coachAvails.map((av, i) => {
+                  {showAvailabilities && day.coachAvails.map((av, i) => {
                     const top = getTop(av.start_time)
                     const h = getHeight(av.start_time, av.end_time)
                     return (
@@ -268,85 +374,120 @@ export function CoachWeeklyPlanner({
                     )
                   })}
 
-                  {/* Dispos du client (Zone hachurée verte) */}
-                  {day.clientAvails.map((ca, i) => {
-                    const top = getTop(ca.start_time)
-                    const h = Math.max(getHeight(ca.start_time, ca.end_time), 20) // min height
-                    const clientName = clients.find(c => c.id === ca.client_id)?.full_name || 'Client'
-                    
+                  {/* Dispos et Rendez-vous du client calculés ensemble pour éviter les chevauchements */}
+                  {(() => {
+                    const dayBlocks = [
+                      ...day.clientAvails.map(ca => ({
+                        id: ca.id,
+                        start_time: ca.start_time,
+                        end_time: ca.end_time,
+                        itemType: 'availability'
+                      })),
+                      ...day.appointments.map(apt => ({
+                        id: apt.id,
+                        start_time: getTimeStrFromIso(apt.start_time),
+                        end_time: getTimeStrFromIso(apt.end_time),
+                        itemType: 'appointment'
+                      }))
+                    ]
+                    const layouts = computeTimeBlocksLayout(dayBlocks)
+
                     return (
-                      <div 
-                        key={`client-${i}`} 
-                        className="absolute inset-x-1 sm:inset-x-2 border-2 border-dashed border-green-500/50 bg-green-500/5 rounded-xl group transition-all hover:bg-green-500/10 z-0 flex flex-col items-center justify-center overflow-hidden"
-                        style={{ top, height: h }}
-                      >
-                        {/* Hachures en CSS */}
-                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #22c55e 10px, #22c55e 20px)' }}></div>
-                        
-                        <div className="relative z-10 flex flex-col items-center justify-center p-1 w-full h-full">
-                          {h >= 40 && <span className="text-[10px] font-bold text-green-700/70 uppercase text-center leading-tight hidden sm:block">{clientName}</span>}
+                      <>
+                        {/* Dispos du client (Zone hachurée verte) */}
+                        {showAvailabilities && day.clientAvails.map((ca, i) => {
+                          const top = getTop(ca.start_time)
+                          const h = Math.max(getHeight(ca.start_time, ca.end_time), 20) // min height
+                          const clientName = clients.find(c => c.id === ca.client_id)?.full_name || 'Client'
+                          const layout = layouts.get(ca.id) || { left: '0%', width: '100%' }
                           
-                          <div className="mt-auto mb-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                            <CreateAppointmentModal 
-                              clients={clients} 
-                              coachAppointments={appointments}
-                              clientAvailabilities={clientAvailabilities} 
-                              defaultDate={day.dateStr}
-                              defaultStartTime={ca.start_time.substring(0,5)}
-                              defaultEndTime={ca.end_time.substring(0,5)}
-                              defaultClientId={ca.client_id}
-                              triggerButton={
-                                <Button size="sm" className="h-6 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs rounded-lg shadow-md bg-green-600 hover:bg-green-700 text-white">
-                                  <Plus className="h-3 w-3 sm:mr-1" />
-                                  <span className="hidden sm:inline">Planifier</span>
-                                </Button>
-                              } 
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-
-                  {/* Rendez-vous (Blocs solides) */}
-                  {day.appointments.map((apt: any, i: number) => {
-                    const top = getTop(getTimeStrFromIso(apt.start_time))
-                    const rawHeight = getHeight(getTimeStrFromIso(apt.start_time), getTimeStrFromIso(apt.end_time))
-                    const h = Math.max(rawHeight, 20) // Minimum 20px pour rester lisible
-                    const isPast = new Date(apt.start_time) < new Date()
-                    
-                    const colorIndex = apt.client_id ? hashString(apt.client_id) % COLORS.length : i % COLORS.length
-                    const aptColor = COLORS[colorIndex]
-                    const isShort = h <= 35 // Si <= 35px (~30 mins), on change de disposition
-
-                    return (
-                      <EditAppointmentModal
-                        key={`apt-${i}`}
-                        clients={clients}
-                        coachAppointments={appointments}
-                        appointment={apt}
-                        triggerButton={
-                          <div 
-                            className={`absolute inset-x-1 sm:inset-x-2 rounded-xl overflow-hidden shadow-sm border z-10 transition-all hover:shadow-md hover:z-20 flex cursor-pointer ${isShort ? 'flex-row items-center justify-between p-1 px-2 gap-2' : 'flex-col p-2 sm:p-3 gap-1'} ${isPast ? 'bg-muted border-border opacity-70 text-muted-foreground' : aptColor}`}
-                            style={{ top, height: h }}
-                            title={`${apt.title}\n${getTimeStrFromIso(apt.start_time)} - ${getTimeStrFromIso(apt.end_time)}`}
-                          >
-                            <div className="font-bold text-[10px] sm:text-xs leading-tight line-clamp-1 truncate">{apt.title}</div>
-                            <div className={`text-[9px] sm:text-[10px] flex items-center gap-1 opacity-90 shrink-0`}>
-                              <Clock className={`h-2.5 w-2.5 shrink-0 ${isShort ? 'hidden sm:block' : ''}`} />
-                              {getTimeStrFromIso(apt.start_time)} - {getTimeStrFromIso(apt.end_time)}
-                            </div>
-                            {!isShort && h >= 60 && apt.profiles?.full_name && (
-                              <div className="mt-1 text-[10px] sm:text-xs font-medium truncate flex items-center gap-1">
-                                <User className="h-3 w-3 shrink-0" />
-                                {apt.profiles.full_name}
+                          return (
+                            <div 
+                              key={`client-${i}`} 
+                              className="absolute border-2 border-dashed border-green-500/50 bg-green-500/5 rounded-xl group transition-all hover:bg-green-500/10 z-0 flex flex-col items-center justify-center overflow-hidden"
+                              style={{ 
+                                top, 
+                                height: h, 
+                                left: `calc(${layout.left} + 4px)`, 
+                                width: `calc(${layout.width} - 8px)` 
+                              }}
+                            >
+                              {/* Hachures en CSS */}
+                              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #22c55e 10px, #22c55e 20px)' }}></div>
+                              
+                              <div className="relative z-10 flex flex-col items-center justify-center p-1 w-full h-full">
+                                {h >= 40 && <span className="text-[10px] font-bold text-green-700/70 uppercase text-center leading-tight hidden sm:block">{clientName}</span>}
+                                
+                                <div className="mt-auto mb-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <CreateAppointmentModal 
+                                    clients={clients} 
+                                    coachAppointments={appointments}
+                                    clientAvailabilities={clientAvailabilities} 
+                                    defaultDate={day.dateStr}
+                                    defaultStartTime={ca.start_time.substring(0,5)}
+                                    defaultEndTime={ca.end_time.substring(0,5)}
+                                    defaultClientId={ca.client_id}
+                                    triggerButton={
+                                      <Button size="sm" className="h-6 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs rounded-lg shadow-md bg-green-600 hover:bg-green-700 text-white">
+                                        <Plus className="h-3 w-3 sm:mr-1" />
+                                        <span className="hidden sm:inline">Planifier</span>
+                                      </Button>
+                                    } 
+                                  />
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        }
-                      />
+                            </div>
+                          )
+                        })}
+
+                        {/* Rendez-vous (Blocs solides) */}
+                        {day.appointments.map((apt: any, i: number) => {
+                          const top = getTop(getTimeStrFromIso(apt.start_time))
+                          const rawHeight = getHeight(getTimeStrFromIso(apt.start_time), getTimeStrFromIso(apt.end_time))
+                          const h = Math.max(rawHeight, 20) // Minimum 20px pour rester lisible
+                          const isPast = new Date(apt.start_time) < new Date()
+                          
+                          const colorIndex = apt.client_id ? hashString(apt.client_id) % COLORS.length : i % COLORS.length
+                          const aptColor = COLORS[colorIndex]
+                          const isShort = h <= 35 // Si <= 35px (~30 mins), on change de disposition
+                          const layout = layouts.get(apt.id) || { left: '0%', width: '100%' }
+
+                          return (
+                            <EditAppointmentModal
+                              key={`apt-${i}`}
+                              clients={clients}
+                              coachAppointments={appointments}
+                              appointment={apt}
+                              triggerButton={
+                                <div 
+                                  className={`absolute rounded-xl overflow-hidden shadow-sm border z-10 transition-all hover:shadow-md hover:z-20 flex cursor-pointer ${isShort ? 'flex-row items-center justify-between p-1 px-2 gap-2' : 'flex-col p-2 sm:p-3 gap-1'} ${isPast ? 'bg-muted border-border opacity-70 text-muted-foreground' : aptColor}`}
+                                  style={{ 
+                                    top, 
+                                    height: h, 
+                                    left: `calc(${layout.left} + 4px)`, 
+                                    width: `calc(${layout.width} - 8px)` 
+                                  }}
+                                  title={`${apt.title}\n${getTimeStrFromIso(apt.start_time)} - ${getTimeStrFromIso(apt.end_time)}`}
+                                >
+                                  <div className="font-bold text-[10px] sm:text-xs leading-tight line-clamp-1 truncate">{apt.title}</div>
+                                  <div className={`text-[9px] sm:text-[10px] flex items-center gap-1 opacity-90 shrink-0`}>
+                                    <Clock className={`h-2.5 w-2.5 shrink-0 ${isShort ? 'hidden sm:block' : ''}`} />
+                                    {getTimeStrFromIso(apt.start_time)} - {getTimeStrFromIso(apt.end_time)}
+                                  </div>
+                                  {!isShort && h >= 60 && apt.profiles?.full_name && (
+                                    <div className="mt-1 text-[10px] sm:text-xs font-medium truncate flex items-center gap-1">
+                                      <User className="h-3 w-3 shrink-0" />
+                                      {apt.profiles.full_name}
+                                    </div>
+                                  )}
+                                </div>
+                              }
+                            />
+                          )
+                        })}
+                      </>
                     )
-                  })}
+                  })()}
 
                 </div>
               ))}

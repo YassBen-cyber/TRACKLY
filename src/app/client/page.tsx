@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogOut, User as UserIcon, Dumbbell, Calendar } from 'lucide-react'
+import { LogOut, User as UserIcon, Dumbbell, Calendar, AlertCircle } from 'lucide-react'
 import { ClientAvailabilities } from './client-availabilities'
 import { ClientWorkouts } from './client-workouts'
 import { ClientPayments } from './client-payments'
@@ -50,11 +50,31 @@ export default async function ClientDashboard() {
   const recentPayments = payments?.slice(0, 3) || [] // Top 3 recent payments
 
   const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
-  const pendingSessions = assignedSessions?.filter(s => s.status === 'planned' && s.scheduled_date <= todayStr) || []
+  const pendingSessions = assignedSessions?.filter(s => s.status === 'planned' && s.scheduled_date < todayStr) || []
+  const upcomingSessions = assignedSessions?.filter(s => s.status === 'planned' && s.scheduled_date >= todayStr) || []
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <SetPasswordCard />
+
+      {pendingSessions.length > 0 && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-yellow-500/20 p-2 rounded-xl text-yellow-400">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground text-sm">Vous avez {pendingSessions.length} {pendingSessions.length > 1 ? 'séances en retard' : 'séance en retard'}</p>
+              <p className="text-muted-foreground text-xs">Pensez à faire vos retours pour que votre coach puisse suivre votre progression.</p>
+            </div>
+          </div>
+          <Link href="/client/workouts" className="w-full sm:w-auto">
+            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl w-full sm:w-auto">
+              Faire mes retours
+            </Button>
+          </Link>
+        </div>
+      )}
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
@@ -98,17 +118,17 @@ export default async function ClientDashboard() {
             </Link>
           </div>
           
-          {pendingSessions.length > 0 ? (
+          {upcomingSessions.length > 0 ? (
             <div className="bg-muted/30 p-4 rounded-xl border border-border">
-              <p className="font-bold text-lg text-foreground">{pendingSessions[0].title}</p>
-              <p className="text-sm text-muted-foreground mt-1">Planifié le {new Date(pendingSessions[0].scheduled_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+              <p className="font-bold text-lg text-foreground">{upcomingSessions[0].title}</p>
+              <p className="text-sm text-muted-foreground mt-1">Planifié le {new Date(upcomingSessions[0].scheduled_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
               <Link href="/client/workouts" className="mt-3 block">
                 <Button className="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20">Aller à la séance</Button>
               </Link>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground py-6 border border-dashed border-border rounded-xl">
-              <p>Aucun entraînement en attente.</p>
+              <p>Aucun entraînement planifié.</p>
             </div>
           )}
         </div>

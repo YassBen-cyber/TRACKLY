@@ -17,7 +17,7 @@ export function AssignedSessionsList({
   const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
 
   const filteredSessions = assignedSessions.filter(session => {
-    const isPast = session.scheduled_date <= todayStr
+    const isPast = session.scheduled_date < todayStr
     
     if (filter === 'all') return true
     if (filter === 'upcoming') return session.status === 'planned' && !isPast
@@ -65,7 +65,7 @@ export function AssignedSessionsList({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filteredSessions.map(session => {
             const dateObj = new Date(session.scheduled_date)
-            const isPast = session.scheduled_date <= todayStr
+            const isPast = session.scheduled_date < todayStr
             const isPending = session.status === 'planned' && isPast
 
             let bgColor = isPast ? 'bg-card border-border' : 'bg-blue-500/10 border-blue-500/20'

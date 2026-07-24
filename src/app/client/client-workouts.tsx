@@ -24,8 +24,8 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
   const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
 
   // Classification des séances
-  const upcoming = sessions.filter(s => s.status === 'planned' && s.scheduled_date > todayStr)
-  const pending = sessions.filter(s => s.status === 'planned' && s.scheduled_date <= todayStr)
+  const upcoming = sessions.filter(s => s.status === 'planned' && s.scheduled_date >= todayStr)
+  const pending = sessions.filter(s => s.status === 'planned' && s.scheduled_date < todayStr)
   const history = sessions.filter(s => s.status === 'completed' || s.status === 'missed')
 
   const handleValidate = async (e: React.FormEvent) => {
