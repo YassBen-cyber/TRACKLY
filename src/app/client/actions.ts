@@ -178,3 +178,41 @@ export async function createAppointmentAsClient(coachId: string, title: string, 
   return { success: true }
 }
 
+export async function getClientDayPlannerData(dateStr: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  // 1. Récupérer les rendez-vous du client pour la date sélectionnée
+  const startOfDay = `${dateStr}T00:00:00`
+  const endOfDay = `${dateStr}T23:59:59`
+
+  const { data: appointments } = await supabase
+    .from('appointments')
+    .select('*, profiles:coach_id(full_name, photo_url)')
+    .eq('client_id', user.id)
+    .gte('start_time', startOfDay)
+    .lte('start_time', endOfDay)
+    .order('start_time', { ascending: true })
+
+  const formattedAppointments = appointments?.map(apt => ({
+    ...apt,
+    coach_name: apt.profiles?.full_name,
+    coach_photo: apt.profiles?.photo_url
+  })) || []
+
+  // 2. Récupérer les entraînements (assigned_sessions) du jour sélectionné
+  const { data: sessions } = await supabase
+    .from('assigned_sessions')
+    .select('*')
+    .eq('client_id', user.id)
+    .eq('scheduled_date', dateStr)
+    .order('created_at', { ascending: true })
+
+  return {
+    appointments: formattedAppointments,
+    sessions: sessions || []
+  }
+}
+
+

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Dumbbell, LayoutDashboard, Activity, CreditCard, History, LogOut, Settings, User, Calendar } from 'lucide-react'
+import { Dumbbell, LayoutDashboard, Activity, CreditCard, LogOut, Settings, User, Calendar, Clock } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 import { MobileNav } from '@/components/mobile-nav'
@@ -22,8 +22,8 @@ export default async function ClientLayout({ children }: { children: React.React
     { href: '/client', label: "Vue d'ensemble", icon: <LayoutDashboard className="h-5 w-5" /> },
     { href: '/client/workouts', label: 'Entraînements', icon: <Dumbbell className="h-5 w-5" /> },
     { href: '/client/appointments', label: 'Rendez-vous', icon: <Calendar className="h-5 w-5" /> },
+    { href: '/client/dispos', label: 'Mes Dispos', icon: <Clock className="h-5 w-5" /> },
     { href: '/client/metrics', label: 'Ma Progression', icon: <Activity className="h-5 w-5" /> },
-    { href: '/client/history', label: 'Historique', icon: <History className="h-5 w-5" /> },
     { href: '/client/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
     { href: '/client/settings', label: 'Paramètres', icon: <Settings className="h-5 w-5" /> },
   ]
@@ -78,15 +78,7 @@ export default async function ClientLayout({ children }: { children: React.React
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         <MobileNav 
-          links={[
-            { href: '/client', label: "Vue d'ensemble", icon: <LayoutDashboard className="h-5 w-5" /> },
-            { href: '/client/workouts', label: 'Entraînements', icon: <Dumbbell className="h-5 w-5" /> },
-            { href: '/client/appointments', label: 'Rendez-vous', icon: <Calendar className="h-5 w-5" /> },
-            { href: '/client/metrics', label: 'Ma Progression', icon: <Activity className="h-5 w-5" /> },
-            { href: '/client/history', label: 'Historique', icon: <History className="h-5 w-5" /> },
-            { href: '/client/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
-            { href: '/client/settings', label: 'Paramètres', icon: <Settings className="h-5 w-5" /> },
-          ]}
+          links={links}
           profileNode={
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0 border-2 border-primary/20">
@@ -125,4 +117,5 @@ export default async function ClientLayout({ children }: { children: React.React
     </div>
   )
 }
+
 

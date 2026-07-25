@@ -2,13 +2,10 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogOut, User as UserIcon, Dumbbell, Calendar, AlertCircle } from 'lucide-react'
-import { ClientAvailabilities } from './client-availabilities'
-import { ClientWorkouts } from './client-workouts'
+import { User as UserIcon, AlertCircle, Dumbbell, Clock, CreditCard, ArrowRight } from 'lucide-react'
 import { ClientPayments } from './client-payments'
 import { SetPasswordCard } from './set-password-card'
-import { ClientMetrics } from './client-metrics'
-import { ClientAppointments } from './client-appointments'
+import { ClientDayPlanner } from './client-day-planner'
 
 export default async function ClientDashboard() {
   const supabase = await createClient()
@@ -21,55 +18,80 @@ export default async function ClientDashboard() {
   // Récupérer le profil
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
-  // Récupérer le profil du coach, ses dispos et ses rdv
+  // Récupérer le profil du coach
   let coachProfile = null
   if (profile?.coach_id) {
     const { data: coachData } = await supabase.from('profiles').select('full_name, photo_url').eq('id', profile.coach_id).single()
     coachProfile = coachData
   }
 
-  // Rendez-vous du client
-  const { data: clientAppointmentsData } = await supabase.from('appointments')
-    .select('*, profiles:coach_id(full_name)')
+  const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
+
+  // Rendez-vous du jour
+  const startOfDay = `${todayStr}T00:00:00`
+  const endOfDay = `${todayStr}T23:59:59`
+
+  const { data: todayAppointmentsData } = await supabase
+    .from('appointments')
+    .select('*, profiles:coach_id(full_name, photo_url)')
     .eq('client_id', user.id)
-    .gte('end_time', new Date().toISOString())
+    .gte('start_time', startOfDay)
+    .lte('start_time', endOfDay)
     .order('start_time', { ascending: true })
-    
-  const clientAppointments = clientAppointmentsData?.map(apt => ({
+
+  const initialAppointments = todayAppointmentsData?.map(apt => ({
     ...apt,
-    coach_name: apt.profiles?.full_name
+    coach_name: apt.profiles?.full_name,
+    coach_photo: apt.profiles?.photo_url
   })) || []
 
-  // Récupérer les disponibilités
-  const { data: availabilities } = await supabase.from('client_availabilities').select('*').eq('client_id', user.id).order('date')
+  // Entraînements du jour
+  const { data: todaySessions } = await supabase
+    .from('assigned_sessions')
+    .select('*')
+    .eq('client_id', user.id)
+    .eq('scheduled_date', todayStr)
+    .order('created_at', { ascending: true })
 
-  const { data: assignedSessions } = await supabase.from('assigned_sessions').select('*').eq('client_id', user.id).order('scheduled_date', { ascending: true })
+  // Séances en retard (à valider)
+  const { data: assignedSessions } = await supabase
+    .from('assigned_sessions')
+    .select('*')
+    .eq('client_id', user.id)
 
-  const { data: payments } = await supabase.from('payments').select('*').eq('client_id', user.id).order('created_at', { ascending: false })
-
-  const recentPayments = payments?.slice(0, 3) || [] // Top 3 recent payments
-
-  const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
   const pendingSessions = assignedSessions?.filter(s => s.status === 'planned' && s.scheduled_date < todayStr) || []
-  const upcomingSessions = assignedSessions?.filter(s => s.status === 'planned' && s.scheduled_date >= todayStr) || []
+
+  // Derniers paiements
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('client_id', user.id)
+    .order('created_at', { ascending: false })
+
+  const recentPayments = payments?.slice(0, 3) || []
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <SetPasswordCard />
 
+      {/* Alerte séances en retard */}
       {pendingSessions.length > 0 && (
-        <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-yellow-500/20 p-2 rounded-xl text-yellow-400">
-              <AlertCircle className="h-5 w-5" />
+            <div className="bg-yellow-500/20 p-2.5 rounded-2xl text-yellow-400">
+              <AlertCircle className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-sm">Vous avez {pendingSessions.length} {pendingSessions.length > 1 ? 'séances en retard' : 'séance en retard'}</p>
-              <p className="text-muted-foreground text-xs">Pensez à faire vos retours pour que votre coach puisse suivre votre progression.</p>
+              <p className="font-bold text-foreground text-sm">
+                Vous avez {pendingSessions.length} {pendingSessions.length > 1 ? 'séances en retard' : 'séance en retard'}
+              </p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                N'oubliez pas de transmettre vos ressentis à votre coach.
+              </p>
             </div>
           </div>
           <Link href="/client/workouts" className="w-full sm:w-auto">
-            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl w-full sm:w-auto">
+            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-xl w-full sm:w-auto">
               Faire mes retours
             </Button>
           </Link>
@@ -79,8 +101,10 @@ export default async function ClientDashboard() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Bonjour, {profile?.full_name || user.email} 👋</h1>
-          <p className="text-muted-foreground mt-1">Voici votre résumé du jour.</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+            Bonjour, {profile?.full_name || user.email} 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">Consultez votre programme du jour ou choisissez une autre date.</p>
         </div>
         
         {coachProfile && (
@@ -104,82 +128,55 @@ export default async function ClientDashboard() {
         )}
       </div>
 
-      <div className="flex flex-col gap-6">
-        
-        {/* Next Workout Card */}
-        <div className="bg-card p-6 rounded-3xl border border-border shadow-md hover:shadow-lg transition-shadow flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-primary" />
-              Prochain Entraînement
-            </h2>
-            <Link href="/client/workouts">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">Voir tout</Button>
-            </Link>
-          </div>
-          
-          {upcomingSessions.length > 0 ? (
-            <div className="bg-muted/30 p-4 rounded-xl border border-border">
-              <p className="font-bold text-lg text-foreground">{upcomingSessions[0].title}</p>
-              <p className="text-sm text-muted-foreground mt-1">Planifié le {new Date(upcomingSessions[0].scheduled_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-              <Link href="/client/workouts" className="mt-3 block">
-                <Button className="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20">Aller à la séance</Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground py-6 border border-dashed border-border rounded-xl">
-              <p>Aucun entraînement planifié.</p>
-            </div>
-          )}
-        </div>
+      {/* Sélecteur de jour & Planning dynamique du jour */}
+      <ClientDayPlanner 
+        initialDate={todayStr}
+        initialAppointments={initialAppointments}
+        initialSessions={todaySessions || []}
+      />
 
-        {/* Next Appointment Card */}
-        <div className="bg-card p-6 rounded-3xl border border-border shadow-md hover:shadow-lg transition-shadow flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-500" />
-              Prochain Rendez-vous
-            </h2>
-            <Link href="/client/appointments">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-blue-500">Voir tout</Button>
-            </Link>
-          </div>
-          
-          {clientAppointments.length > 0 ? (
-            <div className="bg-blue-500/5 p-4 rounded-xl border border-blue-500/20">
-              <p className="font-bold text-lg text-foreground">{clientAppointments[0].title}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {new Date(clientAppointments[0].start_time).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
-              </p>
-              <Link href="/client/appointments" className="mt-3 block">
-                <Button className="w-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-500/20">Voir les détails</Button>
-              </Link>
+      {/* Accès rapides */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/client/dispos" className="group">
+          <div className="bg-card p-6 rounded-3xl border border-border shadow-sm group-hover:border-primary/50 transition-all flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 text-primary rounded-2xl">
+                <Clock className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">Mes Disponibilités</h3>
+                <p className="text-xs text-muted-foreground">Gérer vos créneaux libres pour le coach</p>
+              </div>
             </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground py-6 border border-dashed border-border rounded-xl">
-              <p>Aucun rendez-vous prévu.</p>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+        </Link>
+
+        <Link href="/client/workouts" className="group">
+          <div className="bg-card p-6 rounded-3xl border border-border shadow-sm group-hover:border-primary/50 transition-all flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-500/10 text-blue-500 rounded-2xl">
+                <Dumbbell className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-lg group-hover:text-blue-500 transition-colors">Tous mes entraînements</h3>
+                <p className="text-xs text-muted-foreground">Voir le programme et l'historique complet</p>
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Availabilities Widget */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Mes Dispos / Souhaits de RDV</h2>
-          <div className="bg-card p-6 rounded-3xl border border-border shadow-md">
-            <ClientAvailabilities availabilities={availabilities || []} />
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
           </div>
-        </div>
+        </Link>
+      </div>
 
-        {/* Payments Widget */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-foreground">Derniers Paiements</h2>
-            <Link href="/client/payments">
-              <Button variant="link" className="text-primary p-0">Historique</Button>
-            </Link>
-          </div>
-          <ClientPayments payments={recentPayments} />
+      {/* Derniers Paiements */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-foreground">Derniers Paiements</h2>
+          <Link href="/client/payments">
+            <Button variant="link" className="text-primary p-0">Historique complet</Button>
+          </Link>
         </div>
+        <ClientPayments payments={recentPayments} />
       </div>
     </div>
   )
