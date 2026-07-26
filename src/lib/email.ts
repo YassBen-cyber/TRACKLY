@@ -235,3 +235,104 @@ export async function notifyClientAvailabilitiesAdded({
 
   await sendEmail({ to: coachInfo.email, subject, text, html })
 }
+
+/**
+ * Rappel 24h avant un rendez-vous
+ */
+export async function sendAppointment24hReminder({
+  appointment
+}: {
+  appointment: any
+}) {
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const clientInfo = await getUserProfileAndEmail(appointment.client_id)
+  if (!clientInfo.email) return false
+
+  const coachInfo = await getUserProfileAndEmail(appointment.coach_id)
+
+  const startDate = new Date(appointment.start_time)
+  const endDate = new Date(appointment.end_time)
+  const dateFormatted = startDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const timeFormatted = `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')} - ${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`
+
+  const isRemote = appointment.location_type === 'remote'
+  const locationText = isRemote ? 'Visio' : `Présentiel (${appointment.location_details || 'Adresse communiquée par le coach'})`
+
+  const subject = `[Rappel 24h] Rendez-vous demain : ${appointment.title}`
+  const text = `Bonjour ${clientInfo.name},\n\nRappel : vous avez un rendez-vous demain avec votre coach ${coachInfo.name} :\n\n- Motif : ${appointment.title}\n- Date : ${dateFormatted}\n- Horaires : ${timeFormatted}\n- Lieu : ${locationText}\n\nAccédez à vos rendez-vous :\n${origin}/client/appointments`
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e5e7eb; border-radius: 20px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="color: #2563eb; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">TRACKLY</h1>
+        <p style="color: #6b7280; font-size: 13px; margin-top: 4px;">Rappel Automatique</p>
+      </div>
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Rappel : Rendez-vous demain ! ⏰</h2>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Bonjour <strong>${clientInfo.name}</strong>,</p>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Ceci est un rappel pour votre rendez-vous prévu <strong>demain</strong> avec votre coach <strong>${coachInfo.name}</strong> :</p>
+      
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 16px; margin: 24px 0; border-left: 4px solid #2563eb;">
+        <p style="margin: 0 0 8px 0; color: #1e40af; font-size: 16px; font-weight: 700;">${appointment.title}</p>
+        <p style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 14px;">📆 <strong>Date :</strong> ${dateFormatted}</p>
+        <p style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 14px;">⏰ <strong>Horaires :</strong> ${timeFormatted}</p>
+        <p style="margin: 0 0 6px 0; color: #1e3a8a; font-size: 14px;">📍 <strong>Modalité :</strong> ${locationText}</p>
+        ${appointment.meeting_url ? `<p style="margin: 6px 0 0 0; color: #2563eb; font-size: 14px;">💻 <a href="${appointment.meeting_url}" style="color: #2563eb; text-decoration: underline;">Rejoindre la visio</a></p>` : ''}
+      </div>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${origin}/client/appointments" style="background-color: #2563eb; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block;">Voir mes rendez-vous</a>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0 16px 0;" />
+      <p style="color: #9ca3af; font-size: 12px; text-align: center;">Notification automatique envoyée via Trackly.</p>
+    </div>
+  `
+
+  return await sendEmail({ to: clientInfo.email, subject, text, html })
+}
+
+/**
+ * Rappel 24h avant un entraînement / workout
+ */
+export async function sendWorkout24hReminder({
+  session
+}: {
+  session: any
+}) {
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const clientInfo = await getUserProfileAndEmail(session.client_id)
+  if (!clientInfo.email) return false
+
+  const dateObj = new Date(session.scheduled_date + 'T00:00:00')
+  const dateFormatted = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+  const subject = `[Rappel 24h] Séance d'entraînement demain : ${session.title}`
+  const text = `Bonjour ${clientInfo.name},\n\nRappel : vous avez une séance d'entraînement prévue demain !\n\n- Séance : ${session.title}\n- Date : ${dateFormatted}\n\nAccédez à votre séance sur Trackly :\n${origin}/client/workouts`
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e5e7eb; border-radius: 20px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="color: #2563eb; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">TRACKLY</h1>
+        <p style="color: #6b7280; font-size: 13px; margin-top: 4px;">Rappel Entraînement</p>
+      </div>
+      <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Préparez-vous : Séance d'entraînement demain ! 💪</h2>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Bonjour <strong>${clientInfo.name}</strong>,</p>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Votre séance d'entraînement <strong>${session.title}</strong> est au programme pour demain !</p>
+      
+      <div style="background-color: #f0fdf4; padding: 20px; border-radius: 16px; margin: 24px 0; border-left: 4px solid #16a34a;">
+        <p style="margin: 0 0 8px 0; color: #14532d; font-size: 16px; font-weight: 700;">🏋️ ${session.title}</p>
+        <p style="margin: 0 0 6px 0; color: #166534; font-size: 14px;">📆 <strong>Date :</strong> ${dateFormatted}</p>
+        ${session.notes ? `<p style="margin: 8px 0 0 0; color: #15803d; font-size: 13px; font-style: italic;">📝 ${session.notes}</p>` : ''}
+      </div>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${origin}/client/workouts" style="background-color: #16a34a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; display: inline-block;">Voir ma séance sur Trackly</a>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0 16px 0;" />
+      <p style="color: #9ca3af; font-size: 12px; text-align: center;">Notification automatique envoyée via Trackly.</p>
+    </div>
+  `
+
+  return await sendEmail({ to: clientInfo.email, subject, text, html })
+}

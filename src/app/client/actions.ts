@@ -25,7 +25,8 @@ export async function addAvailability(formData: FormData) {
     })
 
   if (error) {
-    throw new Error('Erreur lors de l\'ajout de la disponibilité')
+    console.error("Erreur addAvailability Supabase:", error)
+    throw new Error(error.message || 'Erreur lors de l\'ajout de la disponibilité')
   }
 
   // Notifier le coach par email
@@ -57,6 +58,7 @@ export async function deleteAvailability(id: string) {
   }
 
   revalidatePath('/client')
+  revalidatePath('/client/dispos')
 }
 
 export async function validateSession(sessionId: string, status: 'completed' | 'missed', feedback: string) {
