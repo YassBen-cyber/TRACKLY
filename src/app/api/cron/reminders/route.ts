@@ -14,9 +14,9 @@ export async function GET(request: Request) {
     }
 
     const now = new Date()
-    // 24h range for appointments: start_time between now + 23h and now + 25h
-    const windowStart = new Date(now.getTime() + 23 * 60 * 60 * 1000).toISOString()
-    const windowEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000).toISOString()
+    // Daily cron window (runs at 18:00): fetch all appointments scheduled in the next 30h with reminder_sent_at IS NULL
+    const windowStart = now.toISOString()
+    const windowEnd = new Date(now.getTime() + 30 * 60 * 60 * 1000).toISOString()
 
     // Date string for workouts tomorrow (YYYY-MM-DD)
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
