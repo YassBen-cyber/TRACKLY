@@ -23,7 +23,7 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('18:00')
   const [endTime, setEndTime] = useState('19:00')
-  const [availabilityType, setAvailabilityType] = useState('workout')
+  const [availabilityType, setAvailabilityType] = useState('both')
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -87,7 +87,7 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
             <h2 className="text-2xl font-bold text-foreground">Mes Disponibilités</h2>
           </div>
           <p className="text-muted-foreground text-sm mb-6">
-            Indiquez les jours exacts où vous êtes disponible pour vous entraîner ou pour un appel.
+            Indiquez les jours exacts où vous êtes disponible. Par défaut, vos créneaux sont valables pour un rendez-vous et un entraînement.
           </p>
 
           {error && (
@@ -128,14 +128,14 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
                 </Select>
               </div>
               <div className="flex-1">
-                <Select value={availabilityType} onValueChange={(val) => setAvailabilityType(val || 'workout')}>
+                <Select value={availabilityType} onValueChange={(val) => setAvailabilityType(val || 'both')}>
                   <SelectTrigger className="bg-card border-border h-11 rounded-xl text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-muted/50 border-border text-foreground">
-                    <SelectItem value="workout">Entraînement</SelectItem>
-                    <SelectItem value="appointment">Appel / Visio</SelectItem>
-                    <SelectItem value="both">Les deux</SelectItem>
+                    <SelectItem value="both">RDV & Entraînement (Par défaut)</SelectItem>
+                    <SelectItem value="workout">Entraînement uniquement</SelectItem>
+                    <SelectItem value="appointment">RDV / Visio uniquement</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -180,7 +180,7 @@ export function ClientAvailabilities({ availabilities, readOnly = false }: { ava
                         )}
                       </div>
                       <span className="text-xs mt-1 text-primary/70">
-                        {slot.availability_type === 'workout' ? 'Entraînement' : slot.availability_type === 'appointment' ? 'Appel / Visio' : 'Entraînement & Appel'}
+                        {slot.availability_type === 'workout' ? 'Entraînement uniquement' : slot.availability_type === 'appointment' ? 'RDV / Visio uniquement' : 'RDV & Entraînement'}
                       </span>
                     </div>
                   ))}

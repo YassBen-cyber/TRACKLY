@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { notifyClientAvailabilitiesAdded, notifyAppointmentEvent } from '@/lib/email'
 
 export async function addAvailability(formData: FormData) {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export async function addAvailability(formData: FormData) {
   const date = formData.get('date') as string
   const startTime = formData.get('startTime') as string
   const endTime = formData.get('endTime') as string
-  const availabilityType = (formData.get('availabilityType') as string) || 'workout'
+  const availabilityType = (formData.get('availabilityType') as string) || 'both'
 
   const { error } = await supabase
     .from('client_availabilities')
@@ -27,7 +28,17 @@ export async function addAvailability(formData: FormData) {
     throw new Error('Erreur lors de l\'ajout de la disponibilité')
   }
 
+  // Notifier le coach par email
+  notifyClientAvailabilitiesAdded({
+    clientId: user.id,
+    date,
+    startTime,
+    endTime,
+    availabilityType
+  }).catch(err => console.error("Erreur notification email (disponibilité):", err))
+
   revalidatePath('/client')
+  revalidatePath('/client/dispos')
 }
 
 export async function deleteAvailability(id: string) {
@@ -172,6 +183,19 @@ export async function createAppointmentAsClient(coachId: string, title: string, 
   if (error) {
     throw new Error('Erreur lors de la prise de rendez-vous')
   }
+
+  // Notifier le coach par email
+  notifyAppointmentEvent({
+    coachId,
+    clientId: user.id,
+    title,
+    startTime,
+    endTime,
+    locationType,
+    locationDetails,
+    notes,
+    createdByRole: 'client'
+  }).catch(err => console.error("Erreur notification email (RDV client):", err))
 
   revalidatePath('/client')
   revalidatePath('/coach/calendar')

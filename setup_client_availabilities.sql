@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.client_availabilities (
   date date NOT NULL,
   start_time time without time zone NOT NULL,
   end_time time without time zone NOT NULL,
-  availability_type text NOT NULL DEFAULT 'workout' CHECK (availability_type IN ('workout', 'appointment', 'both')),
+  availability_type text NOT NULL DEFAULT 'both' CHECK (availability_type IN ('workout', 'appointment', 'both')),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT client_availabilities_pkey PRIMARY KEY (id),
   CONSTRAINT client_availabilities_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.profiles(id)
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.client_availabilities (
 
 -- Try adding availability_type in case the table already exists
 ALTER TABLE public.client_availabilities 
-ADD COLUMN IF NOT EXISTS availability_type text NOT NULL DEFAULT 'workout' CHECK (availability_type IN ('workout', 'appointment', 'both'));
+ADD COLUMN IF NOT EXISTS availability_type text NOT NULL DEFAULT 'both' CHECK (availability_type IN ('workout', 'appointment', 'both'));
 
 -- Add location_type and location_details to appointments
 ALTER TABLE public.appointments

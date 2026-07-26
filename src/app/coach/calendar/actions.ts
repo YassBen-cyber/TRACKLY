@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { notifyAppointmentEvent } from '@/lib/email'
 
 export async function setAvailabilities(availabilities: { day_of_week: number, start_time: string, end_time: string }[]) {
   const supabase = await createClient()
@@ -68,6 +69,20 @@ export async function createAppointment(clientId: string, title: string, startTi
     console.error("Supabase insert error:", error)
     throw new Error(error.message || 'Erreur lors de la création du rendez-vous')
   }
+
+  // Notifier l'athlète par email
+  notifyAppointmentEvent({
+    coachId: user.id,
+    clientId,
+    title,
+    startTime,
+    endTime,
+    locationType,
+    locationDetails,
+    meetingUrl,
+    notes,
+    createdByRole: 'coach'
+  }).catch(err => console.error("Erreur notification email:", err))
 
   revalidatePath('/coach/calendar')
   revalidatePath(`/coach/client/${clientId}`) // Revalidate client page too
