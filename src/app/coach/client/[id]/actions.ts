@@ -354,3 +354,26 @@ export async function deleteMetricType(metricTypeId: string, clientId: string) {
   revalidatePath(`/coach/client/${clientId}`)
   return { success: true }
 }
+
+export async function updateClientGoal(clientId: string, mainGoal: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { data: profile } = await supabase.from('profiles').select('coach_id').eq('id', clientId).single()
+  if (profile?.coach_id !== user.id) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ main_goal: mainGoal })
+    .eq('id', clientId)
+
+  if (error) {
+    console.error('Error updating client goal:', error)
+    return { error: 'Erreur lors de la mise à jour de l\'objectif' }
+  }
+
+  revalidatePath(`/coach/client/${clientId}`)
+  revalidatePath('/coach')
+  return { success: true }
+}

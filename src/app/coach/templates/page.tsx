@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Target, List } from 'lucide-react'
 import { CreateTemplateModal } from './create-template-modal'
+import { EditTemplateModal } from './edit-template-modal'
 import { DeleteTemplateButton } from './delete-template-button'
 
 export default async function TemplatesPage() {
@@ -75,6 +76,7 @@ export default async function TemplatesPage() {
                   </TableCell>
                   <TableCell className="text-right px-6 py-4">
                     <div className="flex justify-end items-center gap-1">
+                      <EditTemplateModal template={template} />
                       <DeleteTemplateButton templateId={template.id} templateName={template.name} />
                     </div>
                   </TableCell>

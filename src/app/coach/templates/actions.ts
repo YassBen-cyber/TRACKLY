@@ -24,6 +24,27 @@ export async function createTemplate(coachId: string, data: { name: string, desc
   return { success: true }
 }
 
+export async function updateTemplate(templateId: string, data: { name: string, description: string, metrics: any[] }) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('metric_templates')
+    .update({
+      name: data.name,
+      description: data.description,
+      metrics: data.metrics
+    })
+    .eq('id', templateId)
+
+  if (error) {
+    console.error('Update template error', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/coach/templates')
+  return { success: true }
+}
+
 export async function deleteTemplate(templateId: string) {
   const supabase = await createClient()
 

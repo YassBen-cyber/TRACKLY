@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, User, Calendar, MapPin, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, User, Calendar, MapPin, AlertTriangle, Mail, CheckCircle2 } from 'lucide-react'
 import { ClientMetricsView } from './client-metrics-view'
 import { AssignTemplateModal } from './assign-template-modal'
 import { AssignProgramModal } from './assign-program-modal'
@@ -12,6 +12,8 @@ import { WeeklyPlanner } from './weekly-planner'
 import { ClientAvailabilities } from '@/app/client/client-availabilities'
 import { AppointmentHistory } from './appointment-history'
 import { CreateAppointmentModal } from '../../calendar/create-appointment-modal'
+
+import { ClientGoalCard } from './client-goal-card'
 
 export default async function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,6 +30,24 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
 
   if (!client || client.coach_id !== user.id) {
     redirect('/coach')
+  }
+
+  // Email de l'athlète
+  let clientEmail = client.email || null
+  if (!clientEmail && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+      const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      )
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(id)
+      if (authUser?.user?.email) {
+        clientEmail = authUser.user.email
+      }
+    } catch (e) {
+      console.error('Error fetching client email', e)
+    }
   }
 
   // Métriques
@@ -72,7 +92,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
           
           <div className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="flex items-center gap-6">
-              <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/50 shadow-[0_0_30px_rgba(var(--color-primary),0.3)] overflow-hidden">
+              <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/50 shadow-[0_0_30px_rgba(var(--color-primary),0.3)] overflow-hidden shrink-0">
                 {client.photo_url ? (
                   <img src={client.photo_url} alt={client.full_name} className="w-full h-full object-cover" />
                 ) : (
@@ -81,7 +101,12 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
               </div>
               <div className="space-y-2">
                 <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{client.full_name}</h1>
-                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {clientEmail && (
+                    <p className="text-foreground font-semibold text-sm flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-xl border border-blue-500/20">
+                      <Mail className="h-4 w-4 text-blue-400" /> {clientEmail}
+                    </p>
+                  )}
                   <p className="text-muted-foreground text-sm flex items-center gap-1.5">
                     <Calendar className="h-4 w-4" /> Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
                   </p>
@@ -101,14 +126,30 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
 
           </div>
 
-          {client.medical_history && (
-            <div className="glass-panel p-6 rounded-3xl border border-red-200 bg-red-50 flex gap-4 items-start">
-              <div className="bg-red-100 p-3 rounded-2xl flex-shrink-0">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+          {/* Rappel d'Objectif Principal du Coach */}
+          <ClientGoalCard clientId={client.id} mainGoal={client.main_goal} />
+
+          {/* Section Maladies / Antécédents médicaux */}
+          {client.medical_history ? (
+            <div className="glass-panel p-6 rounded-3xl border border-red-500/30 bg-red-500/10 flex gap-4 items-start shadow-sm">
+              <div className="bg-red-500/20 p-3 rounded-2xl flex-shrink-0 text-red-400">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-red-400 text-base flex items-center gap-2">
+                  <span>Antécédents médicaux, maladies & blessures</span>
+                </h3>
+                <p className="text-foreground/90 text-sm whitespace-pre-wrap leading-relaxed">{client.medical_history}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="glass-panel p-5 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 flex gap-4 items-center">
+              <div className="bg-emerald-500/10 p-2.5 rounded-2xl text-emerald-400 shrink-0">
+                <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-bold text-red-900 mb-1">Antécédents médicaux et blessures</h3>
-                <p className="text-red-800 text-sm whitespace-pre-wrap">{client.medical_history}</p>
+                <h3 className="font-semibold text-foreground text-sm">Informations médicales</h3>
+                <p className="text-muted-foreground text-xs">Aucun antécédent médical ni maladie/blessure renseigné par l'athlète.</p>
               </div>
             </div>
           )}

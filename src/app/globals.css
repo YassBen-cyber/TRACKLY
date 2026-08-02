@@ -100,26 +100,28 @@
 }
 
 .force-light {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --card: #ffffff;
-  --card-foreground: #0a0a0a;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #0a0a0a;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #0a0a0a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #0a0a0a;
-  color-scheme: light;
+  --background: #ffffff !important;
+  --foreground: #0a0a0a !important;
+  --card: #ffffff !important;
+  --card-foreground: #0a0a0a !important;
+  --popover: #ffffff !important;
+  --popover-foreground: #0a0a0a !important;
+  --primary: #0a0a0a !important;
+  --primary-foreground: #ffffff !important;
+  --secondary: #f5f5f5 !important;
+  --secondary-foreground: #0a0a0a !important;
+  --muted: #f5f5f5 !important;
+  --muted-foreground: #737373 !important;
+  --accent: #f5f5f5 !important;
+  --accent-foreground: #0a0a0a !important;
+  --destructive: #ef4444 !important;
+  --destructive-foreground: #ffffff !important;
+  --border: #e5e5e5 !important;
+  --input: #e5e5e5 !important;
+  --ring: #0a0a0a !important;
+  color-scheme: light !important;
+  background-color: #ffffff !important;
+  color: #0a0a0a !important;
 }
 
 :root.dark {
@@ -193,4 +195,92 @@ html{
 .imghero {
   width: 50% !important;
   margin: auto
+}
+
+/* ── Uiverse.io Button ────────────────────────────────────── */
+.uiverse-button {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  outline: none;
+  border: 0;
+  vertical-align: middle;
+  text-decoration: none;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  width: 14rem;
+  height: auto;
+}
+
+.uiverse-button .circle {
+  transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+  position: relative;
+  display: block;
+  margin: 0;
+  width: 3rem;
+  height: 3rem;
+  background: var(--foreground);
+  border-radius: 1.625rem;
+}
+
+.uiverse-button .circle .icon {
+  transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  background: var(--background);
+}
+
+.uiverse-button .circle .icon.arrow {
+  transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+  left: 0.625rem;
+  width: 1.125rem;
+  height: 0.125rem;
+  background: none;
+}
+
+.uiverse-button .circle .icon.arrow::before {
+  position: absolute;
+  content: "";
+  top: -0.29rem;
+  right: 0.0625rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-top: 0.125rem solid var(--background);
+  border-right: 0.125rem solid var(--background);
+  transform: rotate(45deg);
+}
+
+.uiverse-button .button-text {
+  transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.75rem 0;
+  margin: 0 0 0 1.85rem;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.uiverse-button:hover .circle {
+  width: 100%;
+}
+
+.uiverse-button:hover .circle .icon.arrow {
+  background: var(--background);
+  transform: translate(1rem, 0);
+}
+
+.uiverse-button:hover .button-text {
+  color: var(--background);
 }
