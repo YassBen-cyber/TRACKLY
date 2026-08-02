@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 import { MobileNav } from '@/components/mobile-nav'
 import { SidebarNav } from '@/components/sidebar-nav'
+import { LogoutButton } from '@/components/logout-button'
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -61,17 +62,7 @@ export default async function ClientLayout({ children }: { children: React.React
               {profile?.full_name || 'Athlète'}
             </div>
           </div>
-          <form action={async () => {
-            'use server'
-            const sb = await createClient()
-            await sb.auth.signOut()
-            redirect('/login')
-          }}>
-            <Button type="submit" variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-red-600">
-              <LogOut className="mr-3 h-5 w-5" />
-              Déconnexion
-            </Button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
 
@@ -95,19 +86,7 @@ export default async function ClientLayout({ children }: { children: React.React
               </div>
             </div>
           }
-          logoutNode={
-            <form action={async () => {
-              'use server'
-              const sb = await createClient()
-              await sb.auth.signOut()
-              redirect('/login')
-            }}>
-              <Button type="submit" variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
-                <LogOut className="mr-3 h-5 w-5" />
-                Déconnexion
-              </Button>
-            </form>
-          }
+          logoutNode={<LogoutButton />}
         />
         
         <div className="p-4 md:p-8 max-w-5xl mx-auto">

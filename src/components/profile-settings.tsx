@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Camera, User, Lock, Save, CheckCircle2 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { createClient } from '@/utils/supabase/client'
+import { LogoutButton } from '@/components/logout-button'
 
 export function ProfileSettings({ profile }: { profile: any }) {
   const [fullName, setFullName] = useState(profile.full_name || '')
@@ -192,10 +193,16 @@ export function ProfileSettings({ profile }: { profile: any }) {
           </div>
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold shadow-lg shadow-primary/20">
-          {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
-          {isSubmitting ? "Enregistrement..." : "Enregistrer les modifications"}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary hover:bg-primary/90 text-lg font-bold shadow-lg shadow-primary/20">
+            {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
+            {isSubmitting ? "Enregistrement..." : "Enregistrer les modifications"}
+          </Button>
+
+          <div className="w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-border">
+            <LogoutButton className="w-full sm:w-auto h-12 px-6 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 font-semibold transition-colors" />
+          </div>
+        </div>
       </form>
     </div>
   )
