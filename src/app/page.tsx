@@ -66,7 +66,7 @@ export default function LandingPage() {
           FLOATING PILL GLASS NAVBAR
       ──────────────────────────────────────────────────────────── */}
       <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
-        <nav className="pointer-events-auto w-full max-w-xl rounded-full bg-white/70 backdrop-blur-2xl border border-black/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300">
+        <nav className="pointer-events-auto w-full max-w-2xl rounded-full bg-white/70 backdrop-blur-2xl border border-black/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <Logo size={36} />
