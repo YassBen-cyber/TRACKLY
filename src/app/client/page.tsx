@@ -102,7 +102,7 @@ export default async function ClientDashboard() {
       <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            Bonjour, {profile?.full_name || user.email} 👋
+            Bonjour, {profile?.full_name || user.email}
           </h1>
           <p className="text-muted-foreground mt-1">Consultez votre programme du jour ou choisissez une autre date.</p>
         </div>

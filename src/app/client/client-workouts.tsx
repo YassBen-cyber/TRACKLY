@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Calendar, CheckCircle2, XCircle, AlertCircle, Loader2, Dumbbell, Clock } from 'lucide-react'
 import { validateSession } from './actions'
 import Link from 'next/link'
+import { ExerciseDetailsModal } from '@/components/exercise-details-modal'
 
 export function ClientWorkouts({ sessions }: { sessions: any[] }) {
   const [validatingSession, setValidatingSession] = useState<any>(null)
@@ -91,11 +92,14 @@ export function ClientWorkouts({ sessions }: { sessions: any[] }) {
             {session.exercises && session.exercises.length > 0 ? (
               session.exercises.map((ex: any, idx: number) => (
                 <div key={idx} className="bg-muted/40 p-2.5 rounded-lg border border-border">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-semibold text-foreground">{ex.name}</span>
-                    <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                      {ex.sets}x{ex.reps}
-                    </span>
+                  <div className="flex justify-between items-center mb-1 gap-2">
+                    <span className="text-sm font-semibold text-foreground truncate">{ex.name}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                        {ex.sets}x{ex.reps}
+                      </span>
+                      <ExerciseDetailsModal exercise={ex} />
+                    </div>
                   </div>
                   {(ex.rest || ex.notes) && (
                     <div className="text-xs text-muted-foreground flex flex-wrap gap-2">

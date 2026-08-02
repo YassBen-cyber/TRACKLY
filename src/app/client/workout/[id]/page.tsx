@@ -30,7 +30,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
     .single()
 
   return (
-    <div className="min-h-screen bg-[#F2F1ED] p-4 md:p-8">
+    <div className="min-h-screen  md:p-8">
       <WorkoutDetailsClient session={session} coachName={coach?.full_name} />
     </div>
   )

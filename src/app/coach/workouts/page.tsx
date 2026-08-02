@@ -2,6 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Dumbbell, Calendar as CalendarIcon } from 'lucide-react'
 import { CreateWorkoutModal } from './create-workout-modal'
+import { EditWorkoutModal } from './edit-workout-modal'
+import { DeleteWorkoutButton } from './delete-workout-button'
+import { DuplicateWorkoutButton } from './duplicate-workout-button'
 import { Button } from '@/components/ui/button'
 
 export default async function WorkoutsPage() {
@@ -47,6 +50,11 @@ export default async function WorkoutsPage() {
               <div className="flex justify-between items-start mb-4">
                 <div className="bg-primary/20 p-3 rounded-2xl">
                   <Dumbbell className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DuplicateWorkoutButton id={template.id} />
+                  <EditWorkoutModal template={template} />
+                  <DeleteWorkoutButton id={template.id} />
                 </div>
               </div>
               

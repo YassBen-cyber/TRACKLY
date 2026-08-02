@@ -123,25 +123,25 @@
 }
 
 :root.dark {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: #0a0a0a;
-  --card-foreground: #ffffff;
-  --popover: #0a0a0a;
-  --popover-foreground: #ffffff;
-  --primary: #ff5500;
-  --primary-foreground: #ffffff;
-  --secondary: #171717;
-  --secondary-foreground: #ffffff;
-  --muted: #171717;
-  --muted-foreground: #a3a3a3;
-  --accent: #171717;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #262626;
-  --input: #262626;
-  --ring: #ff5500;
+  --background: #12151E;
+  --foreground: #F8FAFC;
+  --card: #1B1E2B;
+  --card-foreground: #F8FAFC;
+  --popover: #1B1E2B;
+  --popover-foreground: #F8FAFC;
+  --primary: #FFFFFF;
+  --primary-foreground: #12151E;
+  --secondary: #242838;
+  --secondary-foreground: #F8FAFC;
+  --muted: #242838;
+  --muted-foreground: #94A3B8;
+  --accent: #242838;
+  --accent-foreground: #F8FAFC;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #2B3042;
+  --input: #2B3042;
+  --ring: #FFFFFF;
 }
 
 @layer base {
@@ -186,8 +186,8 @@ html{
 }
 
 :root.dark .glass-panel {
-  background: #121212;
-  border-color: #262626;
+  background: #1B1E2B;
+  border-color: #2B3042;
 }
 
 .imghero {

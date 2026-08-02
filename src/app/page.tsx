@@ -51,37 +51,103 @@ function AccordionItem({ question, answer }: { question: string; answer: string 
 }
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="force-light min-h-screen bg-background font-sans selection:bg-primary/30 selection:text-primary transition-colors duration-300">
       
       {/* ────────────────────────────────────────────────────────────
-          NAVBAR
+          FLOATING PILL GLASS NAVBAR
       ──────────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 inset-x-0 h-20 border-b border-border/50 bg-background/80 backdrop-blur-xl z-50 transition-colors duration-300">
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <Logo size={42} />
-            <span className="font-sans text-xl font-medium tracking-tight text-foreground">Trackly</span>
+      <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
+        <nav className="pointer-events-auto w-full max-w-5xl rounded-full bg-background/50 dark:bg-background/40 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300">
+          {/* Logo & Brand */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <Logo size={36} />
+            <span className="font-sans text-lg font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+              Trackly
+            </span>
           </Link>
           
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Fonctionnalités</a>
-            <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Tarifs</a>
-            <a href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/40">
+            <a href="#features" className="px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">
+              Fonctionnalités
+            </a>
+            <a href="#faq" className="px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">
+              FAQ
+            </a>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Desktop CTA Buttons */}
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/login">
-              <Button variant="ghost" className="text-sm font-medium px-3 sm:px-4">Connexion</Button>
+              <Button variant="ghost" className="text-xs font-semibold px-4 rounded-full hover:bg-muted">
+                Connexion
+              </Button>
             </Link>
             <Link href="/register">
-              <Button className="rounded-full px-4 sm:px-6 text-sm sm:text-base font-medium tracking-tight shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+              <Button className="rounded-full px-5 text-xs font-bold tracking-tight shadow-md shadow-primary/20 hover:scale-105 transition-all bg-primary hover:bg-primary/90 text-primary-foreground">
                 Démarrer
               </Button>
             </Link>
           </div>
+
+          {/* Mobile Hamburger Button (2 ultra-thin bars) */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden relative w-10 h-10 flex flex-col justify-center items-center rounded-full bg-muted/60 hover:bg-muted border border-border/40 transition-colors focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            <div className="w-5 flex flex-col gap-[6px] items-center justify-center">
+              <span
+                className={`h-[1.5px] w-5 bg-foreground rounded-full transition-all duration-300 transform origin-center ${
+                  mobileMenuOpen ? 'rotate-45 translate-y-[3.75px]' : ''
+                }`}
+              />
+              <span
+                className={`h-[1.5px] w-5 bg-foreground rounded-full transition-all duration-300 transform origin-center ${
+                  mobileMenuOpen ? '-rotate-45 -translate-y-[3.75px]' : ''
+                }`}
+              />
+            </div>
+          </button>
+        </nav>
+      </header>
+
+      {/* Mobile Glass Menu Dropdown Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed top-20 inset-x-4 z-40 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="rounded-3xl bg-background/75 dark:bg-background/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl p-6 flex flex-col space-y-3">
+            <a
+              href="#features"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-semibold text-foreground hover:text-primary py-2.5 px-4 rounded-2xl hover:bg-muted/50 transition-colors"
+            >
+              Fonctionnalités
+            </a>
+            <a
+              href="#faq"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-semibold text-foreground hover:text-primary py-2.5 px-4 rounded-2xl hover:bg-muted/50 transition-colors"
+            >
+              FAQ
+            </a>
+            <div className="pt-3 border-t border-border flex flex-col gap-2.5">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full rounded-2xl h-11 text-xs font-bold border-border">
+                  Connexion
+                </Button>
+              </Link>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full rounded-2xl h-11 text-xs font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Démarrer
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-      </nav>
+      )}
 
       {/* ────────────────────────────────────────────────────────────
           HERO SECTION
@@ -92,7 +158,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 space-y-8 text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-light tracking-tighter text-foreground leading-[1.1]">
-              Le CRM qui <span className="font-serif italic font-light text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">simplifie</span> votre coaching.
+              Le CRM qui <span className="font-serif italic font-light text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-400 to-sky-400">simplifie</span> votre coaching.
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Centralisez vos athlètes, planifiez leurs entraînements, suivez leurs performances, gérez vos rendez-vous et vos paiements depuis une seule plateforme.
@@ -117,16 +183,187 @@ export default function LandingPage() {
             </div>
           </div>
           
-          <div className="flex-1 w-full relative">
-<div className="relative h-64 sm:h-80 md:h-[30vw]">
-  <Image
-    src="/web-app.png"
-    alt="Trackly logo"
-    fill
-    className="object-contain rounded-2xl md:rounded-[2rem]"
-    priority
-  />
-</div>
+          <div className="flex-1 w-full flex justify-center items-center overflow-hidden py-4">
+            <div className="scale-[0.52] sm:scale-[0.72] md:scale-[0.85] lg:scale-100 origin-center transition-transform duration-300">
+              <div 
+                style={{
+                  position: 'relative',
+                  width: '891px',
+                  height: '634px',
+                  marginTop: '0px',
+                  flexShrink: 0,
+                  transformOrigin: '50% 40% 0px',
+                  willChange: 'transform',
+                  transform: 'perspective(1100px) rotateX(0deg) translateY(0px)'
+                }}
+              >
+                {/* Image Cadre iPhone Umano Studio */}
+                <img 
+                  alt="Trackly App Frame" 
+                  fetchPriority="high" 
+                  style={{
+                    position: 'absolute',
+                    top: '-31px',
+                    left: '-85px',
+                    width: '1061px',
+                    height: '707px',
+                    pointerEvents: 'none'
+                  }} 
+                  src="https://umanodesign.studio/assets/105e7cd3a106296d90d081af3766923516632143.webp" 
+                />
+
+                {/* Barre de statut iOS */}
+                <div style={{
+                  position: 'absolute',
+                  left: '321px',
+                  top: '54px',
+                  width: '249px',
+                  height: '38px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0px 15px'
+                }}>
+                  <span style={{
+                    fontFamily: '"Inter", sans-serif',
+                    fontWeight: 600,
+                    fontSize: '10.5px',
+                    color: 'rgb(0, 0, 0)'
+                  }}>9:41</span>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <div className="w-2.5 h-2 bg-black rounded-sm opacity-80" />
+                    <div className="w-2.5 h-2 bg-black rounded-sm opacity-90" />
+                    <div className="w-3.5 h-2 border border-black rounded-[2px] p-[1px] flex items-center">
+                      <div className="w-2 h-full bg-black rounded-[1px]" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Écran du téléphone avec notification & aperçu Trackly */}
+                <div style={{
+                  position: 'absolute',
+                  left: '340px',
+                  top: '115px',
+                  width: '211px',
+                  height: '442px',
+                  background: '#090D16',
+                  borderRadius: '17px',
+                  padding: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '9px',
+                  overflow: 'hidden'
+                }}>
+                  {/* Notification Haute (Header notification style Umano) */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    padding: '6px 8px'
+                  }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+                      borderRadius: '10px',
+                      width: '36px',
+                      height: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+                    }}>
+                      <Image src="/TRACKLY_LOGO.webp" alt="Trackly" width={20} height={20} className="object-contain" />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                      <span style={{
+                        fontFamily: '"Inter", sans-serif',
+                        fontWeight: 500,
+                        fontSize: '8px',
+                        color: '#60A5FA',
+                        letterSpacing: '0.3px',
+                        textTransform: 'uppercase'
+                      }}>Trackly Coaching</span>
+                      <span style={{
+                        fontFamily: '"Inter", sans-serif',
+                        fontWeight: 600,
+                        fontSize: '9.5px',
+                        color: '#FFFFFF',
+                        lineHeight: '13px',
+                        marginTop: '-1px'
+                      }}>Séance terminée par Thomas ! 🔥</span>
+                    </div>
+                  </div>
+
+                  {/* Contenu UI de l'application en direct */}
+                  <div className="flex-1 w-full rounded-xl bg-slate-900/90 border border-white/10 p-3 flex flex-col justify-between overflow-hidden relative">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-[9px] text-slate-400 font-medium">Programme Athlète</p>
+                          <p className="text-xs font-bold text-white leading-tight">Full Body Hypertrophie</p>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[8px] font-bold">En cours</span>
+                      </div>
+
+                      {/* Barre de progression */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[8px] text-slate-300 font-semibold">
+                          <span>Progression Séance</span>
+                          <span className="text-blue-400 font-bold">85%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 w-[85%] rounded-full shadow-sm" />
+                        </div>
+                      </div>
+
+                      {/* Liste d'exercices */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[7px] font-bold">✓</div>
+                            <span className="text-[9px] font-semibold text-slate-200">Développé couché</span>
+                          </div>
+                          <span className="text-[8px] font-mono text-slate-400">4x10 @ 80kg</span>
+                        </div>
+
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[7px] font-bold">✓</div>
+                            <span className="text-[9px] font-semibold text-slate-200">Squat barre</span>
+                          </div>
+                          <span className="text-[8px] font-mono text-slate-400">4x8 @ 110kg</span>
+                        </div>
+
+                        <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[7px] font-bold">3</div>
+                            <span className="text-[9px] font-bold text-blue-400">Traction supinatrice</span>
+                          </div>
+                          <span className="text-[8px] font-mono text-blue-300 font-bold">3xMAX</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bilan & Métriques au bas du téléphone */}
+                    <div className="mt-auto p-2 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs">⚡</span>
+                        <div>
+                          <p className="text-[8px] text-slate-300 font-medium">Bilan de performance</p>
+                          <p className="text-[9px] font-bold text-white">+12% de force ce mois</p>
+                        </div>
+                      </div>
+                      <span className="text-[8px] font-bold text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded-md">PRO</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

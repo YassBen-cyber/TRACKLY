@@ -27,12 +27,12 @@ export default async function CoachLayout({
     { href: '/coach', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     { href: '/coach/clients', label: 'Athlètes', icon: <Users className="h-5 w-5" /> },
     { href: '/coach/workouts', label: 'Séances', icon: <Dumbbell className="h-5 w-5" /> },
+    { href: '/coach/exercises', label: 'Exercices', icon: <BookOpen className="h-5 w-5" /> },
     { href: '/coach/programs', label: 'Programmes', icon: <CalendarRange className="h-5 w-5" /> },
     { href: '/coach/calendar', label: 'Calendrier', icon: <Calendar className="h-5 w-5" /> },
     { href: '/coach/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },
     { href: '/coach/templates', label: 'Objectifs', icon: <Settings2 className="h-5 w-5" /> },
     { href: '/coach/settings', label: 'Profil & Paramètres', icon: <Settings className="h-5 w-5" /> },
-    { href: '/coach/help', label: "Centre d'Aide", icon: <BookOpen className="h-5 w-5" /> },
   ]
 
   return (
@@ -89,6 +89,7 @@ export default async function CoachLayout({
             { href: '/coach', label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
             { href: '/coach/clients', label: 'Athlètes', icon: <Users className="h-5 w-5" /> },
             { href: '/coach/workouts', label: 'Séances', icon: <Dumbbell className="h-5 w-5" /> },
+            { href: '/coach/exercises', label: 'Exercices', icon: <BookOpen className="h-5 w-5" /> },
             { href: '/coach/programs', label: 'Programmes', icon: <CalendarRange className="h-5 w-5" /> },
             { href: '/coach/calendar', label: 'Calendrier', icon: <Calendar className="h-5 w-5" /> },
             { href: '/coach/payments', label: 'Paiements', icon: <CreditCard className="h-5 w-5" /> },

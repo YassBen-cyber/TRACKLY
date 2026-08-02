@@ -14,8 +14,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Loader2, Plus, Trash2, Edit, Video, FileText } from 'lucide-react'
-import { updateAssignedSession, deleteAssignedSession } from './actions'
-import { getCoachExercises } from '@/app/coach/exercises/actions'
+import { updateWorkoutTemplate } from './actions'
+import { getCoachExercises } from '../exercises/actions'
 import { ExerciseSearchPicker } from '@/components/exercise-search-picker'
 
 type Exercise = {
@@ -27,22 +27,15 @@ type Exercise = {
   video_url?: string;
 }
 
-export function EditAssignedSessionModal({ 
-  clientId, 
-  session 
-}: { 
-  clientId: string, 
-  session: any
-}) {
+export function EditWorkoutModal({ template }: { template: any }) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [libraryExercises, setLibraryExercises] = useState<any[]>([])
-  
-  const [title, setTitle] = useState(session.title)
-  const [date, setDate] = useState(session.scheduled_date)
-  const [exercises, setExercises] = useState<Exercise[]>(session.exercises || [])
+
+  const [exercises, setExercises] = useState<Exercise[]>(
+    template.exercises?.length ? template.exercises : [{ name: '', sets: '', reps: '', rest: '', notes: '', video_url: '' }]
+  )
 
   useEffect(() => {
     if (open) {
@@ -84,10 +77,17 @@ export function EditAssignedSessionModal({
     setIsLoading(true)
     setError(null)
 
+    // Validation basique
     const validExercises = exercises.filter(ex => ex.name.trim() !== '')
+    if (validExercises.length === 0) {
+      setError('Veuillez ajouter au moins un exercice valide.')
+      setIsLoading(false)
+      return
+    }
 
+    const formData = new FormData(e.currentTarget)
     try {
-      await updateAssignedSession(session.id, clientId, title, date, validExercises)
+      await updateWorkoutTemplate(template.id, formData, validExercises)
       setOpen(false)
     } catch (err: any) {
       setError(err.message)
@@ -96,24 +96,11 @@ export function EditAssignedSessionModal({
     }
   }
 
-  const handleDelete = async () => {
-    if (!confirm("Voulez-vous vraiment supprimer cette séance ?")) return;
-    setIsDeleting(true);
-    setError(null);
-    try {
-      await deleteAssignedSession(session.id, clientId)
-      setOpen(false)
-    } catch (err: any) {
-      setError(err.message)
-      setIsDeleting(false)
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <button className="text-muted-foreground hover:text-foreground transition-colors" title="Modifier ou supprimer">
-          <Edit className="h-4 w-4" />
+        <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
+          <Edit className="h-5 w-5" />
         </button>
       } />
       <DialogContent className="sm:max-w-[750px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
@@ -121,11 +108,11 @@ export function EditAssignedSessionModal({
           <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <Edit className="h-5 w-5 text-blue-500" />
-                Modifier la séance assignée
+                <Edit className="h-5 w-5 text-primary" />
+                Modifier le Template
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                Ajustez les exercices spécifiquement pour cet athlète ou supprimez la séance.
+                Ajustez les exercices, séries, consignes ou vidéos du modèle de séance.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -139,29 +126,28 @@ export function EditAssignedSessionModal({
 
             <div className="space-y-4">
               <div className="space-y-2 group">
-                <Label className="text-muted-foreground group-focus-within:text-blue-500 transition-colors">Nom de la séance</Label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50" />
+                <Label htmlFor={`title-${template.id}`} className="text-muted-foreground group-focus-within:text-primary transition-colors">Nom de la séance</Label>
+                <Input id={`title-${template.id}`} name="title" defaultValue={template.title} required placeholder="Ex: Full Body Hypertrophie" className="bg-card border-border h-11 rounded-xl text-foreground focus:border-primary/50" />
               </div>
               <div className="space-y-2 group">
-                <Label className="text-muted-foreground group-focus-within:text-blue-500 transition-colors">Date de la séance</Label>
-                <Input type="date" value={date} onChange={e => setDate(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-blue-500/50 dark:[color-scheme:dark]" />
+                <Label htmlFor={`desc-${template.id}`} className="text-muted-foreground group-focus-within:text-primary transition-colors">Description (Optionnelle)</Label>
+                <Input id={`desc-${template.id}`} name="description" defaultValue={template.description || ''} placeholder="Ex: Séance axée sur le volume musculaire" className="bg-card border-border h-11 rounded-xl text-foreground focus:border-primary/50" />
               </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
                 <Label className="text-lg font-semibold text-foreground">Exercices</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-blue-500 hover:bg-blue-500/10 hover:text-blue-400">
+                <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-primary hover:bg-primary/10">
                   <Plus className="h-4 w-4 mr-1" /> Ajouter un exercice
                 </Button>
               </div>
 
               <div className="space-y-4">
-                {exercises.length === 0 && <p className="text-sm text-muted-foreground italic">Aucun exercice.</p>}
                 {exercises.map((ex, idx) => (
-                  <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all hover:border-blue-500/30">
+                  <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all hover:border-primary/30">
                     <div className="flex items-center justify-between gap-2 pr-8">
-                      <span className="text-xs font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-lg">
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg">
                         Exercice #{idx + 1}
                       </span>
                       {libraryExercises.length > 0 && (
@@ -172,9 +158,11 @@ export function EditAssignedSessionModal({
                       )}
                     </div>
 
-                    <button type="button" onClick={() => removeExercise(idx)} className="absolute top-4 right-4 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {exercises.length > 1 && (
+                      <button type="button" onClick={() => removeExercise(idx)} className="absolute top-4 right-4 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1 md:col-span-2">
@@ -202,7 +190,7 @@ export function EditAssignedSessionModal({
                         <Label className="text-xs text-muted-foreground flex items-center gap-1">
                           <FileText className="h-3 w-3 text-emerald-400" /> Consignes & Conseils (Optionnel)
                         </Label>
-                        <Input value={ex.notes || ''} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes..." className="h-9 bg-muted/40 border-border text-foreground rounded-lg text-xs" />
+                        <Input value={ex.notes || ''} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes de la séance..." className="h-9 bg-muted/40 border-border text-foreground rounded-lg text-xs" />
                       </div>
                     </div>
                   </div>
@@ -212,19 +200,13 @@ export function EditAssignedSessionModal({
           </div>
 
           <div className="p-6 border-t border-border bg-card shrink-0">
-            <DialogFooter className="flex justify-between sm:justify-between w-full">
-              <Button type="button" onClick={handleDelete} disabled={isDeleting || isLoading} className="rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border-none shadow-none">
-                {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Supprimer la séance
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
+                Annuler
               </Button>
-              <div className="flex gap-2">
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl hover:bg-muted text-foreground">
-                  Annuler
-                </Button>
-                <Button type="submit" disabled={isLoading || isDeleting} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-foreground shadow-lg shadow-blue-600/20">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sauvegarder'}
-                </Button>
-              </div>
+              <Button type="submit" disabled={isLoading} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Enregistrer'}
+              </Button>
             </DialogFooter>
           </div>
         </form>

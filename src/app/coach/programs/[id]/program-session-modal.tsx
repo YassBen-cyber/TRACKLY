@@ -13,8 +13,10 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Plus, Trash2, Dumbbell, Library } from 'lucide-react'
+import { Loader2, Plus, Trash2, Dumbbell, Library, Video, FileText } from 'lucide-react'
 import { saveProgramSession } from '../actions'
+import { getCoachExercises } from '@/app/coach/exercises/actions'
+import { ExerciseSearchPicker } from '@/components/exercise-search-picker'
 
 type Exercise = {
   name: string;
@@ -22,6 +24,7 @@ type Exercise = {
   reps: string;
   rest: string;
   notes: string;
+  video_url?: string;
 }
 
 export function ProgramSessionModal({ 
@@ -41,6 +44,7 @@ export function ProgramSessionModal({
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [libraryExercises, setLibraryExercises] = useState<any[]>([])
   
   // Tab state: 'template' or 'manual'
   const [tab, setTab] = useState('template')
@@ -50,10 +54,11 @@ export function ProgramSessionModal({
   
   // Manual state
   const [title, setTitle] = useState("Nouvelle séance")
-  const [exercises, setExercises] = useState<Exercise[]>([{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+  const [exercises, setExercises] = useState<Exercise[]>([{ name: '', sets: '', reps: '', rest: '', notes: '', video_url: '' }])
 
   useEffect(() => {
     if (open) {
+      getCoachExercises().then(setLibraryExercises).catch(console.error)
       if (existingSession) {
         if (existingSession.session_template_id) {
           setTab('template')
@@ -61,20 +66,20 @@ export function ProgramSessionModal({
         } else {
           setTab('manual')
           setTitle(existingSession.title)
-          setExercises(existingSession.exercises?.length ? existingSession.exercises : [{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+          setExercises(existingSession.exercises?.length ? existingSession.exercises : [{ name: '', sets: '', reps: '', rest: '', notes: '', video_url: '' }])
         }
       } else {
         setTab('template')
         setSelectedTemplateId('')
         setTitle("Nouvelle séance")
-        setExercises([{ name: '', sets: '', reps: '', rest: '', notes: '' }])
+        setExercises([{ name: '', sets: '', reps: '', rest: '', notes: '', video_url: '' }])
       }
       setError(null)
     }
   }, [open, existingSession])
 
   const addExercise = () => {
-    setExercises([...exercises, { name: '', sets: '', reps: '', rest: '', notes: '' }])
+    setExercises([...exercises, { name: '', sets: '', reps: '', rest: '', notes: '', video_url: '' }])
   }
 
   const removeExercise = (index: number) => {
@@ -83,8 +88,23 @@ export function ProgramSessionModal({
 
   const updateExercise = (index: number, field: keyof Exercise, value: string) => {
     const newExercises = [...exercises]
-    newExercises[index][field] = value
+    newExercises[index] = { ...newExercises[index], [field]: value }
     setExercises(newExercises)
+  }
+
+  const selectFromLibrary = (index: number, libraryId: string) => {
+    if (!libraryId) return
+    const selected = libraryExercises.find(ex => ex.id === libraryId)
+    if (selected) {
+      const newExercises = [...exercises]
+      newExercises[index] = {
+        ...newExercises[index],
+        name: selected.name,
+        notes: selected.notes || newExercises[index].notes,
+        video_url: selected.video_url || newExercises[index].video_url
+      }
+      setExercises(newExercises)
+    }
   }
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -131,7 +151,7 @@ export function ProgramSessionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[750px] bg-card border-border text-foreground rounded-2xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
         <form onSubmit={onSubmit} className="flex flex-col h-full overflow-hidden">
           <div className="p-6 pb-4 border-b border-border bg-card shrink-0">
             <DialogHeader>
@@ -198,19 +218,31 @@ export function ProgramSessionModal({
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-semibold text-foreground">Exercices</Label>
                     <Button type="button" variant="outline" size="sm" onClick={addExercise} className="rounded-lg border-border text-primary hover:bg-primary/10 hover:text-primary">
-                      <Plus className="h-4 w-4 mr-1" /> Ajouter
+                      <Plus className="h-4 w-4 mr-1" /> Ajouter un exercice
                     </Button>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {exercises.length === 0 && <p className="text-sm text-muted-foreground italic">Aucun exercice.</p>}
                     {exercises.map((ex, idx) => (
-                      <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all">
-                        <button type="button" onClick={() => removeExercise(idx)} className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-colors">
+                      <div key={idx} className="bg-card border border-border rounded-xl p-4 space-y-3 relative group transition-all hover:border-primary/30">
+                        <div className="flex items-center justify-between gap-2 pr-8">
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg">
+                            Exercice #{idx + 1}
+                          </span>
+                          {libraryExercises.length > 0 && (
+                            <ExerciseSearchPicker
+                              libraryExercises={libraryExercises}
+                              onSelect={(selected) => selectFromLibrary(idx, selected.id)}
+                            />
+                          )}
+                        </div>
+
+                        <button type="button" onClick={() => removeExercise(idx)} className="absolute top-4 right-4 text-muted-foreground hover:text-destructive transition-colors">
                           <Trash2 className="h-4 w-4" />
                         </button>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div className="space-y-1 md:col-span-2">
                             <Label className="text-xs text-muted-foreground">Nom de l'exercice</Label>
                             <Input value={ex.name} onChange={(e) => updateExercise(idx, 'name', e.target.value)} required={tab==='manual'} placeholder="Ex: Squat" className="h-9 bg-muted/40 border-border text-foreground rounded-lg" />
@@ -223,11 +255,20 @@ export function ProgramSessionModal({
                             </div>
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">Repos & Notes</Label>
-                            <div className="flex gap-2">
-                              <Input value={ex.rest} onChange={(e) => updateExercise(idx, 'rest', e.target.value)} placeholder="Repos" className="h-9 bg-muted/40 border-border text-foreground rounded-lg w-1/3" />
-                              <Input value={ex.notes} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes" className="h-9 bg-muted/40 border-border text-foreground rounded-lg flex-1" />
-                            </div>
+                            <Label className="text-xs text-muted-foreground">Temps de Repos</Label>
+                            <Input value={ex.rest} onChange={(e) => updateExercise(idx, 'rest', e.target.value)} placeholder="Repos" className="h-9 bg-muted/40 border-border text-foreground rounded-lg" />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Video className="h-3 w-3 text-blue-400" /> Lien Vidéo Démo (Optionnel)
+                            </Label>
+                            <Input value={ex.video_url || ''} onChange={(e) => updateExercise(idx, 'video_url', e.target.value)} placeholder="Ex: https://youtube.com/watch?v=..." className="h-9 bg-muted/40 border-border text-foreground rounded-lg text-xs" />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                              <FileText className="h-3 w-3 text-emerald-400" /> Consignes & Conseils (Optionnel)
+                            </Label>
+                            <Input value={ex.notes || ''} onChange={(e) => updateExercise(idx, 'notes', e.target.value)} placeholder="Consignes..." className="h-9 bg-muted/40 border-border text-foreground rounded-lg text-xs" />
                           </div>
                         </div>
                       </div>

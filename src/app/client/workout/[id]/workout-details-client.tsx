@@ -5,6 +5,7 @@ import { ArrowLeft, Download, Calendar, Clock, Activity, FileText } from 'lucide
 import Link from 'next/link'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { ExerciseDetailsModal } from '@/components/exercise-details-modal'
 
 export function WorkoutDetailsClient({ session, coachName }: { session: any, coachName: string | null }) {
   const dateObj = new Date(session.scheduled_date)
@@ -97,16 +98,19 @@ export function WorkoutDetailsClient({ session, coachName }: { session: any, coa
           <div className="grid grid-cols-1 gap-4">
             {session.exercises && session.exercises.length > 0 ? (
               session.exercises.map((ex: any, idx: number) => (
-                <div key={idx} className="group bg-card border border-border hover:border-primary/50 p-6 rounded-2xl transition-all shadow-sm hover:shadow-md flex flex-col md:flex-row justify-between gap-6">
+                <div key={idx} className="group bg-card border border-border hover:border-primary/50 p-6 rounded-2xl transition-all shadow-sm hover:shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-2">
-                      <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm">{idx + 1}</span>
-                      {ex.name}
-                    </h3>
-                    {ex.notes && <p className="text-muted-foreground italic text-sm ml-10">"{ex.notes}"</p>}
+                    <div className="flex items-center gap-3 flex-wrap mb-2">
+                      <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-semibold">{idx + 1}</span>
+                        {ex.name}
+                      </h3>
+                      <ExerciseDetailsModal exercise={ex} />
+                    </div>
+                    {ex.notes && <p className="text-muted-foreground italic text-sm ml-11 whitespace-pre-wrap break-words line-clamp-3">"{ex.notes}"</p>}
                   </div>
                   
-                  <div className="flex flex-wrap md:flex-nowrap items-center gap-4 ml-10 md:ml-0">
+                  <div className="flex flex-wrap md:flex-nowrap items-center gap-4 ml-11 md:ml-0">
                     <div className="bg-primary/10 text-primary px-4 py-2 rounded-xl flex flex-col items-center min-w-[80px]">
                       <span className="text-xs font-bold uppercase tracking-wider opacity-70">Séries</span>
                       <span className="text-lg font-black">{ex.sets}x{ex.reps}</span>

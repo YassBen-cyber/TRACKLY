@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { ThemeToggle } from './theme-toggle'
 import Image from 'next/image'
@@ -18,29 +17,51 @@ export function MobileNav({ links, profileNode, logoutNode }: {
 
   return (
     <div className="md:hidden">
-      <div className="bg-background border-b border-border p-4 flex justify-between items-center transition-colors duration-300">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="mr-1">
-            <Menu className="h-6 w-6" />
-          </Button>
-          <Link href={pathname?.startsWith('/coach') ? '/coach' : '/client'} className="flex items-center gap-2">
+      {/* Floating Pill Glass Navbar */}
+      <header className="fixed top-3 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+        <nav className="pointer-events-auto w-full max-w-lg rounded-full bg-card/50 dark:bg-card/40 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.18)] px-4 py-2 flex items-center justify-between transition-all duration-300">
+          {/* Logo & Brand */}
+          <Link href={pathname?.startsWith('/coach') ? '/coach' : '/client'} className="flex items-center gap-2.5 group">
             <Image src="/TRACKLY_LOGO.webp" alt="Trackly logo" width={32} height={32} className="object-contain" priority />
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">TRACKLY</span>
+            <span className="font-bold text-base tracking-tight text-foreground group-hover:text-primary transition-colors">
+              TRACKLY
+            </span>
           </Link>
-        </div>
-        <ThemeToggle />
-      </div>
 
+          {/* Right Controls: Theme Toggle & 2-bar Thin Hamburger */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setOpen(!open)}
+              className="relative w-9 h-9 flex flex-col justify-center items-center rounded-full bg-muted/60 hover:bg-muted border border-border/40 transition-colors focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              <div className="w-4.5 flex flex-col gap-[5px] items-center justify-center">
+                <span
+                  className={`h-[1.5px] w-4.5 bg-foreground rounded-full transition-all duration-300 transform origin-center ${
+                    open ? 'rotate-45 translate-y-[3.25px]' : ''
+                  }`}
+                />
+                <span
+                  className={`h-[1.5px] w-4.5 bg-foreground rounded-full transition-all duration-300 transform origin-center ${
+                    open ? '-rotate-45 -translate-y-[3.25px]' : ''
+                  }`}
+                />
+              </div>
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Spacer to prevent content overlap on mobile */}
+      <div className="h-16 md:hidden" />
+
+      {/* Dropdown Glass Menu (Appears right underneath the floating pill) */}
       {open && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-card border-r border-border shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
-            <div className="p-4 flex items-center justify-between border-b border-border">
-              <span className="font-bold">Menu</span>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-                <X className="h-6 w-6" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
+        <div className="fixed top-16 inset-x-4 z-40 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="rounded-3xl bg-card/75 dark:bg-card/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl p-5 flex flex-col gap-3 max-h-[78vh] overflow-y-auto custom-scrollbar">
+            {/* Links list */}
+            <div className="flex flex-col gap-1">
               {links.map((link, i) => {
                 const isExactOnly = link.href === '/client' || link.href === '/coach'
                 const isActive = isExactOnly 
@@ -49,20 +70,37 @@ export function MobileNav({ links, profileNode, logoutNode }: {
                   
                 return (
                   <Link key={i} href={link.href} onClick={() => setOpen(false)}>
-                    <Button variant={isActive ? "secondary" : "ghost"} className={`w-full justify-start ${isActive ? 'font-bold' : ''}`}>
-                      <span className="mr-3">{link.icon}</span>
+                    <Button 
+                      variant={isActive ? "secondary" : "ghost"} 
+                      className={`w-full justify-start rounded-2xl h-11 text-sm ${
+                        isActive 
+                          ? 'font-bold bg-primary/10 text-primary border border-primary/20' 
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <span className="mr-3 shrink-0">{link.icon}</span>
                       {link.label}
                     </Button>
                   </Link>
                 )
               })}
             </div>
-            <div className="p-4 border-t border-border flex flex-col gap-4">
-              {profileNode}
-              <div>
-                {logoutNode}
+
+            {/* Profile & Logout section at bottom */}
+            {(profileNode || logoutNode) && (
+              <div className="pt-3 border-t border-border/60 flex flex-col gap-3">
+                {profileNode && (
+                  <div className="p-3 bg-muted/40 rounded-2xl border border-border/40">
+                    {profileNode}
+                  </div>
+                )}
+                {logoutNode && (
+                  <div onClick={() => setOpen(false)}>
+                    {logoutNode}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
