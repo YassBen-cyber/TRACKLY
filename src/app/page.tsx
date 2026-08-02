@@ -76,7 +76,7 @@ export default function LandingPage() {
           </Link>
           
           {/* Desktop Navigation Links */}
-          <div className="">
+          <div className="hidden md: block">
             <a href="#features" className="px-6 py-1.5 text-s  text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-full transition-all">
               Fonctionnalités
             </a>
