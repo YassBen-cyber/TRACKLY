@@ -174,11 +174,16 @@ export default function LandingPage() {
             {/* Uiverse Animated Button */}
             <div className="pt-2 flex flex-col items-center">
               <Link href="/register">
-                <button className="uiverse-button learn-more">
-                  <span className="circle" aria-hidden="true">
-                    <span className="icon arrow"></span>
-                  </span>
-                  <span className="button-text">Commencer</span>
+                <button
+                  className="bg-primary text-center w-56 rounded-2xl h-14 relative text-primary-foreground text-lg font-semibold group shadow-lg shadow-primary/30 overflow-hidden"
+                  type="button"
+                >
+                  <div
+                    className="bg-primary-foreground rounded-xl h-12 w-12 flex items-center justify-center absolute right-1 top-[4px] group-hover:w-[calc(100%-8px)] z-10 duration-500"
+                  >
+                    <ArrowRight className="w-5 h-5 text-primary" />
+                  </div>
+                  <p className="translate-x-[-12px] group-hover:translate-x-0 transition-transform duration-500">Commencer</p>
                 </button>
               </Link>
             </div>
@@ -806,9 +811,17 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href="/register">
-              <Button size="lg" className="h-16 px-10 rounded-full text-xl font-medium tracking-tight shadow-2xl shadow-primary/30 hover:scale-105 transition-all w-full sm:w-auto">
-                Commencer gratuitement
-              </Button>
+              <button
+                className="bg-primary text-center w-full sm:w-80 rounded-2xl h-14 relative text-primary-foreground text-lg font-semibold group shadow-lg shadow-primary/30 overflow-hidden"
+                type="button"
+              >
+                <div
+                  className="bg-primary-foreground rounded-xl h-12 w-12 flex items-center justify-center absolute right-1 top-[4px] group-hover:w-[calc(100%-8px)] z-10 duration-500"
+                >
+                  <ArrowRight className="w-5 h-5 text-primary" />
+                </div>
+                <p className="translate-x-[-12px] group-hover:translate-x-0 transition-transform duration-500">Commencer gratuitement</p>
+              </button>
             </Link>
           </div>
         </div>

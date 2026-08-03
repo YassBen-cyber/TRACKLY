@@ -38,17 +38,28 @@ export async function createAppointment(clientId: string, title: string, startTi
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
 
+  console.log('[Calendar] Début création rendez-vous pour clientId:', clientId)
+  console.log('[Calendar] Start:', startTime, 'End:', endTime)
+
   // Check for overlapping appointments
-  const { data: overlapping } = await supabase
+  const { data: overlapping, error: overlapError } = await supabase
     .from('appointments')
-    .select('id')
+    .select('id, status, start_time, end_time')
     .eq('coach_id', user.id)
+    .neq('status', 'cancelled')
     .lt('start_time', endTime)
     .gt('end_time', startTime)
 
+  if (overlapError) {
+    console.error('[Calendar] Erreur lors de la vérification des chevauchements:', overlapError)
+  }
+
   if (overlapping && overlapping.length > 0) {
+    console.warn('[Calendar] Conflit de rendez-vous détecté:', overlapping)
     throw new Error('Vous avez déjà un rendez-vous prévu sur ce créneau horaire.')
   }
+
+  console.log('[Calendar] Aucun conflit détecté, insertion dans Supabase...')
 
   const { error } = await supabase
     .from('appointments')
@@ -66,9 +77,11 @@ export async function createAppointment(clientId: string, title: string, startTi
     })
 
   if (error) {
-    console.error("Supabase insert error:", error)
+    console.error("[Calendar] Supabase insert error:", error)
     throw new Error(error.message || 'Erreur lors de la création du rendez-vous')
   }
+  
+  console.log('[Calendar] Rendez-vous créé avec succès !')
 
   // Notifier l'athlète par email
   notifyAppointmentEvent({
@@ -111,16 +124,25 @@ export async function updateAppointment(appointmentId: string, clientId: string,
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
 
+  console.log('[Calendar] Début mise à jour rendez-vous ID:', appointmentId)
+  console.log('[Calendar] Start:', startTime, 'End:', endTime)
+
   // Check for overlapping appointments (excluding current one)
-  const { data: overlapping } = await supabase
+  const { data: overlapping, error: overlapError } = await supabase
     .from('appointments')
-    .select('id')
+    .select('id, status, start_time, end_time')
     .eq('coach_id', user.id)
     .neq('id', appointmentId)
+    .neq('status', 'cancelled')
     .lt('start_time', endTime)
     .gt('end_time', startTime)
 
+  if (overlapError) {
+    console.error('[Calendar] Erreur de vérification des chevauchements (update):', overlapError)
+  }
+
   if (overlapping && overlapping.length > 0) {
+    console.warn('[Calendar] Conflit de rendez-vous détecté lors de la modification:', overlapping)
     throw new Error('Vous avez déjà un rendez-vous prévu sur ce créneau horaire.')
   }
 
@@ -140,9 +162,11 @@ export async function updateAppointment(appointmentId: string, clientId: string,
     .eq('coach_id', user.id)
 
   if (error) {
-    console.error("Supabase update error:", error)
+    console.error("[Calendar] Supabase update error:", error)
     throw new Error(error.message || 'Erreur lors de la modification du rendez-vous')
   }
+  
+  console.log('[Calendar] Rendez-vous mis à jour avec succès !')
 
   revalidatePath('/coach/calendar')
   revalidatePath(`/coach/client/${clientId}`)

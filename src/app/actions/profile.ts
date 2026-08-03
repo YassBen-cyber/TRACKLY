@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { saveCoachIbanAndConnectStripe } from '@/app/actions/stripe'
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient()
@@ -48,9 +49,21 @@ export async function updateProfile(formData: FormData) {
   if (iban !== null) {
     const cleanIban = iban ? iban.replace(/\s+/g, '').toUpperCase() : null
     updateData.iban = cleanIban
+    
+    // Si c'est un coach et qu'un IBAN est fourni, on fait la vraie connexion Stripe
     if (cleanIban) {
-      updateData.stripe_connected = true
-      updateData.stripe_account_id = updateData.stripe_account_id || `acct_custom_${user.id.substring(0, 8)}`
+      // On va vérifier le rôle du profil
+      const { data: profileCheck } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (profileCheck?.role === 'coach') {
+        try {
+          await saveCoachIbanAndConnectStripe(cleanIban)
+        } catch (err: any) {
+          throw new Error("Erreur Stripe : " + err.message)
+        }
+      } else {
+        updateData.stripe_connected = true
+        updateData.stripe_account_id = updateData.stripe_account_id || `acct_custom_${user.id.substring(0, 8)}`
+      }
     }
   }
 
