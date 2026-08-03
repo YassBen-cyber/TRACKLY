@@ -30,7 +30,7 @@ export async function saveCoachIbanAndConnectStripe(iban: string) {
     try {
       let accountId = profile.stripe_account_id
 
-      if (!accountId) {
+      if (!accountId || accountId.startsWith('acct_custom_') || accountId.startsWith('acct_test_')) {
         // Création du compte Stripe Connect Custom pour le coach
         const account = await stripe.accounts.create({
           type: 'custom',
@@ -81,11 +81,11 @@ export async function saveCoachIbanAndConnectStripe(iban: string) {
       return { success: true, isMock: false }
     } catch (err: any) {
       console.error('Stripe Custom IBAN creation error:', err)
-      // Fallback si l'API Stripe retourne une erreur de validation IBAN en test
+      throw new Error(`Erreur Stripe lors de l'enregistrement de l'IBAN : ${err.message || err}`)
     }
   }
 
-  // Mode démo / test
+  // Mode démo / test (uniquement si STRIPE_SECRET_KEY n'est pas du tout configuré)
   const mockAccountId = `acct_custom_${user.id.substring(0, 8)}`
   await supabase
     .from('profiles')
@@ -126,7 +126,7 @@ export async function connectStripeAccount() {
     try {
       let accountId = profile.stripe_account_id
 
-      if (!accountId) {
+      if (!accountId || accountId.startsWith('acct_custom_') || accountId.startsWith('acct_test_')) {
         // Créer un compte Stripe Connect Express pour le coach
         const account = await stripe.accounts.create({
           type: 'express',
@@ -166,7 +166,7 @@ export async function connectStripeAccount() {
       return { url: accountLink.url, isMock: false }
     } catch (err: any) {
       console.error('Stripe Connect error:', err)
-      // Fallback vers le mode de simulation test si l'API Stripe retourne une erreur de clé
+      throw new Error(`Erreur Stripe Connect : ${err.message || err}`)
     }
   }
 
@@ -232,7 +232,7 @@ export async function createCheckoutSession(paymentId: string) {
 
   const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-  // Si Stripe est configuré avec des clés réelles de test
+  // Si Stripe est configuré avec des clés réelles
   if (stripe && isStripeConfigured()) {
     try {
       const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -261,7 +261,12 @@ export async function createCheckoutSession(paymentId: string) {
       }
 
       // Si le coach a un compte Stripe Connect valide
-      if (payment.coach?.stripe_account_id && payment.coach?.stripe_connected) {
+      if (
+        payment.coach?.stripe_account_id && 
+        payment.coach?.stripe_connected &&
+        !payment.coach.stripe_account_id.startsWith('acct_custom_') &&
+        !payment.coach.stripe_account_id.startsWith('acct_test_')
+      ) {
         // Appliquer 2% de frais de plateforme pour Trackly
         const platformFee = Math.round(Number(payment.amount) * 100 * 0.02)
         sessionParams.payment_intent_data = {
@@ -286,10 +291,11 @@ export async function createCheckoutSession(paymentId: string) {
       return { url: session.url, isTestModal: false }
     } catch (err: any) {
       console.error('Stripe Checkout session creation error:', err)
+      throw new Error(`Erreur Stripe lors du paiement : ${err.message}`)
     }
   }
 
-  // Mode Test / Démo interactif si pas de clé de secret renseignée
+  // Mode Test / Démo interactif uniquement si pas de clés Stripe renseignées
   return { url: null, isTestModal: true, payment }
 }
 
