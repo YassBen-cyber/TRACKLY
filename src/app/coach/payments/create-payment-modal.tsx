@@ -24,6 +24,7 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
   const [title, setTitle] = useState('')
   const [amount, setAmount] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('online')
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,12 +38,13 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
     }
 
     try {
-      await createPayment(clientId, title, parseFloat(amount), dueDate)
+      await createPayment(clientId, title, parseFloat(amount), dueDate, paymentMethod)
       setOpen(false)
       setClientId('')
       setTitle('')
       setAmount('')
       setDueDate('')
+      setPaymentMethod('online')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -93,6 +95,19 @@ export function CreatePaymentModal({ clients }: { clients: any[] }) {
           <div className="space-y-2">
             <Label className="text-muted-foreground">Montant (€)</Label>
             <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required className="bg-card border-border h-11 rounded-xl text-foreground focus:border-emerald-500/50" />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Mode de règlement préconisé</Label>
+            <select 
+              value={paymentMethod} 
+              onChange={e => setPaymentMethod(e.target.value)}
+              className="flex h-11 w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            >
+              <option value="online" className="bg-muted/50">💳 Paiement en ligne (Paiement par carte)</option>
+              <option value="cash" className="bg-muted/50">💵 Espèces</option>
+              <option value="other" className="bg-muted/50">🏦 Virement bancaire / Autre</option>
+            </select>
           </div>
 
           <div className="space-y-2">

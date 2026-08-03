@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Camera, User, Lock, Save, CheckCircle2 } from 'lucide-react'
+import { Loader2, Camera, User, Lock, Save, CheckCircle2, Building2 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { createClient } from '@/utils/supabase/client'
 import { LogoutButton } from '@/components/logout-button'
@@ -13,6 +13,7 @@ import { LogoutButton } from '@/components/logout-button'
 export function ProfileSettings({ profile }: { profile: any }) {
   const [fullName, setFullName] = useState(profile.full_name || '')
   const [password, setPassword] = useState('')
+  const [iban, setIban] = useState(profile.iban || '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(profile.photo_url || null)
   
@@ -75,6 +76,9 @@ export function ProfileSettings({ profile }: { profile: any }) {
       }
       if (password) {
         formData.append('password', password)
+      }
+      if (profile.role === 'coach') {
+        formData.append('iban', iban)
       }
 
       await updateProfile(formData)
@@ -170,6 +174,32 @@ export function ProfileSettings({ profile }: { profile: any }) {
                 className="min-h-[100px] rounded-xl bg-card border-border"
                 placeholder="Renseignez ici vos allergies, anciennes blessures ou conditions médicales dont le coach devrait être informé..."
               />
+            </div>
+          </div>
+        )}
+
+        {profile.role === 'coach' && (
+          <div className="pt-6 border-t border-border space-y-4">
+            <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-emerald-400" />
+              Compte Bancaire de Réception (IBAN)
+            </h4>
+            <div className="space-y-2">
+              <Label htmlFor="iban" className="text-muted-foreground">Votre IBAN pour recevoir vos virements</Label>
+              <div className="relative">
+                <Input 
+                  id="iban"
+                  type="text"
+                  value={iban}
+                  onChange={(e) => setIban(e.target.value)}
+                  className="h-12 rounded-xl bg-card border-border font-mono tracking-wider pl-10"
+                  placeholder="FR76 3000 1007 9401 2345 6789 018"
+                />
+                <Building2 className="w-5 h-5 text-muted-foreground absolute left-3 top-3.5" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                En enregistrant votre IBAN, votre compte est configuré pour recevoir automatiquement les paiements en ligne de vos élèves.
+              </p>
             </div>
           </div>
         )}

@@ -3,7 +3,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function createPayment(clientId: string, title: string, amount: number, dueDate: string) {
+export async function createPayment(
+  clientId: string, 
+  title: string, 
+  amount: number, 
+  dueDate: string,
+  paymentMethod: string = 'online'
+) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
@@ -16,6 +22,7 @@ export async function createPayment(clientId: string, title: string, amount: num
       title,
       amount,
       due_date: dueDate || null,
+      payment_method: paymentMethod,
       status: 'pending'
     })
 
@@ -29,6 +36,18 @@ export async function updatePaymentStatus(paymentId: string, status: 'pending' |
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
+
+  // Règle de sécurité : vérifier si le paiement est déjà payé (verrouillé)
+  const { data: existing } = await supabase
+    .from('payments')
+    .select('status')
+    .eq('id', paymentId)
+    .eq('coach_id', user.id)
+    .single()
+
+  if (existing?.status === 'paid') {
+    throw new Error('Ce paiement est déjà validé et réglé. Il est verrouillé et ne peut plus être modifié.')
+  }
 
   const updates: any = { status }
   if (status === 'paid') {
@@ -54,6 +73,18 @@ export async function deletePayment(paymentId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
 
+  // Règle de sécurité : un paiement validé ne peut pas être supprimé
+  const { data: existing } = await supabase
+    .from('payments')
+    .select('status')
+    .eq('id', paymentId)
+    .eq('coach_id', user.id)
+    .single()
+
+  if (existing?.status === 'paid') {
+    throw new Error('Ce paiement est déjà validé et réglé. Il est verrouillé et ne peut pas être supprimé.')
+  }
+
   const { error } = await supabase
     .from('payments')
     .delete()
@@ -65,3 +96,4 @@ export async function deletePayment(paymentId: string) {
   revalidatePath('/coach/payments')
   return { success: true }
 }
+

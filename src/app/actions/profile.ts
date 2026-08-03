@@ -16,6 +16,7 @@ export async function updateProfile(formData: FormData) {
   const address = formData.get('address') as string | null
   const medicalHistory = formData.get('medicalHistory') as string | null
   const mainGoal = formData.get('mainGoal') as string | null
+  const iban = formData.get('iban') as string | null
 
   // Update auth password if provided
   if (password) {
@@ -43,6 +44,14 @@ export async function updateProfile(formData: FormData) {
   }
   if (mainGoal !== null) {
     updateData.main_goal = mainGoal || null
+  }
+  if (iban !== null) {
+    const cleanIban = iban ? iban.replace(/\s+/g, '').toUpperCase() : null
+    updateData.iban = cleanIban
+    if (cleanIban) {
+      updateData.stripe_connected = true
+      updateData.stripe_account_id = updateData.stripe_account_id || `acct_custom_${user.id.substring(0, 8)}`
+    }
   }
 
   const { error: profileError } = await supabase
