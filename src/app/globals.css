@@ -151,7 +151,7 @@
     @apply border-border outline-ring/50;
     font-weight: 300 !important;
   }
-  body, h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, label, select, textarea, strong, b, th, td {
+  body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-weight: 300 !important;
