@@ -8,10 +8,12 @@ import { LogOut, Loader2 } from 'lucide-react'
 
 export function LogoutButton({ 
   className,
-  onLogout 
+  onLogout,
+  iconOnly = false
 }: { 
   className?: string
   onLogout?: () => void 
+  iconOnly?: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
@@ -55,6 +57,26 @@ export function LogoutButton({
 
     // 4. Redirection forcée vers la page de connexion
     window.location.href = '/login'
+  }
+
+  if (iconOnly) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={handleLogout}
+        disabled={isLoading}
+        title="Déconnexion"
+        className={className || "w-10 h-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"}
+      >
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <LogOut className="h-5 w-5 text-red-500" />
+        )}
+      </Button>
+    )
   }
 
   return (

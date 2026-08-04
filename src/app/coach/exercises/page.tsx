@@ -51,8 +51,8 @@ export default async function ExercisesPage() {
           {exercises.map(exercise => (
             <div key={exercise.id} className="glass-panel p-5 sm:p-7 rounded-3xl flex flex-col group hover:border-primary/30 transition-all border border-border/80 shadow-sm hover:shadow-md">
               <div className="flex justify-between items-center mb-4 gap-2">
-                <div className="bg-primary/10 p-3 rounded-2xl shrink-0">
-                  <Dumbbell className="h-6 w-6 text-primary" />
+                <div className="shrink-0 text-primary">
+                  <Dumbbell className="h-6 w-6" />
                 </div>
                 <div className="flex items-center gap-2">
                   <EditExerciseModal exercise={exercise} />

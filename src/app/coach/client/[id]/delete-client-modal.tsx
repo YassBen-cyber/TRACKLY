@@ -6,7 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Loader2, Trash2, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export function DeleteClientButton({ clientId, clientName }: { clientId: string, clientName: string }) {
+export function DeleteClientModal({ 
+  clientId, 
+  clientName, 
+  redirectTo = '/coach' 
+}: { 
+  clientId: string
+  clientName: string
+  redirectTo?: string
+}) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -27,7 +35,12 @@ export function DeleteClientButton({ clientId, clientName }: { clientId: string,
       }
 
       setOpen(false)
-      router.refresh()
+      if (redirectTo) {
+        router.push(redirectTo)
+        router.refresh()
+      } else {
+        router.refresh()
+      }
     } catch (err: any) {
       setError(err.message)
       setIsLoading(false)
@@ -38,23 +51,21 @@ export function DeleteClientButton({ clientId, clientName }: { clientId: string,
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
         <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={(e) => e.stopPropagation()}
-          className="rounded-full hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors mr-1"
-          title="Supprimer le client"
+          variant="outline" 
+          className="border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-xl transition-all font-medium text-sm flex items-center gap-2"
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className="h-4 w-4" />
+          <span>Supprimer l'athlète</span>
         </Button>
       } />
-      <DialogContent className="sm:max-w-md border-border bg-card text-foreground shadow-2xl shadow-red-950/20 rounded-3xl p-6" onClick={(e) => e.stopPropagation()}>
+      <DialogContent className="sm:max-w-md border-border bg-card text-foreground shadow-2xl shadow-red-950/20 rounded-3xl p-6">
         <DialogHeader className="space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0">
             <AlertTriangle className="h-6 w-6" />
           </div>
           <DialogTitle className="text-xl font-bold">Supprimer {clientName} ?</DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm leading-relaxed">
-            Êtes-vous sûr de vouloir supprimer définitivement cet athlète ? Cette action est <strong className="text-foreground">irréversible</strong> et supprimera toutes ses données.
+            Êtes-vous sûr de vouloir supprimer définitivement cet athlète ? Cette action est <strong className="text-foreground">irréversible</strong> et supprimera tous ses entraînements, métriques, rendez-vous et données personnelles.
           </DialogDescription>
         </DialogHeader>
 

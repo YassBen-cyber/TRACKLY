@@ -284,3 +284,12 @@ html{
 .uiverse-button:hover .button-text {
   color: var(--background);
 }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

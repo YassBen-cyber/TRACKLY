@@ -13,7 +13,6 @@ import { LogoutButton } from '@/components/logout-button'
 export function ProfileSettings({ profile }: { profile: any }) {
   const [fullName, setFullName] = useState(profile.full_name || '')
   const [password, setPassword] = useState('')
-  const [iban, setIban] = useState(profile.iban || '')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(profile.photo_url || null)
   
@@ -77,11 +76,11 @@ export function ProfileSettings({ profile }: { profile: any }) {
       if (password) {
         formData.append('password', password)
       }
-      if (profile.role === 'coach') {
-        formData.append('iban', iban)
-      }
 
-      await updateProfile(formData)
+      const result = await updateProfile(formData)
+      if (result && result.error) {
+        throw new Error(result.error)
+      }
       setSuccess(true)
       setPassword('')
     } catch (err: any) {
@@ -182,24 +181,15 @@ export function ProfileSettings({ profile }: { profile: any }) {
           <div className="pt-6 border-t border-border space-y-4">
             <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Building2 className="w-5 h-5 text-emerald-400" />
-              Compte Bancaire de Réception (IBAN)
+              Compte Bancaire de Réception
             </h4>
             <div className="space-y-2">
-              <Label htmlFor="iban" className="text-muted-foreground">Votre IBAN pour recevoir vos virements</Label>
-              <div className="relative">
-                <Input 
-                  id="iban"
-                  type="text"
-                  value={iban}
-                  onChange={(e) => setIban(e.target.value)}
-                  className="h-12 rounded-xl bg-card border-border font-mono tracking-wider pl-10"
-                  placeholder="FR76 3000 1007 9401 2345 6789 018"
-                />
-                <Building2 className="w-5 h-5 text-muted-foreground absolute left-3 top-3.5" />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                En enregistrant votre IBAN, votre compte est configuré pour recevoir automatiquement les paiements en ligne de vos élèves.
+              <p className="text-sm text-muted-foreground">
+                La configuration de votre compte de réception (IBAN) se fait désormais de manière sécurisée directement via Stripe.
               </p>
+              <Button type="button" variant="outline" className="mt-2" onClick={() => window.location.href = '/coach/payments'}>
+                Aller à la section Paiements
+              </Button>
             </div>
           </div>
         )}

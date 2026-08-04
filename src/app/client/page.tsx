@@ -78,7 +78,7 @@ export default async function ClientDashboard() {
       {pendingSessions.length > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-yellow-500/20 p-2.5 rounded-2xl text-yellow-400">
+            <div className="text-yellow-400">
               <AlertCircle className="h-6 w-6" />
             </div>
             <div>
@@ -140,7 +140,7 @@ export default async function ClientDashboard() {
         <Link href="/client/dispos" className="group">
           <div className="bg-card p-6 rounded-3xl border border-border shadow-sm group-hover:border-primary/50 transition-all flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 text-primary rounded-2xl">
+              <div className="text-primary">
                 <Clock className="h-6 w-6" />
               </div>
               <div>
@@ -155,7 +155,7 @@ export default async function ClientDashboard() {
         <Link href="/client/workouts" className="group">
           <div className="bg-card p-6 rounded-3xl border border-border shadow-sm group-hover:border-primary/50 transition-all flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 text-blue-500 rounded-2xl">
+              <div className="text-blue-500">
                 <Dumbbell className="h-6 w-6" />
               </div>
               <div>

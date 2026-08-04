@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ShieldCheck, Zap, Loader2, CheckCircle2, Building2 } from 'lucide-react'
-import { saveCoachIbanAndConnectStripe, disconnectStripeAccount } from '@/app/actions/stripe'
+import { connectStripeAccount, disconnectStripeAccount } from '@/app/actions/stripe'
 
 interface StripeConnectCardProps {
   profile: any
@@ -13,23 +13,25 @@ interface StripeConnectCardProps {
 
 export function StripeConnectCard({ profile, totalEarned }: StripeConnectCardProps) {
   const [loading, setLoading] = useState(false)
-  const [iban, setIban] = useState(profile?.iban || '')
   const [isConnected, setIsConnected] = useState<boolean>(Boolean(profile?.stripe_connected))
-  const [showIbanInput, setShowIbanInput] = useState(false)
 
-  const handleSaveIban = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!iban.trim()) return alert("Veuillez saisir un IBAN valide")
-    
+  const handleConnect = async () => {
     setLoading(true)
     try {
-      await saveCoachIbanAndConnectStripe(iban)
-      setIsConnected(true)
-      setShowIbanInput(false)
-      alert("Votre IBAN a été enregistré avec succès ! Le système de virement automatique est actif.")
+      const res = await connectStripeAccount()
+      if (res && res.error) {
+        alert(res.error)
+        return
+      }
+      if (res && res.url) {
+        window.location.href = res.url
+      } else if (res && res.isMock) {
+        setIsConnected(true)
+        alert("Connecté en mode simulation avec succès.")
+      }
     } catch (err: any) {
       console.error(err)
-      alert("Erreur lors de la sauvegarde de l'IBAN : " + err.message)
+      alert("Erreur Stripe : " + err.message)
     } finally {
       setLoading(false)
     }
@@ -41,7 +43,6 @@ export function StripeConnectCard({ profile, totalEarned }: StripeConnectCardPro
     try {
       await disconnectStripeAccount()
       setIsConnected(false)
-      setIban('')
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -82,12 +83,13 @@ export function StripeConnectCard({ profile, totalEarned }: StripeConnectCardPro
             <div className="flex items-center gap-3">
               <Button
                 type="button"
-                onClick={() => setShowIbanInput(!showIbanInput)}
+                onClick={handleConnect}
+                disabled={loading}
                 variant="outline"
                 className="rounded-xl border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-bold"
               >
-                <Building2 className="w-4 h-4 mr-2" />
-                {showIbanInput ? "Masquer IBAN" : "Modifier IBAN"}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Building2 className="w-4 h-4 mr-2" />}
+                Gérer sur Stripe
               </Button>
               <Button
                 type="button"
@@ -102,40 +104,17 @@ export function StripeConnectCard({ profile, totalEarned }: StripeConnectCardPro
           ) : (
             <Button
               type="button"
-              onClick={() => setShowIbanInput(true)}
+              onClick={handleConnect}
+              disabled={loading}
               className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 px-6 shadow-lg shadow-emerald-600/20"
             >
-              <Building2 className="w-5 h-5 mr-2" />
-              Saisir mon IBAN
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Building2 className="w-5 h-5 mr-2" />}
+              Configurer mon compte bancaire
             </Button>
           )}
         </div>
       </div>
 
-      {/* Formulaire de saisie d'IBAN intégrée */}
-      {showIbanInput && (
-        <form onSubmit={handleSaveIban} className="mt-6 pt-6 border-t border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="relative flex-1">
-            <Input
-              type="text"
-              value={iban}
-              onChange={(e) => setIban(e.target.value)}
-              placeholder="FR76 3000 1007 9401 2345 6789 018"
-              className="h-12 rounded-xl bg-card border-border font-mono tracking-wider pl-10"
-              required
-            />
-            <Building2 className="w-5 h-5 text-muted-foreground absolute left-3 top-3.5" />
-          </div>
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-600/20"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <ShieldCheck className="w-5 h-5 mr-2" />}
-            Enregistrer l'IBAN
-          </Button>
-        </form>
-      )}
 
       {/* Résumé financier */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/60">

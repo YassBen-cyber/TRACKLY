@@ -48,8 +48,8 @@ export default async function WorkoutsPage() {
           {templates.map(template => (
             <div key={template.id} className="glass-panel p-6 rounded-3xl flex flex-col group hover:border-primary/30 transition-all border border-border">
               <div className="flex justify-between items-start mb-4">
-                <div className="bg-primary/20 p-3 rounded-2xl">
-                  <Dumbbell className="h-6 w-6 text-primary" />
+                <div className="text-primary">
+                  <Dumbbell className="h-6 w-6" />
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <DuplicateWorkoutButton id={template.id} />

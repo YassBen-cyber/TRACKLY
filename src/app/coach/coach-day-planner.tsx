@@ -57,7 +57,7 @@ export function CoachDayPlanner({ initialDate, initialAppointments, initialSessi
       {/* Barre de navigation temporelle */}
       <div className="bg-card border border-border rounded-3xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl">
+          <div className="p-3 text-primary rounded-2xl">
             <CalendarIcon className="h-6 w-6" />
           </div>
           <div>

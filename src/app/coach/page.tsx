@@ -90,7 +90,7 @@ export default async function CoachDashboard() {
                 <p className="text-sm font-medium text-muted-foreground mb-1">Athlètes actifs</p>
                 <h3 className="text-4xl font-display font-black text-foreground">{activeClientsCount}</h3>
               </div>
-              <div className="p-3 bg-muted rounded-2xl text-primary">
+              <div className="text-primary">
                 <Users className="w-6 h-6" />
               </div>
             </div>
@@ -105,7 +105,7 @@ export default async function CoachDashboard() {
                 <p className="text-sm font-medium text-muted-foreground mb-1">RDV à venir (Total)</p>
                 <h3 className="text-4xl font-display font-black text-foreground">{upcomingCount}</h3>
               </div>
-              <div className="p-3 bg-muted rounded-2xl text-orange-500">
+              <div className="text-orange-500">
                 <Calendar className="w-6 h-6" />
               </div>
             </div>
@@ -119,7 +119,7 @@ export default async function CoachDashboard() {
               <p className="text-sm font-medium text-muted-foreground mb-1">Séances Aujourd'hui</p>
               <h3 className="text-4xl font-display font-black text-foreground">{initialSessions.length}</h3>
             </div>
-            <div className="p-3 bg-muted rounded-2xl text-blue-500">
+            <div className="text-blue-500">
               <Dumbbell className="w-6 h-6" />
             </div>
           </div>

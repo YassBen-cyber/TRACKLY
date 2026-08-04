@@ -14,6 +14,7 @@ import { AppointmentHistory } from './appointment-history'
 import { CreateAppointmentModal } from '../../calendar/create-appointment-modal'
 
 import { ClientGoalCard } from './client-goal-card'
+import { DeleteClientModal } from './delete-client-modal'
 
 export default async function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -84,11 +85,14 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         
         <div className="flex flex-col gap-4">
-          <Link href="/coach">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-0 -ml-2 hover:bg-transparent">
-              <ChevronLeft className="mr-1 h-4 w-4" /> Retour au tableau de bord
-            </Button>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/coach">
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-0 -ml-2 hover:bg-transparent">
+                <ChevronLeft className="mr-1 h-4 w-4" /> Retour au tableau de bord
+              </Button>
+            </Link>
+            <DeleteClientModal clientId={client.id} clientName={client.full_name} redirectTo="/coach" />
+          </div>
           
           <div className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="flex items-center gap-6">
@@ -132,7 +136,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
           {/* Section Maladies / Antécédents médicaux */}
           {client.medical_history ? (
             <div className="glass-panel p-6 rounded-3xl border border-red-500/30 bg-red-500/10 flex gap-4 items-start shadow-sm">
-              <div className="bg-red-500/20 p-3 rounded-2xl flex-shrink-0 text-red-400">
+              <div className="flex-shrink-0 text-red-400">
                 <AlertTriangle className="h-6 w-6" />
               </div>
               <div className="space-y-1">
@@ -144,7 +148,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
             </div>
           ) : (
             <div className="glass-panel p-5 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 flex gap-4 items-center">
-              <div className="bg-emerald-500/10 p-2.5 rounded-2xl text-emerald-400 shrink-0">
+              <div className="text-emerald-400 shrink-0">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
